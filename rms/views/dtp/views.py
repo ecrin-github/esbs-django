@@ -1,4 +1,6 @@
+from mozilla_django_oidc.contrib.drf import OIDCAuthentication
 from rest_framework import viewsets, permissions
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 
 from rms.models.dtp.dtas import DataTransferAccesses
 from rms.models.dtp.dtp_datasets import DtpDatasets
@@ -20,6 +22,7 @@ from rms.serializers.dtp.dtps_dto import DataTransferProcessesOutputSerializer, 
 
 
 class DataTransferAccessesList(viewsets.ModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DataTransferAccesses.objects.all()
     serializer_class = DataTransferAccessesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -36,6 +39,7 @@ class DataTransferAccessesList(viewsets.ModelViewSet):
 
 
 class DtpDatasetsList(viewsets.ModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DtpDatasets.objects.all()
     serializer_class = DtpDatasetsOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -52,6 +56,7 @@ class DtpDatasetsList(viewsets.ModelViewSet):
 
 
 class DtpNotesList(viewsets.ModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DtpNotes.objects.all()
     serializer_class = DtpNotesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -68,6 +73,7 @@ class DtpNotesList(viewsets.ModelViewSet):
 
 
 class DtpObjectsList(viewsets.ModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DtpObjects.objects.all()
     serializer_class = DtpObjectsOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -84,6 +90,7 @@ class DtpObjectsList(viewsets.ModelViewSet):
 
 
 class DtpPeopleList(viewsets.ModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DtpPeople.objects.all()
     serializer_class = DtpPeopleOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -100,6 +107,7 @@ class DtpPeopleList(viewsets.ModelViewSet):
 
 
 class DtpPrereqsList(viewsets.ModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DtpPrereqs.objects.all()
     serializer_class = DtpPrereqsOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -116,6 +124,7 @@ class DtpPrereqsList(viewsets.ModelViewSet):
 
 
 class DtpStudiesList(viewsets.ModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DtpStudies.objects.all()
     serializer_class = DtpStudiesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -132,7 +141,7 @@ class DtpStudiesList(viewsets.ModelViewSet):
 
 
 class DataTransferProcessesList(viewsets.ModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DataTransferProcesses.objects.all()
     serializer_class = DataTransferProcessesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-

@@ -1,4 +1,6 @@
+from mozilla_django_oidc.contrib.drf import OIDCAuthentication
 from rest_framework import viewsets, permissions
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 
 from mdm.models.data_object.data_objects import DataObjects
 from mdm.models.data_object.object_contributors import ObjectContributors
@@ -31,6 +33,7 @@ from mdm.serializers.data_object.object_topics_dto import ObjectTopicsOutputSeri
 
 
 class DataObjectsList(viewsets.ModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DataObjects.objects.all()
     serializer_class = DataObjectsOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -42,6 +45,7 @@ class DataObjectsList(viewsets.ModelViewSet):
 
 
 class ObjectContributorsList(viewsets.ModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = ObjectContributors.objects.all()
     serializer_class = ObjectContributorsOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -63,6 +67,7 @@ class ObjectContributorsList(viewsets.ModelViewSet):
 
 
 class ObjectDatasetsList(viewsets.ModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = ObjectDatasets.objects.all()
     serializer_class = ObjectDatasetsOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -84,6 +89,7 @@ class ObjectDatasetsList(viewsets.ModelViewSet):
 
 
 class ObjectDatesList(viewsets.ModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = ObjectDates.objects.all()
     serializer_class = ObjectDatesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -105,6 +111,7 @@ class ObjectDatesList(viewsets.ModelViewSet):
 
 
 class ObjectDescriptionsList(viewsets.ModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = ObjectDescriptions.objects.all()
     serializer_class = ObjectDescriptionsOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -126,6 +133,7 @@ class ObjectDescriptionsList(viewsets.ModelViewSet):
 
 
 class ObjectIdentifiersList(viewsets.ModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = ObjectIdentifiers.objects.all()
     serializer_class = ObjectIdentifiersOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -147,6 +155,7 @@ class ObjectIdentifiersList(viewsets.ModelViewSet):
 
 
 class ObjectInstancesList(viewsets.ModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = ObjectInstances.objects.all()
     serializer_class = ObjectInstancesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -168,6 +177,7 @@ class ObjectInstancesList(viewsets.ModelViewSet):
 
 
 class ObjectRelationshipsList(viewsets.ModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = ObjectRelationships.objects.all()
     serializer_class = ObjectRelationshipsOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -189,6 +199,7 @@ class ObjectRelationshipsList(viewsets.ModelViewSet):
 
 
 class ObjectRightsList(viewsets.ModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = ObjectRights.objects.all()
     serializer_class = ObjectRightsOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -210,6 +221,7 @@ class ObjectRightsList(viewsets.ModelViewSet):
 
 
 class ObjectTitlesList(viewsets.ModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = ObjectTitles.objects.all()
     serializer_class = ObjectTitlesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -231,6 +243,7 @@ class ObjectTitlesList(viewsets.ModelViewSet):
 
 
 class ObjectTopicsList(viewsets.ModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = ObjectTopics.objects.all()
     serializer_class = ObjectTopicsOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]

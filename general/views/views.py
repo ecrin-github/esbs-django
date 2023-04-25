@@ -1,4 +1,6 @@
+from mozilla_django_oidc.contrib.drf import OIDCAuthentication
 from rest_framework import viewsets, permissions
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 
 from general.models.geog_entities import GeogEntities
 from general.models.language_codes import LanguageCodes
@@ -26,18 +28,21 @@ from general.serializers.published_journals_dto import PublishedJournalsOutputSe
 
 # Create your views here.
 class GeogEntitiesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = GeogEntities.objects.all()
     serializer_class = GeogEntitiesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class MeshLookupList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = MeshLookup.objects.all()
     serializer_class = MeshLookupOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class OrgAttributesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = OrgAttributes.objects.all()
     serializer_class = OrgAttributesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -54,6 +59,7 @@ class OrgAttributesList(viewsets.ReadOnlyModelViewSet):
 
 
 class OrgLinksList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = OrgLinks.objects.all()
     serializer_class = OrgLinksOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -70,6 +76,7 @@ class OrgLinksList(viewsets.ReadOnlyModelViewSet):
 
 
 class OrgLocationsList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = OrgLocations.objects.all()
     serializer_class = OrgLocationsOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -86,6 +93,7 @@ class OrgLocationsList(viewsets.ReadOnlyModelViewSet):
 
 
 class OrgNamesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = OrgNames.objects.all()
     serializer_class = OrgNamesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -102,6 +110,7 @@ class OrgNamesList(viewsets.ReadOnlyModelViewSet):
 
 
 class OrgRelationshipsList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = OrgRelationships.objects.all()
     serializer_class = OrgRelationshipsOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -118,6 +127,7 @@ class OrgRelationshipsList(viewsets.ReadOnlyModelViewSet):
 
 
 class OrgTypeMembershipList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = OrgTypeMembership.objects.all()
     serializer_class = OrgTypeMembershipOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -134,18 +144,21 @@ class OrgTypeMembershipList(viewsets.ReadOnlyModelViewSet):
 
 
 class PublishedJournalsList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = PublishedJournals.objects.all()
     serializer_class = PublishedJournalsOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class LanguageCodesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = LanguageCodes.objects.all()
     serializer_class = LanguageCodesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class OrganisationsList(viewsets.ModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = Organisations.objects.all()
     serializer_class = OrganisationsOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]

@@ -1,4 +1,6 @@
+from mozilla_django_oidc.contrib.drf import OIDCAuthentication
 from rest_framework import viewsets, permissions
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 from rest_framework.views import APIView
 
 from general.models import Organisations
@@ -13,6 +15,7 @@ from rest_framework.response import Response
 
 
 class UsersList(viewsets.ModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = Users.objects.all()
     serializer_class = UsersSerializer
     permission_classes = [permissions.AllowAny]
@@ -24,6 +27,7 @@ class UsersList(viewsets.ModelViewSet):
 
 
 class UserProfilesList(viewsets.ModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = UserProfiles.objects.all()
     serializer_class = UserProfilesOutputSerializer
     permission_classes = [permissions.AllowAny]
@@ -37,6 +41,7 @@ class UserProfilesList(viewsets.ModelViewSet):
 
 
 class UserEntitiesApiView(APIView):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, userId, format=None):

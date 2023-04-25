@@ -1,4 +1,6 @@
+from mozilla_django_oidc.contrib.drf import OIDCAuthentication
 from rest_framework import permissions, viewsets
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 
 from context.models.access_prereq_types import AccessPrereqTypes
 from context.models.check_status_types import CheckStatusTypes
@@ -102,294 +104,343 @@ from context.serializers.user_types_dto import UserTypesOutputSerializer
 
 # Create your views here.
 class AccessPrereqTypesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = AccessPrereqTypes.objects.all()
     serializer_class = AccessPrereqTypesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class CheckStatusTypesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = CheckStatusTypes.objects.all()
     serializer_class = CheckStatusTypesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class CompositeHashTypesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = CompositeHashTypes.objects.all()
     serializer_class = CompositeHashTypesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class ContributorTypesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = ContributorTypes.objects.all()
     serializer_class = ContributorTypesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class DatasetConsentTypesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DatasetConsentTypes.objects.all()
     serializer_class = DatasetConsentTypesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class DatasetDeidentificationLevelsList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DatasetDeidentificationLevels.objects.all()
     serializer_class = DatasetDeidentificationLevelsOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class DatasetRecordkeyTypesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DatasetRecordkeyTypes.objects.all()
     serializer_class = DatasetRecordkeyTypesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class DateTypesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DateTypes.objects.all()
     serializer_class = DateTypesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class DescriptionTypesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DescriptionTypes.objects.all()
     serializer_class = DescriptionTypesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class DoiStatusTypesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DoiStatusTypes.objects.all()
     serializer_class = DoiStatusTypesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class DtpStatusTypesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DtpStatusTypes.objects.all()
     serializer_class = DtpStatusTypesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class DupStatusTypesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DupStatusTypes.objects.all()
     serializer_class = DupStatusTypesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class GenderEligibilityTypesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = GenderEligibilityTypes.objects.all()
     serializer_class = GenderEligibilityTypesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class GeogEntityTypesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = GeogEntityTypes.objects.all()
     serializer_class = GeogEntityTypesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class IdentifierTypesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = IdentifierTypes.objects.all()
     serializer_class = IdentifierTypesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class LanguageUsageTypesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = LanguageUsageTypes.objects.all()
     serializer_class = LanguageUsageTypesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class LegalStatusTypesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = LegalStatusTypes.objects.all()
     serializer_class = LegalStatusTypesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class LinkTypesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = LinkTypes.objects.all()
     serializer_class = LinkTypesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class ObjectAccessTypesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = ObjectAccessTypes.objects.all()
     serializer_class = ObjectAccessTypesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class ObjectClassesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = ObjectClasses.objects.all()
     serializer_class = ObjectClassesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class ObjectFilterTypesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = ObjectFilterTypes.objects.all()
     serializer_class = ObjectFilterTypesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class ObjectInstanceTypesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = ObjectInstanceTypes.objects.all()
     serializer_class = ObjectInstanceTypesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class ObjectRelationshipTypesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = ObjectRelationshipTypes.objects.all()
     serializer_class = ObjectRelationshipTypesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class ObjectTypesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = ObjectTypes.objects.all()
     serializer_class = ObjectTypesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class OrgAttributeDatatypesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = OrgAttributeDatatypes.objects.all()
     serializer_class = OrgAttributeDatatypesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class OrgAttributeTypesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = OrgAttributeTypes.objects.all()
     serializer_class = OrgAttributeTypesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class OrgClassesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = OrgClasses.objects.all()
     serializer_class = OrgClassesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class OrgLinkTypesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = OrgLinkTypes.objects.all()
     serializer_class = OrgLinkTypesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class OrgNameQualifierTypesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = OrgNameQualifierTypes.objects.all()
     serializer_class = OrgNameQualifierTypesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class OrgRelationshipTypesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = OrgRelationshipTypes.objects.all()
     serializer_class = OrgRelationshipTypesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class OrgTypesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = OrgTypes.objects.all()
     serializer_class = OrgTypesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class PrereqTypesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = PrereqTypes.objects.all()
     serializer_class = PrereqTypesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class RepoAccessTypesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = RepoAccessTypes.objects.all()
     serializer_class = RepoAccessTypesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class ResourceTypesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = ResourceTypes.objects.all()
     serializer_class = ResourceTypesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class RmsUserTypesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = RmsUserTypes.objects.all()
     serializer_class = RmsUserTypesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class RoleClassesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = RoleClasses.objects.all()
     serializer_class = RoleClassesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class RoleTypesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = RoleTypes.objects.all()
     serializer_class = RoleTypesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class SizeUnitsList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = SizeUnits.objects.all()
     serializer_class = SizeUnitsOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class StudyFeatureCategoriesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = StudyFeatureCategories.objects.all()
     serializer_class = StudyFeatureCategoriesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class StudyFeatureTypesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = StudyFeatureTypes.objects.all()
     serializer_class = StudyFeatureTypesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class StudyRelationshipTypesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = StudyRelationshipTypes.objects.all()
     serializer_class = StudyRelationshipTypesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class StudyStatusesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = StudyStatuses.objects.all()
     serializer_class = StudyStatusesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class StudyTypesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = StudyTypes.objects.all()
     serializer_class = StudyTypesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class TimeUnitsList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = TimeUnits.objects.all()
     serializer_class = TimeUnitsOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class TitleTypesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = TitleTypes.objects.all()
     serializer_class = TitleTypesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class TopicTypesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = TopicTypes.objects.all()
     serializer_class = TopicTypesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class TopicVocabulariesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = TopicVocabularies.objects.all()
     serializer_class = TopicVocabulariesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class TrialRegistriesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = TrialRegistries.objects.all()
     serializer_class = TrialRegistriesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class UserTypesList(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = UserTypes.objects.all()
     serializer_class = UserTypesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]

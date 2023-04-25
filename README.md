@@ -8,6 +8,7 @@
     - [Launching](#launching)
     - [Authentication and Permissions](#authentication-and-permissions)
     - [API](#api)
+    - [Changelog](CHANGELOG.md)
 
 
 ## Description
@@ -83,6 +84,14 @@ Also, you can use the `Docker compose` command:
 ## Authentication and Permissions
 To implement all necessary **Authorization and Authentication** needs the `Mozilla Django OIDC` library and integrated [Django Authentication Backend](https://docs.djangoproject.com/en/4.1/topics/auth/customizing/#authentication-backends) are used. 
 To use the `OIDC` functionality, the `LifeScience AAI` service has been used.
+
+In addition, all endpoints were extended with `authentication_classes` attribute, which idea is to specify user's authentication 
+ways to be used to access specific endpoint(s).<br />
+There are four main authentication classes used to protect the API:
+- `SessionAuthentication` - session-based authentication;
+- `BasicAuthentication` - basic authentication type, which uses `username` and `password` to authorise user;
+- `TokenAuthentication` - token-based authentication;
+- `OIDCAuthentication` - OIDC-based authentication, which connects authentication class from the `Mozilla Django OIDC` library.
 
 To manage accesses to any specific endpoint, you can modify the following configuration, which can be found in any
 `views.py` file:

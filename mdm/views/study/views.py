@@ -1,4 +1,6 @@
+from mozilla_django_oidc.contrib.drf import OIDCAuthentication
 from rest_framework import viewsets, permissions
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 
 from mdm.models.study.studies import Studies
 from mdm.models.study.study_contributors import StudyContributors
@@ -20,6 +22,7 @@ from mdm.serializers.study.study_topics_dto import StudyTopicsOutputSerializer, 
 
 
 class StudiesList(viewsets.ModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = Studies.objects.all()
     serializer_class = StudiesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -31,6 +34,7 @@ class StudiesList(viewsets.ModelViewSet):
 
 
 class StudyContributorsList(viewsets.ModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = StudyContributors.objects.all()
     serializer_class = StudyContributorsOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -52,6 +56,7 @@ class StudyContributorsList(viewsets.ModelViewSet):
 
 
 class StudyFeaturesList(viewsets.ModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = StudyFeatures.objects.all()
     serializer_class = StudyFeaturesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -73,6 +78,7 @@ class StudyFeaturesList(viewsets.ModelViewSet):
 
 
 class StudyIdentifiersList(viewsets.ModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = StudyIdentifiers.objects.all()
     serializer_class = StudyIdentifiersOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -94,6 +100,7 @@ class StudyIdentifiersList(viewsets.ModelViewSet):
 
 
 class StudyRelationshipsList(viewsets.ModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = StudyRelationships.objects.all()
     serializer_class = StudyRelationshipsOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -115,6 +122,7 @@ class StudyRelationshipsList(viewsets.ModelViewSet):
 
 
 class StudyTitlesList(viewsets.ModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = StudyTitles.objects.all()
     serializer_class = StudyTitlesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -136,6 +144,7 @@ class StudyTitlesList(viewsets.ModelViewSet):
 
 
 class StudyTopicsList(viewsets.ModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = StudyTopics.objects.all()
     serializer_class = StudyTopicsOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
