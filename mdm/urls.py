@@ -2,6 +2,7 @@ from django.urls import path
 
 from mdm.views.data_object.views import *
 from mdm.views.study.views import *
+from mdm.views.views import *
 
 
 data_objects_list = DataObjectsList.as_view({
@@ -257,4 +258,8 @@ urlpatterns = [
 
     path('studies/<uuid:studyId>/study-topics', study_topics_list),
     path('studies/<uuid:studyId>/study-topics/<uuid:pk>', study_topics_detail),
+
+    path('studies/mdr/data', MdrStudiesData.as_view()),
+    path('studies/mdr', MdrStudies.as_view()),
+    path('data-objects/mdr', MdrDataObjects.as_view()),
 ]
