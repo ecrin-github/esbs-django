@@ -10,21 +10,26 @@ from rms.models.dup.dup_prereqs import DupPrereqs
 from rms.models.dup.dup_secondary_use import DupSecondaryUse
 from rms.models.dup.dup_studies import DupStudies
 from rms.models.dup.dups import DataUseProcesses
-from rms.serializers.dup.duas_dto import DataUseAccessesOutputSerializer
-from rms.serializers.dup.dup_notes_dto import DupNotesOutputSerializer
-from rms.serializers.dup.dup_objects_dto import DupObjectsOutputSerializer
-from rms.serializers.dup.dup_people_dto import DupPeopleOutputSerializer
-from rms.serializers.dup.dup_prereqs_dto import DupPrereqsOutputSerializer
-from rms.serializers.dup.dup_secondary_use_dto import DupSecondaryUseOutputSerializer
-from rms.serializers.dup.dup_studies_dto import DupStudiesOutputSerializer
-from rms.serializers.dup.dups_dto import DataUseProcessesOutputSerializer
+from rms.serializers.dup.duas_dto import DataUseAccessesOutputSerializer, DataUseAccessesInputSerializer
+from rms.serializers.dup.dup_notes_dto import DupNotesOutputSerializer, DupNotesInputSerializer
+from rms.serializers.dup.dup_objects_dto import DupObjectsOutputSerializer, DupObjectsInputSerializer
+from rms.serializers.dup.dup_people_dto import DupPeopleOutputSerializer, DupPeopleInputSerializer
+from rms.serializers.dup.dup_prereqs_dto import DupPrereqsOutputSerializer, DupPrereqsInputSerializer
+from rms.serializers.dup.dup_secondary_use_dto import DupSecondaryUseOutputSerializer, DupSecondaryUseInputSerializer
+from rms.serializers.dup.dup_studies_dto import DupStudiesOutputSerializer, DupStudiesInputSerializer
+from rms.serializers.dup.dups_dto import DataUseProcessesOutputSerializer, DataUseProcessesInputSerializer
 
 
-class DataUseAccessesList(viewsets.ReadOnlyModelViewSet):
+class DataUseAccessesList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DataUseAccesses.objects.all()
     serializer_class = DataUseAccessesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_serializer_class(self):
+        if self.action in ["create", "update", "partial_update"]:
+            return DataUseAccessesInputSerializer
+        return super().get_serializer_class()
 
     def get_queryset(self, *args, **kwargs):
         if getattr(self, 'swagger_fake_view', False):
@@ -37,11 +42,16 @@ class DataUseAccessesList(viewsets.ReadOnlyModelViewSet):
         )
 
 
-class DupNotesList(viewsets.ReadOnlyModelViewSet):
+class DupNotesList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DupNotes.objects.all()
     serializer_class = DupNotesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_serializer_class(self):
+        if self.action in ["create", "update", "partial_update"]:
+            return DupNotesInputSerializer
+        return super().get_serializer_class()
 
     def get_queryset(self, *args, **kwargs):
         if getattr(self, 'swagger_fake_view', False):
@@ -54,11 +64,16 @@ class DupNotesList(viewsets.ReadOnlyModelViewSet):
         )
 
 
-class DupObjectsList(viewsets.ReadOnlyModelViewSet):
+class DupObjectsList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DupObjects.objects.all()
     serializer_class = DupObjectsOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_serializer_class(self):
+        if self.action in ["create", "update", "partial_update"]:
+            return DupObjectsInputSerializer
+        return super().get_serializer_class()
 
     def get_queryset(self, *args, **kwargs):
         if getattr(self, 'swagger_fake_view', False):
@@ -71,11 +86,16 @@ class DupObjectsList(viewsets.ReadOnlyModelViewSet):
         )
 
 
-class DupPeopleList(viewsets.ReadOnlyModelViewSet):
+class DupPeopleList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DupPeople.objects.all()
     serializer_class = DupPeopleOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_serializer_class(self):
+        if self.action in ["create", "update", "partial_update"]:
+            return DupPeopleInputSerializer
+        return super().get_serializer_class()
 
     def get_queryset(self, *args, **kwargs):
         if getattr(self, 'swagger_fake_view', False):
@@ -88,11 +108,16 @@ class DupPeopleList(viewsets.ReadOnlyModelViewSet):
         )
 
 
-class DupPrereqsList(viewsets.ReadOnlyModelViewSet):
+class DupPrereqsList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DupPrereqs.objects.all()
     serializer_class = DupPrereqsOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_serializer_class(self):
+        if self.action in ["create", "update", "partial_update"]:
+            return DupPrereqsInputSerializer
+        return super().get_serializer_class()
 
     def get_queryset(self, *args, **kwargs):
         if getattr(self, 'swagger_fake_view', False):
@@ -105,11 +130,16 @@ class DupPrereqsList(viewsets.ReadOnlyModelViewSet):
         )
 
 
-class DupSecondaryUseList(viewsets.ReadOnlyModelViewSet):
+class DupSecondaryUseList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DupSecondaryUse.objects.all()
     serializer_class = DupSecondaryUseOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_serializer_class(self):
+        if self.action in ["create", "update", "partial_update"]:
+            return DupSecondaryUseInputSerializer
+        return super().get_serializer_class()
 
     def get_queryset(self, *args, **kwargs):
         if getattr(self, 'swagger_fake_view', False):
@@ -122,11 +152,16 @@ class DupSecondaryUseList(viewsets.ReadOnlyModelViewSet):
         )
 
 
-class DupStudiesList(viewsets.ReadOnlyModelViewSet):
+class DupStudiesList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DupStudies.objects.all()
     serializer_class = DupStudiesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_serializer_class(self):
+        if self.action in ["create", "update", "partial_update"]:
+            return DupStudiesInputSerializer
+        return super().get_serializer_class()
 
     def get_queryset(self, *args, **kwargs):
         if getattr(self, 'swagger_fake_view', False):
@@ -139,8 +174,13 @@ class DupStudiesList(viewsets.ReadOnlyModelViewSet):
         )
 
 
-class DataUseProcessesList(viewsets.ReadOnlyModelViewSet):
+class DataUseProcessesList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DataUseProcesses.objects.all()
     serializer_class = DataUseProcessesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_serializer_class(self):
+        if self.action in ["create", "update", "partial_update"]:
+            return DataUseProcessesInputSerializer
+        return super().get_serializer_class()

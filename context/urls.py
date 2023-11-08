@@ -389,8 +389,8 @@ urlpatterns = [
     path('geog-entity-types', geog_entity_types_list),
     path('geog-entity-types/<uuid:pk>', geog_entity_types_detail),
 
-    path('identifier-types', access_prereq_types_list),
-    path('identifier-types/<uuid:pk>', access_prereq_types_detail),
+    path('identifier-types', identifier_types_list),
+    path('identifier-types/<uuid:pk>', identifier_types_detail),
 
     path('language-usage-types', language_usage_types_list),
     path('language-usage-types/<uuid:pk>', language_usage_types_detail),

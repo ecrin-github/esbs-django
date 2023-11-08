@@ -5,7 +5,6 @@ from context.serializers.role_classes_dto import RoleClassesOutputSerializer
 from context.serializers.role_types_dto import RoleTypesOutputSerializer
 from general.serializers.organisations_dto import OrganisationsOutputSerializer
 from users.models.profiles import UserProfiles
-from users.serializers.users_dto import UsersSerializer
 
 
 class UserProfilesInputSerializer(serializers.ModelSerializer):
@@ -15,7 +14,6 @@ class UserProfilesInputSerializer(serializers.ModelSerializer):
 
 
 class UserProfilesOutputSerializer(serializers.ModelSerializer):
-    user = UsersSerializer(many=False, read_only=True)
     role = RoleTypesOutputSerializer(many=False, read_only=True)
     role_class = RoleClassesOutputSerializer(many=False, read_only=True)
     user_type = RmsUserTypesOutputSerializer(many=False, read_only=True)

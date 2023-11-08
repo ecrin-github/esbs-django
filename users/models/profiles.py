@@ -13,7 +13,7 @@ from users.models.users import Users
 
 class UserProfiles(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True, db_index=True)
-    user = models.OneToOneField(Users, on_delete=models.CASCADE, related_name='user_profiles_user_id',
+    user = models.OneToOneField(Users, on_delete=models.CASCADE, related_name='user_profile',
                                 db_column='user_id', default=None, null=True, blank=True)
     ls_aai_id = models.CharField(max_length=255, null=True, blank=True)
     role = models.ForeignKey(RoleTypes, on_delete=models.CASCADE, db_column='role_id',

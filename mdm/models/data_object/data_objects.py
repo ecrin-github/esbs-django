@@ -12,6 +12,7 @@ from context.models.object_classes import ObjectClasses
 from context.models.object_types import ObjectTypes
 from general.models.language_codes import LanguageCodes
 from general.models.organisations import Organisations
+from mdm.models.study.studies import Studies
 from users.models.users import Users
 
 
@@ -49,6 +50,9 @@ class DataObjects(models.Model):
     last_edited_by = models.ForeignKey(Users, on_delete=models.CASCADE, db_column='last_edited_by',
                                        blank=True, null=True, related_name='data_objects_last_edited_by', default=None,
                                        db_constraint=IS_USERS_DB_CONSTRAINT)
+    linked_study = models.ForeignKey(Studies, on_delete=models.CASCADE, unique=False, editable=True, null=True,
+                                     blank=True, db_index=True, default=None,
+                                     db_column='linked_study', related_name='linked_objects')
 
     class Meta:
         db_table = 'data_objects'

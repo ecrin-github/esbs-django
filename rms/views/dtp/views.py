@@ -10,15 +10,15 @@ from rms.models.dtp.dtp_people import DtpPeople
 from rms.models.dtp.dtp_prereqs import DtpPrereqs
 from rms.models.dtp.dtp_studies import DtpStudies
 from rms.models.dtp.dtps import DataTransferProcesses
-from rms.serializers.dtp.dtas_dto import DataTransferAccessesOutputSerializer
-from rms.serializers.dtp.dtp_datasets_dto import DtpDatasetsOutputSerializer
-from rms.serializers.dtp.dtp_notes_dto import DtpNotesOutputSerializer
-from rms.serializers.dtp.dtp_objects_dto import DtpObjectsOutputSerializer
-from rms.serializers.dtp.dtp_people_dto import DtpPeopleOutputSerializer
-from rms.serializers.dtp.dtp_prereqs_dto import DtpPrereqsOutputSerializer
-from rms.serializers.dtp.dtp_studies_dto import DtpStudiesOutputSerializer
+from rms.serializers.dtp.dtas_dto import DataTransferAccessesOutputSerializer, DataTransferAccessesInputSerializer
+from rms.serializers.dtp.dtp_datasets_dto import DtpDatasetsOutputSerializer, DtpDatasetsInputSerializer
+from rms.serializers.dtp.dtp_notes_dto import DtpNotesOutputSerializer, DtpNotesInputSerializer
+from rms.serializers.dtp.dtp_objects_dto import DtpObjectsOutputSerializer, DtpObjectsInputSerializer
+from rms.serializers.dtp.dtp_people_dto import DtpPeopleOutputSerializer, DtpPeopleInputSerializer
+from rms.serializers.dtp.dtp_prereqs_dto import DtpPrereqsOutputSerializer, DtpPrereqsInputSerializer
+from rms.serializers.dtp.dtp_studies_dto import DtpStudiesOutputSerializer, DtpStudiesInputSerializer
 from rms.serializers.dtp.dtps_dto import DataTransferProcessesOutputSerializer, \
-    DataTransferProcessesDetailsOutputSerializer
+    DataTransferProcessesDetailsOutputSerializer, DataTransferProcessesInputSerializer
 
 
 class DataTransferAccessesList(viewsets.ModelViewSet):
@@ -26,6 +26,11 @@ class DataTransferAccessesList(viewsets.ModelViewSet):
     queryset = DataTransferAccesses.objects.all()
     serializer_class = DataTransferAccessesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_serializer_class(self):
+        if self.action in ["create", "update", "partial_update"]:
+            return DataTransferAccessesInputSerializer
+        return super().get_serializer_class()
 
     def get_queryset(self, *args, **kwargs):
         if getattr(self, 'swagger_fake_view', False):
@@ -44,6 +49,11 @@ class DtpDatasetsList(viewsets.ModelViewSet):
     serializer_class = DtpDatasetsOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
+    def get_serializer_class(self):
+        if self.action in ["create", "update", "partial_update"]:
+            return DtpDatasetsInputSerializer
+        return super().get_serializer_class()
+
     def get_queryset(self, *args, **kwargs):
         if getattr(self, 'swagger_fake_view', False):
             # queryset just for schema generation metadata
@@ -60,6 +70,11 @@ class DtpNotesList(viewsets.ModelViewSet):
     queryset = DtpNotes.objects.all()
     serializer_class = DtpNotesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_serializer_class(self):
+        if self.action in ["create", "update", "partial_update"]:
+            return DtpNotesInputSerializer
+        return super().get_serializer_class()
 
     def get_queryset(self, *args, **kwargs):
         if getattr(self, 'swagger_fake_view', False):
@@ -78,6 +93,11 @@ class DtpObjectsList(viewsets.ModelViewSet):
     serializer_class = DtpObjectsOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
+    def get_serializer_class(self):
+        if self.action in ["create", "update", "partial_update"]:
+            return DtpObjectsInputSerializer
+        return super().get_serializer_class()
+
     def get_queryset(self, *args, **kwargs):
         if getattr(self, 'swagger_fake_view', False):
             # queryset just for schema generation metadata
@@ -94,6 +114,11 @@ class DtpPeopleList(viewsets.ModelViewSet):
     queryset = DtpPeople.objects.all()
     serializer_class = DtpPeopleOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_serializer_class(self):
+        if self.action in ["create", "update", "partial_update"]:
+            return DtpPeopleInputSerializer
+        return super().get_serializer_class()
 
     def get_queryset(self, *args, **kwargs):
         if getattr(self, 'swagger_fake_view', False):
@@ -112,6 +137,11 @@ class DtpPrereqsList(viewsets.ModelViewSet):
     serializer_class = DtpPrereqsOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
+    def get_serializer_class(self):
+        if self.action in ["create", "update", "partial_update"]:
+            return DtpPrereqsInputSerializer
+        return super().get_serializer_class()
+
     def get_queryset(self, *args, **kwargs):
         if getattr(self, 'swagger_fake_view', False):
             # queryset just for schema generation metadata
@@ -129,6 +159,11 @@ class DtpStudiesList(viewsets.ModelViewSet):
     serializer_class = DtpStudiesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
+    def get_serializer_class(self):
+        if self.action in ["create", "update", "partial_update"]:
+            return DtpStudiesInputSerializer
+        return super().get_serializer_class()
+
     def get_queryset(self, *args, **kwargs):
         if getattr(self, 'swagger_fake_view', False):
             # queryset just for schema generation metadata
@@ -145,3 +180,8 @@ class DataTransferProcessesList(viewsets.ModelViewSet):
     queryset = DataTransferProcesses.objects.all()
     serializer_class = DataTransferProcessesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_serializer_class(self):
+        if self.action in ["create", "update", "partial_update"]:
+            return DataTransferProcessesInputSerializer
+        return super().get_serializer_class()

@@ -5,6 +5,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from app.serializers import MailSerializer
+from mdm.models import Studies, DataObjects
+from rms.models import DataUseProcesses, DataTransferProcesses
+from users.models import Users
 
 
 class EmailSender(APIView):
@@ -18,3 +21,23 @@ class EmailSender(APIView):
             serializer.save()
             return Response({'status': 'success'}, status=200)
         return Response(serializer.errors,  status=400)
+
+
+class RmsStatistics(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        return Response({
+            "total_studies": Studies.objects.all().count(),
+            "total_objects": DataObjects.objects.all().count(),
+            "dup": {
+                "total": DataUseProcesses.objects.all().count(),
+                "completed": DataUseProcesses.objects.filter(status__name='Complete').count()
+            },
+            "dtp": {
+                "total": DataTransferProcesses.objects.all().count(),
+                "completed": DataTransferProcesses.objects.filter(status__name='Complete').count()
+            },
+            "total_users": Users.objects.all().count()
+        })
+

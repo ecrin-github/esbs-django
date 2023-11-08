@@ -6,6 +6,7 @@ from context.serializers.study_types_dto import StudyTypesOutputSerializer
 from context.serializers.time_units_dto import TimeUnitsOutputSerializer
 from general.serializers.language_codes_dto import LanguageCodesOutputSerializer
 from mdm.models.study.studies import Studies
+from mdm.serializers.data_object.data_objects_dto import DataObjectsOutputSerializer
 from mdm.serializers.study.study_contributors_dto import StudyContributorsOutputSerializer
 from mdm.serializers.study.study_features_dto import StudyFeaturesOutputSerializer
 from mdm.serializers.study.study_identifiers_dto import StudyIdentifiersOutputSerializer
@@ -42,6 +43,8 @@ class StudiesOutputSerializer(serializers.ModelSerializer):
     study_relationships = StudyRelationshipsOutputSerializer(many=True, read_only=True)
     study_titles = StudyTitlesOutputSerializer(many=True, read_only=True)
     study_topics = StudyTopicsOutputSerializer(many=True, read_only=True)
+    linked_objects = DataObjectsOutputSerializer(many=True, read_only=True)
+
 
     class Meta:
         model = Studies
@@ -50,4 +53,4 @@ class StudiesOutputSerializer(serializers.ModelSerializer):
                   'study_status', 'study_enrollment', 'study_gender_elig', 'min_age', 'min_age_unit',
                   'max_age', 'max_age_unit', 'created_on', 'last_edited_by',
                   'study_contributors', 'study_features',
-                  'study_identifiers', 'study_relationships', 'study_titles', 'study_topics']
+                  'study_identifiers', 'study_relationships', 'study_titles', 'study_topics', 'linked_objects']

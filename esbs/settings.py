@@ -190,6 +190,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAdminUser'
     ],
     'DEFAULT_RENDERER_CLASSES': (
+        'app.renderer.CustomRenderer',
         'djangorestframework_camel_case.render.CamelCaseJSONRenderer',
         'djangorestframework_camel_case.render.CamelCaseBrowsableAPIRenderer',
     ),
@@ -201,8 +202,7 @@ REST_FRAMEWORK = {
     'JSON_UNDERSCOREIZE': {
         'no_underscore_before_number': True,
     },
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10,
+    'DEFAULT_PAGINATION_CLASS': 'app.pagination.CustomPagination',
 }
 
 # Password validation

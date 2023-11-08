@@ -8,7 +8,7 @@ from mdm.models import Studies, DataObjects
 from rms.models import DataUseProcesses, DataTransferProcesses, DupStudies, DupObjects, DtpStudies, DtpObjects
 from users.models.profiles import UserProfiles
 from users.models.users import Users
-from users.serializers.profiles_dto import UserProfilesOutputSerializer
+from users.serializers.profiles_dto import UserProfilesOutputSerializer, UserProfilesInputSerializer
 from users.serializers.users_dto import UsersSerializer, CreateUserSerializer
 
 from rest_framework.response import Response
@@ -31,6 +31,11 @@ class UserProfilesList(viewsets.ModelViewSet):
     queryset = UserProfiles.objects.all()
     serializer_class = UserProfilesOutputSerializer
     permission_classes = [permissions.AllowAny]
+
+    def get_serializer_class(self):
+        if self.action in ["create", "update", "partial_update"]:
+            return UserProfilesInputSerializer
+        return super().get_serializer_class()
 
     def get_queryset(self, *args, **kwargs):
         return (

@@ -2,6 +2,7 @@ from django.urls import path
 
 from mdm.views.data_object.views import *
 from mdm.views.study.views import *
+from mdm.views.views import *
 
 
 data_objects_list = DataObjectsList.as_view({
@@ -92,11 +93,11 @@ object_relationships_detail = ObjectRelationshipsList.as_view({
     'delete': 'destroy'
 })
 
-object_rights_list = ObjectRelationshipsList.as_view({
+object_rights_list = ObjectRightsList.as_view({
     'get': 'list',
     'post': 'create'
 })
-object_rights_detail = ObjectRelationshipsList.as_view({
+object_rights_detail = ObjectRightsList.as_view({
     'get': 'retrieve',
     'put': 'update',
     'patch': 'partial_update',
@@ -257,4 +258,21 @@ urlpatterns = [
 
     path('studies/<uuid:studyId>/study-topics', study_topics_list),
     path('studies/<uuid:studyId>/study-topics/<uuid:pk>', study_topics_detail),
+
+    path('studies/mdr/data', MdrStudiesData.as_view()),
+    path('studies/mdr', MdrStudies.as_view()),
+    path('data-objects/mdr', MdrDataObjects.as_view()),
+
+    path('studies/by-org', StudiesByOrg.as_view()),
+    path('data-objects/by-org', DataObjectsByOrg.as_view()),
+    path('dtp/by-org', DtpByOrg.as_view()),
+    path('dup/by-org', DupByOrg.as_view()),
+
+    path('dtp/object-involvement', DtpObjectInvolvement.as_view()),
+    path('dup/object-involvement', DupObjectInvolvement.as_view()),
+
+    path('dtp/study-involvement', DtpStudyInvolvement.as_view()),
+    path('dup/study-involvement', DupStudyInvolvement.as_view()),
+
+    path('multi-studies/objects', MultiStudiesObjects.as_view())
 ]
