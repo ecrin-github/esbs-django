@@ -11,9 +11,9 @@ from general.models.organisations import Organisations
 
 class DataUseProcesses(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, db_index=True)
-    org_id = models.ForeignKey(Organisations, on_delete=models.CASCADE, db_column='org_id',
-                               related_name='dup_org_id', default=None, null=True, blank=True,
-                               db_constraint=IS_GENERAL_DB_CONSTRAINT)
+    organisation = models.ForeignKey(Organisations, on_delete=models.CASCADE, db_column='org_id',
+                                     related_name='organisation', default=None, null=True, blank=True,
+                                     db_constraint=IS_GENERAL_DB_CONSTRAINT)
     display_name = models.CharField(max_length=255, blank=True, null=True)
     status = models.ForeignKey(DupStatusTypes, models.DO_NOTHING, db_column='status_id',
                                related_name='dup_status_id', default=None, null=True, blank=True,
