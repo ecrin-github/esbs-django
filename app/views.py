@@ -41,3 +41,21 @@ class RmsStatistics(APIView):
             "total_users": Users.objects.all().count()
         })
 
+
+class PushNotifications(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        return Response({
+            "total_studies": Studies.objects.all().count(),
+            "total_objects": DataObjects.objects.all().count(),
+            "dup": {
+                "total": DataUseProcesses.objects.all().count(),
+                "completed": DataUseProcesses.objects.filter(status__name='Complete').count()
+            },
+            "dtp": {
+                "total": DataTransferProcesses.objects.all().count(),
+                "completed": DataTransferProcesses.objects.filter(status__name='Complete').count()
+            },
+            "total_users": Users.objects.all().count()
+        })
