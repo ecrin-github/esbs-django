@@ -278,4 +278,5 @@ urlpatterns = [
 
     path('dtp/<uuid:dtpId>/study-involvement', DtpStudiesObjectsInvolvements.as_view()),
     path('dup/<uuid:dupId>/study-involvement', DupStudiesObjectsInvolvements.as_view()),
+    path('dtp/<uuid:dtpId>/dup/<uuid:dupId>/study-involvement', DtpDupStudiesObjectsInvolvements.as_view()),
 ]
