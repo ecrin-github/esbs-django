@@ -265,3 +265,91 @@ class MultiStudiesObjects(APIView):
                     data.append(rec)
 
         return Response({'data': data})
+
+
+class DtpStudiesObjectsInvolvements(APIView):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get(self, request, dtpId, format=None):
+        if dtpId is None:
+            return Response({'error': "dtpId param is missing"})
+
+        dtp_check = DataTransferProcesses.objects.filter(id=dtpId)
+        if not dtp_check.exists():
+            return Response({'error': f"Data transfer process with the ID {dtpId} does not exist."})
+
+        dtp = DataTransferProcesses.objects.get(id=dtpId)
+
+        study_id = self.request.query_params.get('studyId')
+
+        if study_id is None:
+            return Response({'error': "studyId param is missing"})
+
+        study_check = Studies.objects.filter(id=study_id)
+        if not study_check.exists():
+            return Response({'error': f"Study with the ID {study_id} does not exist."})
+        study = Studies.objects.get(id=study_id)
+
+        dtp_studies_check = DtpStudies.objects.filter(study_id=study, dtp_id=dtp)
+
+        data = {
+            "DtpTotal": dtp_studies_check.count(),
+        }
+
+        study_objects_check = DataObjects.objects.filter(linked_study=study)
+        if not study_objects_check.exists():
+            return Response(data)
+
+        for rec in study_objects_check:
+            data_obj = DataObjects.objects.get(id=rec.id)
+            dtp_objects_check = DtpObjects.objects.filter(object_id=data_obj, dtp_id=dtp)
+            if not dtp_objects_check.exists():
+                continue
+            data['DtpTotal'] += dtp_objects_check.count()
+
+        return Response(data)
+
+
+class DupStudiesObjectsInvolvements(APIView):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get(self, request, dupId, format=None):
+        if dupId is None:
+            return Response({'error': "dupId param is missing"})
+
+        dup_check = DataUseProcesses.objects.filter(id=dupId)
+        if not dup_check.exists():
+            return Response({'error': f"Data use process with the ID {dupId} does not exist."})
+
+        dup = DataUseProcesses.objects.get(id=dupId)
+
+        study_id = self.request.query_params.get('studyId')
+
+        if study_id is None:
+            return Response({'error': "studyId param is missing"})
+
+        study_check = Studies.objects.filter(id=study_id)
+        if not study_check.exists():
+            return Response({'error': f"Study with the ID {study_id} does not exist."})
+        study = Studies.objects.get(id=study_id)
+
+        dup_studies_check = DupStudies.objects.filter(study_id=study, dup_id=dup)
+
+        data = {
+            "DupTotal": dup_studies_check.count(),
+        }
+
+        study_objects_check = DataObjects.objects.filter(linked_study=study)
+        if not study_objects_check.exists():
+            return Response(data)
+
+        for rec in study_objects_check:
+            data_obj = DataObjects.objects.get(id=rec.id)
+            dup_objects_check = DupObjects.objects.filter(object_id=data_obj, dup_id=dup)
+            if not dup_objects_check.exists():
+                continue
+            data['DupTotal'] += dup_objects_check.count()
+
+        return Response(data)
