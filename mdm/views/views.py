@@ -1,5 +1,6 @@
 import json
 
+import psycopg2
 import requests
 from mozilla_django_oidc.contrib.drf import OIDCAuthentication
 from rest_framework import permissions
@@ -7,10 +8,23 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 
+from configs.remote_db_settings import (REMOTE_DB_USER, REMOTE_DB_PASSWORD, REMOTE_DB_HOST, REMOTE_DB_PORT,
+                                        REMOTE_RMS_DB_NAME)
+from context.models import TrialRegistries
+from db_exports.export_context_and_general_data import get_data_from_table
 from general.models import Organisations
 from mdm.models import DataObjects, StudyContributors, Studies
 from mdm.serializers.data_object.data_objects_dto import DataObjectsOutputSerializer
 from rms.models import DataTransferProcesses, DataUseProcesses, DtpObjects, DupObjects, DupStudies, DtpStudies
+
+
+rms_db_connection = psycopg2.connect(
+    user=REMOTE_DB_USER,
+    password=REMOTE_DB_PASSWORD,
+    host=REMOTE_DB_HOST,
+    port=REMOTE_DB_PORT,
+    database=REMOTE_RMS_DB_NAME
+)
 
 
 class MdrStudiesData(APIView):
@@ -26,8 +40,25 @@ class MdrStudiesData(APIView):
         if sd_sid is None:
             return Response({'error': "sdSid param is missing"})
 
+        trial_registry_check = TrialRegistries.objects.filter(id=reg_id)
+        if not trial_registry_check.exists():
+            return Response({'error': "Trial registry does not exist"})
+
+        trial_registry = TrialRegistries.objects.get(id=reg_id)
+        records = get_data_from_table('rms', 'lup', 'trial_registries')
+
+        trial_registry_id = None
+
+        for record in records:
+            if record[1] == trial_registry.name:
+                trial_registry_id = record[0]
+                break
+
+        if trial_registry_id is None:
+            return Response({'error': "Trial registry does not exist in the MDR database"})
+
         res = requests.get(
-            f"https://api.ecrin-rms.org/api/studies/mdr/{reg_id}/{sd_sid}/data",
+            f"https://api.ecrin-rms.org/api/studies/mdr/{trial_registry_id}/{sd_sid}/data",
             headers={'Authorization': request.META['HTTP_AUTHORIZATION']}
         )
         json_res = json.loads(res.text)
@@ -48,8 +79,25 @@ class MdrStudies(APIView):
         if sd_sid is None:
             return Response({'error': "sdSid param is missing"})
 
+        trial_registry_check = TrialRegistries.objects.filter(id=reg_id)
+        if not trial_registry_check.exists():
+            return Response({'error': "Trial registry does not exist"})
+
+        trial_registry = TrialRegistries.objects.get(id=reg_id)
+        records = get_data_from_table('rms', 'lup', 'trial_registries')
+
+        trial_registry_id = None
+
+        for record in records:
+            if record[1] == trial_registry.name:
+                trial_registry_id = record[0]
+                break
+
+        if trial_registry_id is None:
+            return Response({'error': "Trial registry does not exist in the MDR database"})
+
         res = requests.get(
-            f"https://api.ecrin-rms.org/api/studies/mdr/{reg_id}/{sd_sid}",
+            f"https://api.ecrin-rms.org/api/studies/mdr/{trial_registry_id}/{sd_sid}",
             headers={'Authorization': request.META['HTTP_AUTHORIZATION']}
         )
         json_res = json.loads(res.text)
