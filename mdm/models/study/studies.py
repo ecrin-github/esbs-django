@@ -16,7 +16,7 @@ from users.models.users import Users
 
 class Studies(models.Model):
     id = models.UUIDField(primary_key=True, unique=True, editable=False, default=uuid.uuid4, db_index=True)
-    sd_sid = models.CharField(max_length=255, blank=True, null=True, editable=False, unique=True)
+    sd_sid = models.CharField(max_length=255, blank=True, null=True, editable=True, unique=True)
     display_title = models.CharField(max_length=255, blank=True, null=True)
     title_lang_code = models.ForeignKey(LanguageCodes, on_delete=models.CASCADE, db_column='title_lang_code_id',
                                         blank=True, null=True, default=None, db_constraint=IS_GENERAL_DB_CONSTRAINT,
