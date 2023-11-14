@@ -8,5 +8,4 @@ class CustomAuthMiddleware:
             request.META['HTTP_AUTHORIZATION'] = ''
 
         response = self.get_response(request)
-        response['Access-Control-Allow-Origin'] = '*'
         return response
