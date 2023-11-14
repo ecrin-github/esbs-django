@@ -38,6 +38,7 @@ ALLOWED_HOSTS = ALLOWED_APP_HOSTS
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -301,3 +302,12 @@ EMAIL_USE_TLS = True
 EMAIL_PORT = SMTP_PORT
 EMAIL_HOST_USER = SMTP_LOGIN
 EMAIL_HOST_PASSWORD = SMTP_PASSWORD
+
+
+# Websockets and channels settings
+ASGI_APPLICATION = "esbs.asgi.app"
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
