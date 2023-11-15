@@ -342,7 +342,8 @@ class DtpStudiesObjectsInvolvements(APIView):
         dtp_studies_check = DtpStudies.objects.filter(study_id=study, dtp_id=dtp)
 
         data = {
-            "DtpTotal": dtp_studies_check.count(),
+            "studyAssociated": dtp_studies_check.exists(),
+            "objectsAssociated": False,
         }
 
         study_objects_check = DataObjects.objects.filter(linked_study=study)
@@ -354,7 +355,9 @@ class DtpStudiesObjectsInvolvements(APIView):
             dtp_objects_check = DtpObjects.objects.filter(object_id=data_obj, dtp_id=dtp)
             if not dtp_objects_check.exists():
                 continue
-            data['DtpTotal'] += dtp_objects_check.count()
+            else:
+                data['objectsAssociated'] = True
+                break
 
         return Response(data)
 
@@ -386,7 +389,8 @@ class DupStudiesObjectsInvolvements(APIView):
         dup_studies_check = DupStudies.objects.filter(study_id=study, dup_id=dup)
 
         data = {
-            "DupTotal": dup_studies_check.count(),
+            "studyAssociated": dup_studies_check.exists(),
+            "objectsAssociated": False,
         }
 
         study_objects_check = DataObjects.objects.filter(linked_study=study)
@@ -398,7 +402,9 @@ class DupStudiesObjectsInvolvements(APIView):
             dup_objects_check = DupObjects.objects.filter(object_id=data_obj, dup_id=dup)
             if not dup_objects_check.exists():
                 continue
-            data['DupTotal'] += dup_objects_check.count()
+            else:
+                data['objectsAssociated'] = True
+                break
 
         return Response(data)
 
