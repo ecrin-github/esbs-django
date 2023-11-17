@@ -60,4 +60,4 @@ class DataObjectsOutputSerializer(serializers.ModelSerializer):
                   'doi_status', 'object_class', 'object_type', 'managing_org', 'lang_code', 'access_type',
                   'last_edited_by', 'object_contributors', 'object_datasets', 'object_dates', 'object_descriptions',
                   'object_identifiers', 'object_instances', 'object_relationships', 'object_rights', 'object_titles',
-                  'object_topics']
+                  'object_topics', 'linked_study']

@@ -11,10 +11,10 @@ class DataTransferAccessesInputSerializer(serializers.ModelSerializer):
 
 
 class DataTransferAccessesOutputSerializer(serializers.ModelSerializer):
-    repo_signature_1 = UsersSerializer(many=False, read_only=True)
-    repo_signature_2 = UsersSerializer(many=False, read_only=True)
-    provider_signature_1 = UsersSerializer(many=False, read_only=True)
-    provider_signature_2 = UsersSerializer(many=False, read_only=True)
+    repo_signature1 = UsersSerializer(many=False, read_only=True)
+    repo_signature2 = UsersSerializer(many=False, read_only=True)
+    provider_signature1 = UsersSerializer(many=False, read_only=True)
+    provider_signature2 = UsersSerializer(many=False, read_only=True)
 
     class Meta:
         model = DataTransferAccesses
