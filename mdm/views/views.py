@@ -15,8 +15,10 @@ from db_exports.export_context_and_general_data import get_data_from_table
 from general.models import Organisations
 from mdm.models import DataObjects, StudyContributors, Studies
 from mdm.serializers.data_object.data_objects_dto import DataObjectsOutputSerializer
+from mdm.serializers.study.studies_dto import StudiesOutputSerializer
 from rms.models import DataTransferProcesses, DataUseProcesses, DtpObjects, DupObjects, DupStudies, DtpStudies
-
+from rms.serializers.dtp.dtps_dto import DataTransferProcessesOutputSerializer
+from rms.serializers.dup.dups_dto import DataUseProcessesOutputSerializer
 
 rms_db_connection = psycopg2.connect(
     user=REMOTE_DB_USER,
@@ -141,9 +143,12 @@ class DtpByOrg(APIView):
         if not org_check.exists():
             return Response({'error': f"Organisation with the orgId {org_id} does not exist."})
 
-        data = DataTransferProcesses.objects.filter(organisation=org_check)
+        org_data = Organisations.objects.get(id=org_id)
 
-        return Response(data)
+        data = DataTransferProcesses.objects.filter(organisation=org_data)
+        serializer = DataTransferProcessesOutputSerializer(data, many=True)
+
+        return Response(serializer.data)
 
 
 class DupByOrg(APIView):
@@ -160,9 +165,12 @@ class DupByOrg(APIView):
         if not org_check.exists():
             return Response({'error': f"Organisation with the orgId {org_id} does not exist."})
 
-        data = DataUseProcesses.objects.filter(org_id=org_check)
+        org_data = Organisations.objects.get(id=org_id)
 
-        return Response(data)
+        data = DataUseProcesses.objects.filter(organisation=org_data)
+        serializer = DataUseProcessesOutputSerializer(data, many=True)
+
+        return Response(serializer.data)
 
 
 class DataObjectsByOrg(APIView):
@@ -179,9 +187,12 @@ class DataObjectsByOrg(APIView):
         if not org_check.exists():
             return Response({'error': f"Organisation with the orgId {org_id} does not exist."})
 
-        data = DataObjects.objects.filter(managing_org=org_check)
+        org_data = Organisations.objects.get(id=org_id)
 
-        return Response(data)
+        data = DataObjects.objects.filter(managing_org=org_data)
+        serializer = DataObjectsOutputSerializer(data, many=True)
+
+        return Response(serializer.data)
 
 
 class StudiesByOrg(APIView):
@@ -198,14 +209,17 @@ class StudiesByOrg(APIView):
         if not org_check.exists():
             return Response({'error': f"Organisation with the orgId {org_id} does not exist."})
 
-        data = StudyContributors.objects.filter(organisation=org_check)
+        org_data = Organisations.objects.get(id=org_id)
+
+        data = StudyContributors.objects.filter(organisation=org_data)
         study_ids = []
         for rec in data:
-            study_ids.append(rec.study_id)
+            study_ids.append(rec.study_id_id)
 
         studies = Studies.objects.filter(id__in=study_ids)
+        serializer = StudiesOutputSerializer(studies, many=True)
 
-        return Response(studies)
+        return Response(serializer.data)
 
 
 class DtpObjectInvolvement(APIView):
