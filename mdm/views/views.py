@@ -465,3 +465,61 @@ class DtpDupStudiesObjectsInvolvements(APIView):
                 data['DtpTotal'] += dtp_objects_check.count()
 
         return Response(data)
+
+
+class NewMdrStudies(APIView):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        reg_id = self.request.query_params.get('regId')
+        sd_sid = self.request.query_params.get('sdSid')
+
+        if reg_id is None:
+            return Response({'error': "regId param is missing"})
+        if sd_sid is None:
+            return Response({'error': "sdSid param is missing"})
+
+        REG_IDS = [
+            100116,
+            100117,
+            100118,
+            100119,
+            100120,
+            100121,
+            100122,
+            100123,
+            100124,
+            100125,
+            100126,
+            100127,
+            100128,
+            100129,
+            100130,
+            100131,
+            100132,
+            100135,
+            101405,
+            101900,
+            101901,
+            101940,
+            101989,
+            109108,
+            110426
+        ]
+
+        if int(reg_id) not in REG_IDS:
+            return Response({'error': "Trial registry does not exist"})
+
+        res = requests.get(
+            f"https://newmdr.ecrin.org/api/Study/MDRId/{reg_id}/{sd_sid}",
+        )
+        study_id = res.text
+
+        if study_id == "0" or study_id is None:
+            return Response({'error': "Study does not exist"})
+
+        study_details = requests.get(f"https://newmdr.ecrin.org/api/Study/StudyDetails/{study_id}")
+        json_res = json.loads(study_details.text)
+
+        return Response(json_res)

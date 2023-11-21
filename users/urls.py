@@ -25,7 +25,9 @@ urlpatterns = [
     path('', users_list),
     path('<uuid:pk>', users_detail),
 
-    path('<uuid:userId>/profile', user_profiles_detail),
+    path('<uuid:userId>/profile/<uuid:pk>', user_profiles_detail),
 
     path('<uuid:userId>/entities', UserEntitiesApiView.as_view()),
+
+    path('by-org', UsersByOrganisation.as_view())
 ]

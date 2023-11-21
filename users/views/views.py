@@ -1,6 +1,7 @@
 from mozilla_django_oidc.contrib.drf import OIDCAuthentication
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, status
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
+from rest_framework.parsers import JSONParser
 from rest_framework.views import APIView
 
 from general.models import Organisations
@@ -24,6 +25,20 @@ class UsersList(viewsets.ModelViewSet):
         if self.action in ["create"]:
             return CreateUserSerializer
         return super().get_serializer_class()
+
+    def create(self, request, *args, **kwargs):
+        input_serializer = self.get_serializer(data=request.data)
+        input_serializer.is_valid(raise_exception=True)
+        self.perform_create(input_serializer)
+
+        user = Users.objects.get(email=input_serializer.validated_data["email"])
+        output_serializer = UsersSerializer(user)
+        return Response(output_serializer.data)
+
+
+    def perform_create(self, serializer):
+        family_name_val = self.request.data.get("family_name")
+        serializer.save()
 
 
 class UserProfilesList(viewsets.ModelViewSet):
@@ -101,3 +116,22 @@ class UserEntitiesApiView(APIView):
         }
 
         return Response(data,  status=200)
+
+
+class UsersByOrganisation(APIView):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        org_id = self.request.query_params.get('orgId')
+
+        if org_id is None:
+            return Response({'error': "orgId param is missing"})
+
+        organisation = Organisations.objects.get(id=org_id)
+
+        users = Users.objects.filter(user_profile__organisation=organisation)
+
+        serializer = UsersSerializer(users, many=True)
+
+        return Response({'count': users.count(), 'results': serializer.data, 'statusCode': status.HTTP_200_OK})

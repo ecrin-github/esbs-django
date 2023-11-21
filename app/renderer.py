@@ -1,7 +1,7 @@
 from djangorestframework_camel_case.render import CamelCaseJSONRenderer, CamelCaseBrowsableAPIRenderer
+from rest_framework.utils.serializer_helpers import ReturnList
 
-
-TYPES = [str, int, bool, float, None]
+TYPES = [str, int, bool, float, None, ReturnList]
 
 
 class CustomRenderer(CamelCaseJSONRenderer, CamelCaseBrowsableAPIRenderer):

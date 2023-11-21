@@ -261,6 +261,7 @@ urlpatterns = [
 
     path('studies/mdr/data', MdrStudiesData.as_view()),
     path('studies/mdr', MdrStudies.as_view()),
+    path('studies/new-mdr', NewMdrStudies.as_view()),
     path('data-objects/mdr', MdrDataObjects.as_view()),
 
     path('studies/by-org', StudiesByOrg.as_view()),
