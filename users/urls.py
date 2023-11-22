@@ -23,6 +23,8 @@ user_profiles_detail = UserProfilesList.as_view({
 
 urlpatterns = [
     path('', users_list),
+    path('by-name', UsersByName.as_view()),
+
     path('<uuid:pk>', users_detail),
 
     path('<uuid:userId>/profile/<uuid:pk>', user_profiles_detail),

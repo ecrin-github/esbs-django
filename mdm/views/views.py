@@ -537,3 +537,67 @@ class NewMdrStudies(APIView):
         json_res = json.loads(study_details.text)
 
         return Response(json_res)
+
+
+class StudiesByTitle(APIView):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get(self, request):
+        title_query_string = self.request.query_params.get('title')
+
+        if title_query_string is None:
+            return Response({'error': "title param is missing"})
+
+        studies = Studies.objects.filter(display_title__icontains=title_query_string)
+        serializer = StudiesOutputSerializer(studies, many=True)
+
+        return Response(serializer.data)
+
+
+class DataObjectsByTitle(APIView):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get(self, request):
+        title_query_string = self.request.query_params.get('title')
+
+        if title_query_string is None:
+            return Response({'error': "title param is missing"})
+
+        data_objects = DataObjects.objects.filter(display_title__icontains=title_query_string)
+        serializer = DataObjectsOutputSerializer(data_objects, many=True)
+
+        return Response(serializer.data)
+
+
+class DtpByTitle(APIView):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get(self, request):
+        title_query_string = self.request.query_params.get('title')
+
+        if title_query_string is None:
+            return Response({'error': "title param is missing"})
+
+        dtps = DataTransferProcesses.objects.filter(display_name__icontains=title_query_string)
+        serializer = DataTransferProcessesOutputSerializer(dtps, many=True)
+
+        return Response(serializer.data)
+
+
+class DupByTitle(APIView):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get(self, request):
+        title_query_string = self.request.query_params.get('title')
+
+        if title_query_string is None:
+            return Response({'error': "title param is missing"})
+
+        dups = DataUseProcesses.objects.filter(display_name__icontains=title_query_string)
+        serializer = DataUseProcessesOutputSerializer(dups, many=True)
+
+        return Response(serializer.data)

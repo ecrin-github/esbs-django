@@ -1,3 +1,5 @@
+from django.db.models import Value, Q
+from django.db.models.functions import Concat
 from mozilla_django_oidc.contrib.drf import OIDCAuthentication
 from rest_framework import viewsets, permissions, status
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
@@ -34,7 +36,6 @@ class UsersList(viewsets.ModelViewSet):
         user = Users.objects.get(email=input_serializer.validated_data["email"])
         output_serializer = UsersSerializer(user)
         return Response(output_serializer.data)
-
 
     def perform_create(self, serializer):
         family_name_val = self.request.data.get("family_name")
@@ -135,3 +136,21 @@ class UsersByOrganisation(APIView):
         serializer = UsersSerializer(users, many=True)
 
         return Response({'count': users.count(), 'results': serializer.data, 'statusCode': status.HTTP_200_OK})
+
+
+class UsersByName(APIView):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        name = self.request.query_params.get('name')
+
+        if name is None:
+            return Response({'error': "name param is missing"})
+
+        queryset = Users.objects.annotate(fullname=Concat('first_name', Value(' '), 'last_name'))
+        result = queryset.filter(Q(fullname__icontains=name) | Q(email__icontains=name))
+
+        serializer = UsersSerializer(result, many=True)
+
+        return Response({'count': result.count(), 'results': serializer.data, 'statusCode': status.HTTP_200_OK})

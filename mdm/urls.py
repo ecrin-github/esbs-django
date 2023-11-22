@@ -280,4 +280,9 @@ urlpatterns = [
     path('dtp/<uuid:dtpId>/study-involvement', DtpStudiesObjectsInvolvements.as_view()),
     path('dup/<uuid:dupId>/study-involvement', DupStudiesObjectsInvolvements.as_view()),
     path('dtp/<uuid:dtpId>/dup/<uuid:dupId>/study-involvement', DtpDupStudiesObjectsInvolvements.as_view()),
+
+    path('studies/by-title', StudiesByTitle.as_view()),
+    path('data-objects/by-title', DataObjectsByTitle.as_view()),
+    path('dtp/by-title', DtpByTitle.as_view()),
+    path('dup/by-title', DupByTitle.as_view()),
 ]
