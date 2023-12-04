@@ -26,6 +26,8 @@ class CreateUserSerializer(serializers.Serializer):
     def create(self, validated_data):
         user_dto = CreateUserDto(**validated_data)
 
+        print(validated_data)
+
         user_check = Users.objects.filter(email=user_dto.email)
         if user_check.exists():
             user_data = Users.objects.get(email=user_dto.email)

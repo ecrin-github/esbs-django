@@ -24,6 +24,11 @@ user_profiles_detail = UserProfilesList.as_view({
 urlpatterns = [
     path('', users_list),
     path('by-name', UsersByName.as_view()),
+    path('by-name-and-organisation', UsersByNameAndOrganisation.as_view()),
+    path('by-ls-aai-id', UserByLsAaiId.as_view()),
+    path('by-email', UserByEmail.as_view()),
+
+    path('<uuid:userId>/access-data', UserAccessData.as_view()),
 
     path('<uuid:pk>', users_detail),
 

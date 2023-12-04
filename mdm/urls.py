@@ -285,4 +285,9 @@ urlpatterns = [
     path('data-objects/by-title', DataObjectsByTitle.as_view()),
     path('dtp/by-title', DtpByTitle.as_view()),
     path('dup/by-title', DupByTitle.as_view()),
+
+    path('studies/by-title-and-organisation', StudiesByTitleAndOrg.as_view()),
+    path('data-objects/by-title-and-organisation', DataObjectsByTitleAndOrg.as_view()),
+    path('dtp/by-title-and-organisation', DtpByTitleAndOrg.as_view()),
+    path('dup/by-title-and-organisation', DupByTitleAndOrg.as_view()),
 ]

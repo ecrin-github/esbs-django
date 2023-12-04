@@ -1,6 +1,7 @@
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from rest_framework import permissions, status
+from rest_framework.authentication import BasicAuthentication
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -45,7 +46,8 @@ class RmsStatistics(APIView):
 
 
 class PushNotifications(APIView):
-    permission_classes = [permissions.AllowAny]
+    authentication_classes = [BasicAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
         channel_layer = get_channel_layer()

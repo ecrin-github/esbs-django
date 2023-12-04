@@ -10,7 +10,7 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 
 from configs.remote_db_settings import (REMOTE_DB_USER, REMOTE_DB_PASSWORD, REMOTE_DB_HOST, REMOTE_DB_PORT,
                                         REMOTE_RMS_DB_NAME)
-from context.models import TrialRegistries
+from context.models import TrialRegistries, StudyTypes, StudyStatuses, GenderEligibilityTypes, TimeUnits
 from db_exports.export_context_and_general_data import get_data_from_table
 from general.models import Organisations
 from mdm.models import DataObjects, StudyContributors, Studies
@@ -536,7 +536,65 @@ class NewMdrStudies(APIView):
         study_details = requests.get(f"https://newmdr.ecrin.org/api/Study/StudyDetails/{study_id}")
         json_res = json.loads(study_details.text)
 
-        return Response(json_res)
+        study_type = None
+        if 'study_type' in json_res:
+            if json_res['study_type'] is not None:
+                study_type_check = StudyTypes.objects.filter(name=json_res['study_type']['name'])
+                if study_type_check.exists():
+                    study_type = StudyTypes.objects.get(name=json_res['study_type']['name'])
+
+        study_status = None
+        if 'study_status' in json_res:
+            if json_res['study_status'] is not None:
+                study_status_check = StudyStatuses.objects.filter(name=json_res['study_status']['name'])
+                if study_status_check.exists():
+                    study_status = StudyStatuses.objects.get(name=json_res['study_status']['name'])
+
+        study_gender_elig = None
+        if 'study_gender_elig' in json_res:
+            if json_res['study_gender_elig'] is not None:
+                study_gender_elig_check = GenderEligibilityTypes.objects.filter(name=json_res['study_gender_elig']['name'])
+                if study_gender_elig_check.exists():
+                    study_gender_elig = GenderEligibilityTypes.objects.get(name=json_res['study_gender_elig']['name'])
+
+        min_age_unit = None
+        min_age_value = None
+        if 'min_age' in json_res:
+            if json_res['min_age'] is not None:
+                min_age_unit_check = TimeUnits.objects.filter(name=json_res['min_age']['unit_name'])
+                if min_age_unit_check.exists():
+                    min_age_unit = TimeUnits.objects.get(name=json_res['min_age']['unit_name'])
+                    min_age_value = int(json_res['min_age']['value'])
+
+        max_age_unit = None
+        max_age_value = None
+        if 'max_age' in json_res:
+            if json_res['max_age'] is not None:
+                max_age_unit_check = TimeUnits.objects.filter(name=json_res['max_age']['unit_name'])
+                if max_age_unit_check.exists():
+                    max_age_unit = TimeUnits.objects.get(name=json_res['max_age']['unit_name'])
+                    max_age_value = int(json_res['max_age']['value'])
+
+        study = Studies(
+            display_title=json_res['display_title'] if 'display_title' in json_res else 'Blank title',
+            brief_description=json_res['brief_description'] if 'brief_description' in json_res else None,
+            data_sharing_statement=json_res['data_sharing_statement'] if 'data_sharing_statement' in json_res else None,
+            study_start_year=json_res['study_start_year'] if 'study_start_year' in json_res else None,
+            study_start_month=json_res['study_start_month'] if 'study_start_month' in json_res else None,
+            study_type=study_type,
+            study_status=study_status,
+            study_enrollment=json_res['study_enrollment'] if 'study_enrollment' in json_res else None,
+            study_gender_elig=study_gender_elig,
+            min_age=min_age_value,
+            min_age_unit=min_age_unit,
+            max_age=max_age_value,
+            max_age_unit=max_age_unit,
+        )
+        study.save()
+
+        serializer = StudiesOutputSerializer(study, many=False)
+
+        return Response(serializer.data)
 
 
 class StudiesByTitle(APIView):
@@ -598,6 +656,118 @@ class DupByTitle(APIView):
             return Response({'error': "title param is missing"})
 
         dups = DataUseProcesses.objects.filter(display_name__icontains=title_query_string)
+        serializer = DataUseProcessesOutputSerializer(dups, many=True)
+
+        return Response(serializer.data)
+
+
+class StudiesByTitleAndOrg(APIView):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get(self, request):
+        title_query_string = self.request.query_params.get('title')
+        org_id = self.request.query_params.get('orgId')
+
+        if org_id is None:
+            return Response({'error': 'orgId param is missing'})
+
+        org_check = Organisations.objects.filter(id=org_id)
+        if not org_check.exists():
+            return Response({'error': f'Organisation with the ID {org_id} does not exist'})
+
+        org_data = Organisations.objects.get(id=org_id)
+
+        if title_query_string is None:
+            return Response({'error': "title param is missing"})
+
+        study_contributors_check = StudyContributors.objects.filter(organisation=org_data)
+        if not study_contributors_check.exists():
+            return Response({'error': f'Organisation {org_data.default_name} does not have any related studies'})
+
+        studies_ids = []
+        for study_contrib in study_contributors_check:
+            studies_ids.append(study_contrib.study_id.id)
+
+        studies = Studies.objects.filter(display_title__icontains=title_query_string, id__in=studies_ids)
+        serializer = StudiesOutputSerializer(studies, many=True)
+
+        return Response(serializer.data)
+
+
+class DataObjectsByTitleAndOrg(APIView):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get(self, request):
+        title_query_string = self.request.query_params.get('title')
+        org_id = self.request.query_params.get('orgId')
+
+        if org_id is None:
+            return Response({'error': 'orgId param is missing'})
+
+        org_check = Organisations.objects.filter(id=org_id)
+        if not org_check.exists():
+            return Response({'error': f'Organisation with the ID {org_id} does not exist'})
+
+        org_data = Organisations.objects.get(id=org_id)
+
+        if title_query_string is None:
+            return Response({'error': "title param is missing"})
+
+        data_objects = DataObjects.objects.filter(display_title__icontains=title_query_string, managing_org=org_data)
+        serializer = DataObjectsOutputSerializer(data_objects, many=True)
+
+        return Response(serializer.data)
+
+
+class DtpByTitleAndOrg(APIView):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get(self, request):
+        title_query_string = self.request.query_params.get('title')
+        org_id = self.request.query_params.get('orgId')
+
+        if org_id is None:
+            return Response({'error': 'orgId param is missing'})
+
+        org_check = Organisations.objects.filter(id=org_id)
+        if not org_check.exists():
+            return Response({'error': f'Organisation with the ID {org_id} does not exist'})
+
+        org_data = Organisations.objects.get(id=org_id)
+
+        if title_query_string is None:
+            return Response({'error': "title param is missing"})
+
+        dtps = DataTransferProcesses.objects.filter(display_name__icontains=title_query_string, organisation=org_data)
+        serializer = DataTransferProcessesOutputSerializer(dtps, many=True)
+
+        return Response(serializer.data)
+
+
+class DupByTitleAndOrg(APIView):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get(self, request):
+        title_query_string = self.request.query_params.get('title')
+        org_id = self.request.query_params.get('orgId')
+
+        if org_id is None:
+            return Response({'error': 'orgId param is missing'})
+
+        org_check = Organisations.objects.filter(id=org_id)
+        if not org_check.exists():
+            return Response({'error': f'Organisation with the ID {org_id} does not exist'})
+
+        org_data = Organisations.objects.get(id=org_id)
+
+        if title_query_string is None:
+            return Response({'error': "title param is missing"})
+
+        dups = DataUseProcesses.objects.filter(display_name__icontains=title_query_string, organisation=org_data)
         serializer = DataUseProcessesOutputSerializer(dups, many=True)
 
         return Response(serializer.data)
