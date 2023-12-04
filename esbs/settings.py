@@ -183,7 +183,7 @@ if not IS_USERS_DB_CONSTRAINT:
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'mozilla_django_oidc.contrib.drf.OIDCAuthentication',
+        'app.custom_oidc.CustomAuthentication',
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication'
     ],
@@ -266,7 +266,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # OIDC settings
 # https://proxy.aai.lifescience-ri.eu/.well-known/openid-configuration
 
-OIDC_DRF_AUTH_BACKEND = 'mozilla_django_oidc.auth.OIDCAuthenticationBackend'
+OIDC_DRF_AUTH_BACKEND = 'app.custom_oidc.CustomAuthenticationBackend'
 
 OIDC_RP_CLIENT_ID = CLIENT_ID
 OIDC_RP_CLIENT_SECRET = CLIENT_SECRET
@@ -278,7 +278,7 @@ OIDC_OP_USER_ENDPOINT = USER_ENDPOINT
 OIDC_AUTH_REQUEST_EXTRA_PARAMS = {"code_challenge": "S256"}
 
 AUTHENTICATION_BACKENDS = (
-    'mozilla_django_oidc.auth.OIDCAuthenticationBackend',
+    'app.custom_oidc.CustomAuthenticationBackend',
     'django.contrib.auth.backends.ModelBackend'
 )
 
