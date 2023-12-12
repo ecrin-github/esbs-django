@@ -1,4 +1,4 @@
-from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives
 from rest_framework import serializers
 
 
@@ -7,12 +7,14 @@ class EmailMessageClass:
     message: str
     recipients: str
     sender: str
+    cc: str
 
-    def __init__(self, subject: str, message: str, recipients: str, sender: str):
+    def __init__(self, subject: str, message: str, recipients: str, sender: str, cc: str):
         self.subject = subject
         self.message = message
         self.recipients = recipients
         self.sender = sender
+        self.cc = cc
 
 
 class MailSerializer(serializers.Serializer):
@@ -20,15 +22,21 @@ class MailSerializer(serializers.Serializer):
     message = serializers.CharField()
     recipients = serializers.CharField()
     sender = serializers.EmailField()
+    cc = serializers.EmailField()
 
     def create(self, validated_data):
         email = EmailMessageClass(**validated_data)
-        send_mail(
-            email.subject,
-            email.message,
-            email.sender,
-            email.recipients.split(',')
+
+        message = EmailMultiAlternatives(
+            subject=email.subject,
+            body=email.message,
+            from_email=email.sender,
+            to=email.recipients.split(','),
+            cc=[email.cc],
         )
+
+        message.send()
+
         return email
 
     def update(self, instance, validated_data):
@@ -36,12 +44,16 @@ class MailSerializer(serializers.Serializer):
         instance.message = validated_data.get('message', instance.message)
         instance.recipients = validated_data.get('recipients', instance.recipients)
         instance.sender = validated_data.get('sender', instance.sender)
+        instance.cc = validated_data.get('cc', instance.cc)
 
-        send_mail(
-            instance.subject,
-            instance.message,
-            instance.sender,
-            instance.recipients.split(',')
+        message = EmailMultiAlternatives(
+            subject=instance.subject,
+            body=instance.message,
+            from_email=instance.sender,
+            to=instance.recipients.split(','),
+            cc=[instance.cc],
         )
+
+        message.send()
 
         return instance
