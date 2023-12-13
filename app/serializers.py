@@ -33,6 +33,7 @@ class MailSerializer(serializers.Serializer):
             from_email=email.sender,
             to=email.recipients.split(','),
             cc=[email.cc],
+            reply_to=[email.sender]
         )
 
         message.send()
@@ -52,6 +53,7 @@ class MailSerializer(serializers.Serializer):
             from_email=instance.sender,
             to=instance.recipients.split(','),
             cc=[instance.cc],
+            reply_to=[instance.sender]
         )
 
         message.send()
