@@ -35,6 +35,7 @@ class MailSerializer(serializers.Serializer):
             cc=[email.cc],
             reply_to=[email.sender]
         )
+        message.attach_alternative(email.message, "text/html")
 
         message.send()
 
