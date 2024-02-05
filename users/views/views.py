@@ -244,7 +244,7 @@ class UserAccessData(APIView):
         org_id = user_profile[0].organisation_id
         organisation = Organisations.objects.get(id=org_id)
 
-        dups = DataUseProcesses.objects.filter(org_id=organisation)
+        dups = DataUseProcesses.objects.filter(organisation=organisation)
         dtps = DataTransferProcesses.objects.filter(organisation=organisation)
 
         study_id_list = []
@@ -252,12 +252,12 @@ class UserAccessData(APIView):
         for dup in dups:
             dup_studies = DupStudies.objects.filter(dup_id=dup)
             for dup_study_obj in dup_studies:
-                study_id_list.append(dup_study_obj.study_id)
+                study_id_list.append(dup_study_obj.study_id.id)
 
         for dtp in dtps:
             dtp_studies = DtpStudies.objects.filter(dtp_id=dtp)
             for dtp_study_obj in dtp_studies:
-                study_id_list.append(dtp_study_obj.study_id)
+                study_id_list.append(dtp_study_obj.study_id.id)
 
         studies_id_set = set(study_id_list)
         studies = Studies.objects.filter(id__in=studies_id_set)
