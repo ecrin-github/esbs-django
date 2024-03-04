@@ -17,6 +17,7 @@ from mdm.serializers.data_object.object_relationships_dto import ObjectRelations
 from mdm.serializers.data_object.object_rights_dto import ObjectRightsOutputSerializer
 from mdm.serializers.data_object.object_titles_dto import ObjectTitlesOutputSerializer
 from mdm.serializers.data_object.object_topics_dto import ObjectTopicsOutputSerializer
+from mdm.serializers.study.study_main_details_dto import StudyMainDetailsSerializer
 from users.models import Users
 from users.serializers.users_dto import UsersSerializer
 
@@ -51,6 +52,8 @@ class DataObjectsOutputSerializer(serializers.ModelSerializer):
     object_rights = ObjectRightsOutputSerializer(many=True, read_only=True)
     object_titles = ObjectTitlesOutputSerializer(many=True, read_only=True)
     object_topics = ObjectTopicsOutputSerializer(many=True, read_only=True)
+
+    linked_study = StudyMainDetailsSerializer(many=False, read_only=True)
 
     class Meta:
         model = DataObjects

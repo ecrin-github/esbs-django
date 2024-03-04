@@ -54,9 +54,3 @@ class StudiesOutputSerializer(serializers.ModelSerializer):
                   'max_age', 'max_age_unit', 'created_on', 'last_edited_by',
                   'study_contributors', 'study_features',
                   'study_identifiers', 'study_relationships', 'study_titles', 'study_topics', 'linked_objects']
-
-
-class StudyMainDetailsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Studies
-        fields = ['id', 'sd_sid', 'display_title']
