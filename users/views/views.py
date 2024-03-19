@@ -133,7 +133,7 @@ class UsersByOrganisation(APIView):
 
         users = Users.objects.filter(user_profile__organisation=organisation)
 
-        serializer = UsersSerializer(users, many=True)
+        serializer = UsersSerializer(users)
 
         return Response({'count': users.count(), 'results': serializer.data, 'statusCode': status.HTTP_200_OK})
 
@@ -151,7 +151,7 @@ class UsersByName(APIView):
         queryset = Users.objects.annotate(fullname=Concat('first_name', Value(' '), 'last_name'))
         result = queryset.filter(Q(fullname__icontains=name) | Q(email__icontains=name))
 
-        serializer = UsersSerializer(result, many=True)
+        serializer = UsersSerializer(result)
 
         return Response({'count': result.count(), 'results': serializer.data, 'statusCode': status.HTTP_200_OK})
 
@@ -180,7 +180,7 @@ class UsersByNameAndOrganisation(APIView):
         result = queryset.filter(Q(fullname__icontains=name) | Q(email__icontains=name))
         res = result.filter(user_profile__organisation=org_data)
 
-        serializer = UsersSerializer(res, many=True)
+        serializer = UsersSerializer(res)
 
         return Response({'count': result.count(), 'results': serializer.data, 'statusCode': status.HTTP_200_OK})
 
@@ -201,7 +201,7 @@ class UserByEmail(APIView):
 
         user_data = Users.objects.get(email=email)
 
-        serializer = UsersSerializer(user_data, many=True)
+        serializer = UsersSerializer(user_data)
 
         return Response(serializer.data)
 
@@ -223,7 +223,7 @@ class UserByLsAaiId(APIView):
         user_profile = UserProfiles.objects.get(ls_aai_id=ls_aai_id)
         user_data = Users.objects.get(id=user_profile.user.id)
 
-        serializer = UsersSerializer(user_data, many=True)
+        serializer = UsersSerializer(user_data)
 
         return Response(serializer.data)
 
