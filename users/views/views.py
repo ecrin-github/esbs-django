@@ -133,7 +133,7 @@ class UsersByOrganisation(APIView):
 
         users = Users.objects.filter(user_profile__organisation=organisation)
 
-        serializer = UsersSerializer(users)
+        serializer = UsersSerializer(users, many=True)
 
         return Response({'count': users.count(), 'results': serializer.data, 'statusCode': status.HTTP_200_OK})
 
@@ -151,7 +151,7 @@ class UsersByName(APIView):
         queryset = Users.objects.annotate(fullname=Concat('first_name', Value(' '), 'last_name'))
         result = queryset.filter(Q(fullname__icontains=name) | Q(email__icontains=name))
 
-        serializer = UsersSerializer(result)
+        serializer = UsersSerializer(result, many=True)
 
         return Response({'count': result.count(), 'results': serializer.data, 'statusCode': status.HTTP_200_OK})
 
@@ -180,7 +180,7 @@ class UsersByNameAndOrganisation(APIView):
         result = queryset.filter(Q(fullname__icontains=name) | Q(email__icontains=name))
         res = result.filter(user_profile__organisation=org_data)
 
-        serializer = UsersSerializer(res)
+        serializer = UsersSerializer(res, many=True)
 
         return Response({'count': result.count(), 'results': serializer.data, 'statusCode': status.HTTP_200_OK})
 
