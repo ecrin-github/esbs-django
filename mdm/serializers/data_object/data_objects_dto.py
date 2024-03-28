@@ -41,6 +41,7 @@ class DataObjectsOutputSerializer(serializers.ModelSerializer):
     lang_code = LanguageCodesOutputSerializer(many=False, read_only=True)
     access_type = ObjectAccessTypesOutputSerializer(many=False, read_only=True)
     last_edited_by = UsersSerializer(many=False, read_only=True)
+    organisation = OrganisationsOutputSerializer(many=False, read_only=True)
 
     object_contributors = ObjectContributorsOutputSerializer(many=True, read_only=True)
     object_datasets = ObjectDatasetsOutputSerializer(many=True, read_only=True)
@@ -59,7 +60,7 @@ class DataObjectsOutputSerializer(serializers.ModelSerializer):
         model = DataObjects
         fields = ['id', 'sd_oid', 'display_title', 'version', 'doi', 'publication_year', 'access_details',
                   'access_details_url', 'url_last_checked', 'add_study_contributors',
-                  'add_study_topics', 'created_on',
+                  'add_study_topics', 'created_on', 'organisation',
                   'doi_status', 'object_class', 'object_type', 'managing_org', 'lang_code', 'access_type',
                   'last_edited_by', 'object_contributors', 'object_datasets', 'object_dates', 'object_descriptions',
                   'object_identifiers', 'object_instances', 'object_relationships', 'object_rights', 'object_titles',

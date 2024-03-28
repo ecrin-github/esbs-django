@@ -52,6 +52,9 @@ class DataObjects(models.Model):
                                        db_constraint=IS_USERS_DB_CONSTRAINT)
     linked_study = models.ForeignKey(Studies, on_delete=models.CASCADE, unique=False, editable=True, null=False,
                                      db_index=True, db_column='linked_study', related_name='linked_objects')
+    organisation = models.ForeignKey(Organisations, on_delete=models.CASCADE, db_column='organisation_id',
+                                     blank=True, null=True, related_name='data_objects_organisation_id', default=None,
+                                     db_constraint=IS_GENERAL_DB_CONSTRAINT)                             
 
     class Meta:
         db_table = 'data_objects'
