@@ -5,6 +5,7 @@ from context.serializers.study_statuses_dto import StudyStatusesOutputSerializer
 from context.serializers.study_types_dto import StudyTypesOutputSerializer
 from context.serializers.time_units_dto import TimeUnitsOutputSerializer
 from general.serializers.language_codes_dto import LanguageCodesOutputSerializer
+from general.serializers.organisations_dto import OrganisationsOutputSerializer
 from mdm.models.study.studies import Studies
 from mdm.serializers.data_object.data_objects_dto import DataObjectsOutputSerializer
 from mdm.serializers.study.study_contributors_dto import StudyContributorsOutputSerializer
@@ -36,6 +37,7 @@ class StudiesOutputSerializer(serializers.ModelSerializer):
     min_age_unit = TimeUnitsOutputSerializer(many=False, read_only=True)
     max_age_unit = TimeUnitsOutputSerializer(many=False, read_only=True)
     last_edited_by = UsersSerializer(many=False, read_only=True)
+    organisation = OrganisationsOutputSerializer(many=False, read_only=True)
 
     study_contributors = StudyContributorsOutputSerializer(many=True, read_only=True)
     study_features = StudyFeaturesOutputSerializer(many=True, read_only=True)
@@ -52,5 +54,5 @@ class StudiesOutputSerializer(serializers.ModelSerializer):
                   'data_sharing_statement', 'study_start_year', 'study_start_month', 'study_type',
                   'study_status', 'study_enrollment', 'study_gender_elig', 'min_age', 'min_age_unit',
                   'max_age', 'max_age_unit', 'created_on', 'last_edited_by',
-                  'study_contributors', 'study_features',
+                  'organisation', 'study_contributors', 'study_features',
                   'study_identifiers', 'study_relationships', 'study_titles', 'study_topics', 'linked_objects']

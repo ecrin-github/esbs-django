@@ -11,6 +11,7 @@ from context.models.study_statuses import StudyStatuses
 from context.models.study_types import StudyTypes
 from context.models.time_units import TimeUnits
 from general.models.language_codes import LanguageCodes
+from general.models.organisations import Organisations
 from users.models.users import Users
 
 
@@ -49,6 +50,10 @@ class Studies(models.Model):
                                        db_column='last_edited_by',
                                        related_name='studies_last_edited_by', default=None,
                                        db_constraint=IS_USERS_DB_CONSTRAINT)
+    organisation = models.ForeignKey(Organisations, on_delete=models.CASCADE, blank=True, null=True,
+                                       db_column='organisation',
+                                       related_name='studies_organisation', default=None,
+                                       db_constraint=IS_GENERAL_DB_CONSTRAINT)
 
     class Meta:
         db_table = 'studies'
