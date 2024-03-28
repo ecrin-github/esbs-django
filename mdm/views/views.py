@@ -187,9 +187,7 @@ class DataObjectsByOrg(APIView):
         if not org_check.exists():
             return Response({'error': f"Organisation with the orgId {org_id} does not exist."})
 
-        org_data = Organisations.objects.get(id=org_id)
-
-        data = DataObjects.objects.filter(managing_org=org_data)
+        data = DataObjects.objects.filter(organisation=org_id)
         serializer = DataObjectsOutputSerializer(data, many=True)
 
         return Response(serializer.data)
@@ -209,14 +207,7 @@ class StudiesByOrg(APIView):
         if not org_check.exists():
             return Response({'error': f"Organisation with the orgId {org_id} does not exist."})
 
-        org_data = Organisations.objects.get(id=org_id)
-
-        data = StudyContributors.objects.filter(organisation=org_data)
-        study_ids = []
-        for rec in data:
-            study_ids.append(rec.study_id_id)
-
-        studies = Studies.objects.filter(id__in=study_ids)
+        studies = Studies.objects.filter(organisation=org_id)
         serializer = StudiesOutputSerializer(studies, many=True)
 
         return Response(serializer.data)
