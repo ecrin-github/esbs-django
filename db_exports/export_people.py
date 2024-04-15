@@ -6,6 +6,10 @@ import random
 import os
 import django
 
+import sys
+from pathlib import Path
+sys.path.append(Path(__file__).resolve().parent.parent.__str__())
+
 from configs.remote_db_settings import *
 from db_exports.export_context_and_general_data import context_db_connection
 
@@ -75,4 +79,4 @@ def import_users():
     print("done")
 
 
-import_users()
+#import_users()
