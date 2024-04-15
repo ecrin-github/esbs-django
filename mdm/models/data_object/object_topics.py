@@ -6,6 +6,7 @@ from django.db import models
 from configs.context_db_settings import IS_CONTEXT_DB_CONSTRAINT
 from configs.users_db_settings import IS_USERS_DB_CONSTRAINT
 from context.models.topic_types import TopicTypes
+from context.models.topic_vocabularies import TopicVocabularies
 from mdm.models.data_object.data_objects import DataObjects
 from users.models.users import Users
 
@@ -20,7 +21,9 @@ class ObjectTopics(models.Model):
     mesh_coded = models.BooleanField(default=False)
     mesh_code = models.CharField(max_length=255, blank=True, null=True)
     mesh_value = models.CharField(max_length=255, blank=True, null=True)
-    original_value = models.CharField(max_length=255, blank=True, null=True)
+    original_value = models.ForeignKey(TopicVocabularies, on_delete=models.CASCADE, db_column='original_value', 
+                                       related_name='object_topics_original_value', default=None, blank=True, null=True,
+                                       db_constraint=IS_CONTEXT_DB_CONSTRAINT)
     created_on = models.DateTimeField(default=datetime.datetime.utcnow)
     last_edited_by = models.ForeignKey(Users, on_delete=models.CASCADE, db_column='last_edited_by',
                                        related_name='object_topics_last_edited_by', default=None, null=True, blank=True,
