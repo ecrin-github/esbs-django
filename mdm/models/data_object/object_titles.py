@@ -20,7 +20,7 @@ class ObjectTitles(models.Model):
     title_type = models.ForeignKey(TitleTypes, on_delete=models.CASCADE, db_index=True,
                                    related_name='object_titles_title_type_id', default=None, null=True, blank=True,
                                    db_column='title_type_id', db_constraint=IS_CONTEXT_DB_CONSTRAINT)
-    title_text = models.CharField(max_length=255, db_index=True)
+    title_text = models.TextField(blank=True, null=True)
     lang_code = models.ForeignKey(LanguageCodes, on_delete=models.CASCADE, db_index=True,
                                   related_name='object_titles_lang_code_id', default=None, null=True, blank=True,
                                   db_column='lang_code_id', db_constraint=IS_GENERAL_DB_CONSTRAINT)

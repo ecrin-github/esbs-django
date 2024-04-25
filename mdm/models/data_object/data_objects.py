@@ -41,7 +41,7 @@ class DataObjects(models.Model):
     access_type = models.ForeignKey(ObjectAccessTypes, on_delete=models.CASCADE, db_column='access_type_id',
                                     blank=True, null=True, related_name='data_objects_access_type_id', default=None,
                                     db_constraint=IS_CONTEXT_DB_CONSTRAINT)
-    access_details = models.CharField(max_length=255, blank=True, null=True)
+    access_details = models.TextField(blank=True, null=True)
     access_details_url = models.URLField(max_length=255, blank=True, null=True)
     url_last_checked = models.DateTimeField(blank=True, null=True)
     add_study_contributors = models.BooleanField(blank=True, null=True)
