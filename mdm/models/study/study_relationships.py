@@ -18,8 +18,8 @@ class StudyRelationships(models.Model):
                                           db_column='relationship_type_id', default=None, null=True, blank=True,
                                           related_name='study_relationships_relationship_type_id',
                                           db_constraint=IS_CONTEXT_DB_CONSTRAINT)
-    target_study_id = models.ForeignKey(Studies, on_delete=models.CASCADE, db_column='target_study_id',
-                                        related_name='study_relationships_target_study_id', default=None, null=True,
+    target_study = models.ForeignKey(Studies, on_delete=models.CASCADE, db_column='target_study',
+                                        related_name='study_relationships_target_study', default=None, null=True,
                                         blank=True)
     created_on = models.DateTimeField(default=datetime.datetime.utcnow)
     last_edited_by = models.ForeignKey(Users, on_delete=models.CASCADE, db_column='last_edited_by',

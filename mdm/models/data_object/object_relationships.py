@@ -18,9 +18,9 @@ class ObjectRelationships(models.Model):
                                           related_name='object_relationships_relationship_type_id', default=None,
                                           null=True, blank=True, db_column='relationship_type_id',
                                           db_constraint=IS_CONTEXT_DB_CONSTRAINT)
-    target_object_id = models.ForeignKey(DataObjects, on_delete=models.CASCADE, db_index=True,
-                                         related_name='object_relationships_target_object_id', default=None, null=True,
-                                         blank=True, db_column='target_object_id')
+    target_object = models.ForeignKey(DataObjects, on_delete=models.CASCADE, db_index=True,
+                                         related_name='object_relationships_target_object', default=None, null=True,
+                                         blank=True, db_column='target_object')
     created_on = models.DateTimeField(default=datetime.datetime.utcnow)
     last_edited_by = models.ForeignKey(Users, on_delete=models.CASCADE, db_index=True,
                                        related_name='object_relationships_last_edited_by', default=None, null=True,

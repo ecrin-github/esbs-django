@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from context.serializers.object_relationship_types_dto import ObjectRelationshipTypesOutputSerializer
+from mdm.serializers.data_object.data_objects_main_details_dto import ObjectMainDetailsSerializer
 from mdm.models.data_object.object_relationships import ObjectRelationships
 from users.models import Users
 from users.serializers.users_dto import UsersSerializer
@@ -20,6 +21,7 @@ class ObjectRelationshipsInputSerializer(serializers.ModelSerializer):
 class ObjectRelationshipsOutputSerializer(serializers.ModelSerializer):
     relationship_type = ObjectRelationshipTypesOutputSerializer(many=False, read_only=True)
     last_edited_by = UsersSerializer(many=False, read_only=True)
+    target_object = ObjectMainDetailsSerializer(many=False, read_only=True)
 
     class Meta:
         model = ObjectRelationships
