@@ -1,5 +1,7 @@
 from django.db.models import Value, Q
 from django.db.models.functions import Concat
+from django.core.exceptions import BadRequest
+from django.http import JsonResponse
 from mozilla_django_oidc.contrib.drf import OIDCAuthentication
 from rest_framework import viewsets, permissions, status
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
@@ -29,13 +31,16 @@ class UsersList(viewsets.ModelViewSet):
         return super().get_serializer_class()
 
     def create(self, request, *args, **kwargs):
-        input_serializer = self.get_serializer(data=request.data)
-        input_serializer.is_valid(raise_exception=True)
-        self.perform_create(input_serializer)
+        try:
+            input_serializer = self.get_serializer(data=request.data)
+            input_serializer.is_valid(raise_exception=True)
+            self.perform_create(input_serializer)
 
-        user = Users.objects.get(email=input_serializer.validated_data["email"])
-        output_serializer = UsersSerializer(user)
-        return Response(output_serializer.data)
+            user = Users.objects.get(email=input_serializer.validated_data["email"])
+            output_serializer = UsersSerializer(user)
+            return Response(output_serializer.data)
+        except BadRequest as e:
+            return JsonResponse({'statusCode': 400, 'message': 'Email address already exists in the Users database.'})
 
     def perform_create(self, serializer):
         family_name_val = self.request.data.get("family_name")
