@@ -1,7 +1,10 @@
 from mozilla_django_oidc.contrib.drf import OIDCAuthentication
 from rest_framework import viewsets, permissions
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
+from mdm.views.common.mixins import MultipleFieldLookupMixin
 from mdm.models.study.studies import Studies
 from mdm.models.study.study_contributors import StudyContributors
 from mdm.models.study.study_features import StudyFeatures
@@ -21,16 +24,33 @@ from mdm.serializers.study.study_titles_dto import StudyTitlesOutputSerializer, 
 from mdm.serializers.study.study_topics_dto import StudyTopicsOutputSerializer, StudyTopicsInputSerializer
 
 
-class StudiesList(viewsets.ModelViewSet):
+class StudiesList(MultipleFieldLookupMixin, viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = Studies.objects.all()
     serializer_class = StudiesOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    lookup_fields = ['pk', 'sd_sid']
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
             return StudiesInputSerializer
         return super().get_serializer_class()
+
+
+class StudyNextId(APIView):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get(self, request, format=None):
+        # Filtering only 'DSRS-[number]' ids
+        studies = list(Studies.objects.filter(sd_sid__iregex=r'^DSRS-[0-9]+$'))
+        if len(studies) > 0:
+            # Retrieving the highest id number
+            studies.sort(key=lambda x: int(x.sd_sid[5:]), reverse=True)
+            next_id = f'DSRS-{int(studies[0].sd_sid[5:])+1}'
+        else:
+            next_id = 'DSRS-1'
+        return Response({'sdSid': next_id})
 
 
 class StudyContributorsList(viewsets.ModelViewSet):

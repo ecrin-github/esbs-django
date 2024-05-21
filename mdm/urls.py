@@ -16,6 +16,8 @@ data_objects_detail = DataObjectsList.as_view({
     'delete': 'destroy'
 })
 
+object_next_id = ObjectNextId.as_view()
+
 object_contributors_list = ObjectContributorsList.as_view({
     'get': 'list',
     'post': 'create'
@@ -137,6 +139,8 @@ studies_detail = StudiesList.as_view({
     'delete': 'destroy'
 })
 
+study_next_id = StudyNextId.as_view()
+
 study_contributors_list = StudyContributorsList.as_view({
     'get': 'list',
     'post': 'create'
@@ -206,7 +210,9 @@ study_topics_detail = StudyTopicsList.as_view({
 
 urlpatterns = [
     path('data-objects', data_objects_list),
+    path('data-objects/next-id', object_next_id),
     path('data-objects/<uuid:pk>', data_objects_detail),
+    path('data-objects/<sd_oid>', data_objects_detail),
 
     path('data-objects/<uuid:objectId>/object-contributors', object_contributors_list),
     path('data-objects/<uuid:objectId>/object-contributors/<uuid:pk>', object_contributors_detail),
@@ -239,7 +245,9 @@ urlpatterns = [
     path('data-objects/<uuid:objectId>/object-topics/<uuid:pk>', object_topics_detail),
 
     path('studies', studies_list),
+    path('studies/next-id', study_next_id),
     path('studies/<uuid:pk>', studies_detail),
+    path('studies/<sd_sid>', studies_detail),
 
     path('studies/<uuid:studyId>/study-contributors', study_contributors_list),
     path('studies/<uuid:studyId>/study-contributors/<uuid:pk>', study_contributors_detail),

@@ -1,7 +1,10 @@
 from mozilla_django_oidc.contrib.drf import OIDCAuthentication
 from rest_framework import viewsets, permissions
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
+from mdm.views.common.mixins import MultipleFieldLookupMixin
 from mdm.models.data_object.data_objects import DataObjects
 from mdm.models.data_object.object_contributors import ObjectContributors
 from mdm.models.data_object.object_datasets import ObjectDatasets
@@ -32,16 +35,33 @@ from mdm.serializers.data_object.object_titles_dto import ObjectTitlesOutputSeri
 from mdm.serializers.data_object.object_topics_dto import ObjectTopicsOutputSerializer, ObjectTopicsInputSerializer
 
 
-class DataObjectsList(viewsets.ModelViewSet):
+class DataObjectsList(MultipleFieldLookupMixin, viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DataObjects.objects.all()
     serializer_class = DataObjectsOutputSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    lookup_fields = ['pk', 'sd_oid']
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
             return DataObjectsInputSerializer
         return super().get_serializer_class()
+
+
+class ObjectNextId(APIView):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get(self, request, format=None):
+        # Filtering only 'DSRO-[number]' ids
+        objects = list(DataObjects.objects.filter(sd_oid__iregex=r'^DSRO-[0-9]+$'))
+        if len(objects) > 0:
+            # Retrieving the highest id number
+            objects.sort(key=lambda x: int(x.sd_oid[5:]), reverse=True)
+            next_id = f'DSRO-{int(objects[0].sd_oid[5:])+1}'
+        else:
+            next_id = 'DSRO-1'
+        return Response({'sdOid': next_id})
 
 
 class ObjectContributorsList(viewsets.ModelViewSet):
