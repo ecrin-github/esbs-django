@@ -3,6 +3,8 @@ import uuid
 
 from django.db import models
 
+from mdm.models.study.study_number_sequence import StudyNumberSeq
+
 from configs.context_db_settings import IS_CONTEXT_DB_CONSTRAINT
 from configs.general_db_settings import IS_GENERAL_DB_CONSTRAINT
 from configs.users_db_settings import IS_USERS_DB_CONSTRAINT
@@ -58,3 +60,9 @@ class Studies(models.Model):
     class Meta:
         db_table = 'studies'
         ordering = ['created_on']
+
+    def save(self, *args, **kwargs):
+        if self._state.adding:
+            # On insert - increment (next) study ID
+            StudyNumberSeq.objects.raw("select 1 as id, nextval('study_number_seq') from study_number_seq")[0]
+        super(Studies, self).save(*args, **kwargs)

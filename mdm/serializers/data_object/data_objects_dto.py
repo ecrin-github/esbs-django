@@ -18,6 +18,7 @@ from mdm.serializers.data_object.object_rights_dto import ObjectRightsOutputSeri
 from mdm.serializers.data_object.object_titles_dto import ObjectTitlesOutputSerializer
 from mdm.serializers.data_object.object_topics_dto import ObjectTopicsOutputSerializer
 from mdm.serializers.study.study_main_details_dto import StudyMainDetailsSerializer
+from mdm.models.data_object.object_number_sequence import ObjectNumberSeq
 from users.models import Users
 from users.serializers.users_dto import UsersSerializer
 
@@ -31,6 +32,11 @@ class DataObjectsInputSerializer(serializers.ModelSerializer):
     class Meta:
         model = DataObjects
         fields = '__all__'
+
+    def to_internal_value(self, data):
+        # Before insert - get DO ID here to avoid concurrency
+        data['sd_oid'] = f'DSRO-{ObjectNumberSeq.objects.raw("select 1 as id, last_value from object_number_seq")[0].last_value}'
+        return super().to_internal_value(data)
 
 
 class DataObjectsOutputSerializer(serializers.ModelSerializer):

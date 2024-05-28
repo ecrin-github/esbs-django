@@ -14,6 +14,7 @@ from mdm.serializers.study.study_identifiers_dto import StudyIdentifiersOutputSe
 from mdm.serializers.study.study_relationships_dto import StudyRelationshipsOutputSerializer
 from mdm.serializers.study.study_titles_dto import StudyTitlesOutputSerializer
 from mdm.serializers.study.study_topics_dto import StudyTopicsOutputSerializer
+from mdm.models.study.study_number_sequence import StudyNumberSeq
 from users.models import Users
 from users.serializers.users_dto import UsersSerializer
 
@@ -27,6 +28,11 @@ class StudiesInputSerializer(serializers.ModelSerializer):
     class Meta:
         model = Studies
         fields = '__all__'
+
+    def to_internal_value(self, data):
+        # Before insert - get study ID here to avoid concurrency
+        data['sd_sid'] = f'DSRS-{StudyNumberSeq.objects.raw("select 1 as id, last_value from study_number_seq")[0].last_value}'
+        return super().to_internal_value(data)
 
 
 class StudiesOutputSerializer(serializers.ModelSerializer):

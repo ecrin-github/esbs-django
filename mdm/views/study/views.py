@@ -12,6 +12,7 @@ from mdm.models.study.study_identifiers import StudyIdentifiers
 from mdm.models.study.study_relationships import StudyRelationships
 from mdm.models.study.study_titles import StudyTitles
 from mdm.models.study.study_topics import StudyTopics
+from mdm.models.study.study_number_sequence import StudyNumberSeq
 from mdm.serializers.study.studies_dto import StudiesOutputSerializer, StudiesInputSerializer
 from mdm.serializers.study.study_contributors_dto import StudyContributorsOutputSerializer, \
     StudyContributorsInputSerializer
@@ -42,14 +43,10 @@ class StudyNextId(APIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get(self, request, format=None):
-        # Filtering only 'DSRS-[number]' ids
-        studies = list(Studies.objects.filter(sd_sid__iregex=r'^DSRS-[0-9]+$'))
-        if len(studies) > 0:
-            # Retrieving the highest id number
-            studies.sort(key=lambda x: int(x.sd_sid[5:]), reverse=True)
-            next_id = f'DSRS-{int(studies[0].sd_sid[5:])+1}'
-        else:
-            next_id = 'DSRS-1'
+        # Get next id, incremented after every insert in the DB
+        order_number = StudyNumberSeq.objects.raw("select 1 as id, last_value from study_number_seq")[0].last_value
+        next_id = f'DSRS-{order_number}'
+
         return Response({'sdSid': next_id})
 
 

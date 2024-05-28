@@ -3,6 +3,8 @@ import uuid
 
 from django.db import models
 
+from mdm.models.data_object.object_number_sequence import ObjectNumberSeq
+
 from configs.context_db_settings import IS_CONTEXT_DB_CONSTRAINT
 from configs.general_db_settings import IS_GENERAL_DB_CONSTRAINT
 from configs.users_db_settings import IS_USERS_DB_CONSTRAINT
@@ -59,3 +61,9 @@ class DataObjects(models.Model):
     class Meta:
         db_table = 'data_objects'
         ordering = ['created_on']
+
+    def save(self, *args, **kwargs):
+        if self._state.adding:
+            # On insert - increment (next) object ID
+            ObjectNumberSeq.objects.raw("select 1 as id, nextval('object_number_seq') from object_number_seq")[0]
+        super(DataObjects, self).save(*args, **kwargs)

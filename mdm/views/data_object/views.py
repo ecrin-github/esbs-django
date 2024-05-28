@@ -16,6 +16,7 @@ from mdm.models.data_object.object_relationships import ObjectRelationships
 from mdm.models.data_object.object_rights import ObjectRights
 from mdm.models.data_object.object_titles import ObjectTitles
 from mdm.models.data_object.object_topics import ObjectTopics
+from mdm.models.data_object.object_number_sequence import ObjectNumberSeq
 from mdm.serializers.data_object.data_objects_dto import DataObjectsOutputSerializer, DataObjectsInputSerializer
 from mdm.serializers.data_object.object_contributors_dto import ObjectContributorsOutputSerializer, \
     ObjectContributorsInputSerializer
@@ -53,14 +54,10 @@ class ObjectNextId(APIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get(self, request, format=None):
-        # Filtering only 'DSRO-[number]' ids
-        objects = list(DataObjects.objects.filter(sd_oid__iregex=r'^DSRO-[0-9]+$'))
-        if len(objects) > 0:
-            # Retrieving the highest id number
-            objects.sort(key=lambda x: int(x.sd_oid[5:]), reverse=True)
-            next_id = f'DSRO-{int(objects[0].sd_oid[5:])+1}'
-        else:
-            next_id = 'DSRO-1'
+        # Get next id, incremented after every insert in the DB
+        order_number = ObjectNumberSeq.objects.raw("select 1 as id, last_value from object_number_seq")[0].last_value
+        next_id = f'DSRO-{order_number}'
+
         return Response({'sdOid': next_id})
 
 
