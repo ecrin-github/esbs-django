@@ -12,7 +12,7 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'esbs.settings')
 django.setup()
 
-from configs.remote_db_settings import *
+from configs.esbs_db_settings import *
 from context.models import CompositeHashTypes, AccessPrereqTypes, CheckStatusTypes, \
     ContributorTypes, \
     DatasetConsentTypes, DatasetDeidentificationLevels, DatasetRecordkeyTypes, \
@@ -33,20 +33,14 @@ from context.models import CompositeHashTypes, AccessPrereqTypes, CheckStatusTyp
 from general.models import PublishedJournals, MeshLookup, Organisations, LanguageCodes, GeogEntities
 
 context_db_connection = psycopg2.connect(
-    user=REMOTE_DB_USER,
-    password=REMOTE_DB_PASSWORD,
-    host=REMOTE_DB_HOST,
-    port=REMOTE_DB_PORT,
-    database=REMOTE_CONTEXT_DB_NAME
+    user=DEV_PG_USER_ESBS_DB,
+    password=DEV_PG_PASSWORD_ESBS_DB,
+    host=DEV_PG_HOST_ESBS_DB,
+    port=DEV_PG_PORT_ESBS_DB,
+    database=DEV_PG_DATABASE_ESBS_DB
 )
 
-rms_db_connection = psycopg2.connect(
-    user=REMOTE_DB_USER,
-    password=REMOTE_DB_PASSWORD,
-    host=REMOTE_DB_HOST,
-    port=REMOTE_DB_PORT,
-    database=REMOTE_RMS_DB_NAME
-)
+rms_db_connection = context_db_connection
 
 
 def get_data_from_table(db: str, schema: str, table_name: str):

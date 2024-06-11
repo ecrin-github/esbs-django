@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 sys.path.append(Path(__file__).resolve().parent.parent.__str__())
 
-from configs.remote_db_settings import *
+from configs.esbs_db_settings import *
 from db_exports.export_context_and_general_data import context_db_connection
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'esbs.settings')
@@ -25,11 +25,11 @@ from users.models.profiles import UserProfiles
 
 
 rms_db_connection = psycopg2.connect(
-    user=REMOTE_DB_USER,
-    password=REMOTE_DB_PASSWORD,
-    host=REMOTE_DB_HOST,
-    port=REMOTE_DB_PORT,
-    database=REMOTE_RMS_DB_NAME
+    user=DEV_PG_USER_ESBS_DB,
+    password=DEV_PG_PASSWORD_ESBS_DB,
+    host=DEV_PG_HOST_ESBS_DB,
+    port=DEV_PG_PORT_ESBS_DB,
+    database=DEV_PG_DATABASE_ESBS_DB
 )
 
 

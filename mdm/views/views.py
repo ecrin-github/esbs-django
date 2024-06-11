@@ -8,8 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 
-from configs.remote_db_settings import (REMOTE_DB_USER, REMOTE_DB_PASSWORD, REMOTE_DB_HOST, REMOTE_DB_PORT,
-                                        REMOTE_RMS_DB_NAME)
+from context.models.access_prereq_types import AccessPrereqTypes
 from context.models import TrialRegistries, StudyTypes, StudyStatuses, GenderEligibilityTypes, TimeUnits
 from db_exports.export_context_and_general_data import get_data_from_table
 from general.models import Organisations
@@ -19,14 +18,6 @@ from mdm.serializers.study.studies_dto import StudiesOutputSerializer
 from rms.models import DataTransferProcesses, DataUseProcesses, DtpObjects, DupObjects, DupStudies, DtpStudies
 from rms.serializers.dtp.dtps_dto import DataTransferProcessesOutputSerializer
 from rms.serializers.dup.dups_dto import DataUseProcessesOutputSerializer
-
-rms_db_connection = psycopg2.connect(
-    user=REMOTE_DB_USER,
-    password=REMOTE_DB_PASSWORD,
-    host=REMOTE_DB_HOST,
-    port=REMOTE_DB_PORT,
-    database=REMOTE_RMS_DB_NAME
-)
 
 
 class MdrStudiesData(APIView):
