@@ -136,17 +136,6 @@ dup_people_detail = DupPeopleList.as_view({
     'delete': 'destroy'
 })
 
-dup_prereqs_list = DupPrereqsList.as_view({
-    'get': 'list',
-    'post': 'create'
-})
-dup_prereqs_detail = DupPrereqsList.as_view({
-    'get': 'retrieve',
-    'put': 'update',
-    'patch': 'partial_update',
-    'delete': 'destroy'
-})
-
 dup_secondary_use_list = DupSecondaryUseList.as_view({
     'get': 'list',
     'post': 'create'
@@ -217,9 +206,6 @@ urlpatterns = [
 
     path('dup/<uuid:dupId>/people', dup_people_list),
     path('dup/<uuid:dupId>/people/<uuid:pk>', dup_people_detail),
-
-    path('dup/<uuid:dupId>/prereqs', dup_prereqs_list),
-    path('dup/<uuid:dupId>/prereqs/<uuid:pk>', dup_prereqs_detail),
 
     path('dup/<uuid:dupId>/secondary-use', dup_secondary_use_list),
     path('dup/<uuid:dupId>/secondary-use/<uuid:pk>', dup_secondary_use_detail),

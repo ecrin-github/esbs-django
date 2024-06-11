@@ -14,7 +14,6 @@ from rms.serializers.dup.duas_dto import DataUseAccessesOutputSerializer, DataUs
 from rms.serializers.dup.dup_notes_dto import DupNotesOutputSerializer, DupNotesInputSerializer
 from rms.serializers.dup.dup_objects_dto import DupObjectsOutputSerializer, DupObjectsInputSerializer
 from rms.serializers.dup.dup_people_dto import DupPeopleOutputSerializer, DupPeopleInputSerializer
-from rms.serializers.dup.dup_prereqs_dto import DupPrereqsOutputSerializer, DupPrereqsInputSerializer
 from rms.serializers.dup.dup_secondary_use_dto import DupSecondaryUseOutputSerializer, DupSecondaryUseInputSerializer
 from rms.serializers.dup.dup_studies_dto import DupStudiesOutputSerializer, DupStudiesInputSerializer
 from rms.serializers.dup.dups_dto import DataUseProcessesOutputSerializer, DataUseProcessesInputSerializer
@@ -101,28 +100,6 @@ class DupPeopleList(viewsets.ModelViewSet):
         if getattr(self, 'swagger_fake_view', False):
             # queryset just for schema generation metadata
             return DupPeople.objects.none()
-        return (
-            super()
-            .get_queryset(*args, **kwargs)
-            .filter(dup_id=self.kwargs['dupId'])
-        )
-
-
-class DupPrereqsList(viewsets.ModelViewSet):
-    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    queryset = DupPrereqs.objects.all()
-    serializer_class = DupPrereqsOutputSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-
-    def get_serializer_class(self):
-        if self.action in ["create", "update", "partial_update"]:
-            return DupPrereqsInputSerializer
-        return super().get_serializer_class()
-
-    def get_queryset(self, *args, **kwargs):
-        if getattr(self, 'swagger_fake_view', False):
-            # queryset just for schema generation metadata
-            return DupPrereqs.objects.none()
         return (
             super()
             .get_queryset(*args, **kwargs)
