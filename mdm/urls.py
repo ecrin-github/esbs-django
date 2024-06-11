@@ -283,6 +283,8 @@ urlpatterns = [
     path('dtp/study-involvement', DtpStudyInvolvement.as_view()),
     path('dup/study-involvement', DupStudyInvolvement.as_view()),
 
+    path('dup/prereqs', DupPrereqs.as_view()),
+
     path('multi-studies/objects', MultiStudiesObjects.as_view()),
 
     path('dtp/<uuid:dtpId>/study-involvement', DtpStudiesObjectsInvolvements.as_view()),

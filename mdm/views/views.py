@@ -16,6 +16,8 @@ from mdm.models import DataObjects, StudyContributors, Studies
 from mdm.serializers.data_object.data_objects_dto import DataObjectsOutputSerializer
 from mdm.serializers.study.studies_dto import StudiesOutputSerializer
 from rms.models import DataTransferProcesses, DataUseProcesses, DtpObjects, DupObjects, DupStudies, DtpStudies
+from rms.models.dtp.dtp_prereqs import DtpPrereqs
+from rms.serializers.dtp.dtp_prereqs_dto import DtpPrereqsOutputSerializer
 from rms.serializers.dtp.dtps_dto import DataTransferProcessesOutputSerializer
 from rms.serializers.dup.dups_dto import DataUseProcessesOutputSerializer
 
@@ -284,6 +286,18 @@ class DtpStudyInvolvement(APIView):
             })
 
 
+class DupPrereqs(APIView):
+    # Fetches prereqs from DTP prereqs table
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        dtp_prereqs = DtpPrereqs.objects.all()
+        serialized_data = DtpPrereqsOutputSerializer(dtp_prereqs, many=True)
+
+        return Response({'data': serialized_data.data})
+
+
 class MultiStudiesObjects(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -297,6 +311,8 @@ class MultiStudiesObjects(APIView):
         data = []
 
         for studyId in studies_ids:
+            # Note: linkedStudies are still using internal id
+            # TODO: filter on sdSid instead of studyId
             studies_check = Studies.objects.filter(id=studyId)
             if not studies_check.exists():
                 return Response({'error': f"Study with the ID {studyId} does not exist."})
