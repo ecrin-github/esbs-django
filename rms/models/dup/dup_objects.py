@@ -15,7 +15,7 @@ class DupObjects(models.Model):
     dup_id = models.ForeignKey(DataUseProcesses, on_delete=models.CASCADE, db_index=True,
                                related_name='dup_objects_dup_id', default=None, null=True, blank=True,
                                db_column='dup_id')
-    object_id = models.ForeignKey(DataObjects, on_delete=models.CASCADE, db_index=True,
+    data_object = models.ForeignKey(DataObjects, on_delete=models.CASCADE, db_index=True,
                                   related_name='dup_objects_object_id', default=None, null=True, blank=True,
                                   db_column='object_id', db_constraint=IS_MDM_DB_CONSTRAINT)
     access_type = models.ForeignKey(AccessPrereqTypes, on_delete=models.CASCADE, db_index=True,

@@ -16,7 +16,7 @@ class DtpStudies(models.Model):
     id = models.UUIDField(primary_key=True, editable=False, unique=True, db_index=True, default=uuid.uuid4)
     dtp_id = models.ForeignKey(DataTransferProcesses, on_delete=models.CASCADE, db_column='dtp_id',
                                related_name='dtp_studies_dtp_id', default=None, null=True, blank=True)
-    study_id = models.ForeignKey(Studies, on_delete=models.CASCADE, db_column='study_id',
+    study = models.ForeignKey(Studies, on_delete=models.CASCADE, db_column='study_id',
                                  related_name='dtp_studies_study_id', default=None, null=True, blank=True,
                                  db_constraint=IS_MDM_DB_CONSTRAINT)
     md_check_status = models.ForeignKey(CheckStatusTypes, on_delete=models.CASCADE, db_column='md_check_status_id',

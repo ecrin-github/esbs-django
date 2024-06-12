@@ -3,9 +3,9 @@ import uuid
 
 from django.db import models
 
-from configs.users_db_settings import IS_USERS_DB_CONSTRAINT
+from configs.rms_db_settings import IS_RMS_DB_CONSTRAINT
 from rms.models.dup.dups import DataUseProcesses
-from users.models import Users
+from rms.models.dup.dup_people import DupPeople
 
 
 class DataUseAccesses(models.Model):
@@ -14,26 +14,26 @@ class DataUseAccesses(models.Model):
                                related_name='dua_dup_id', default=None, null=True, blank=True, db_column='dup_id')
     conforms_to_default = models.BooleanField(default=False, db_index=True)
     variations = models.TextField(blank=True, null=True)
-    repo_is_proxy_provider = models.BooleanField(default=False, db_index=True)
+    repo_is_proxy_provider = models.BooleanField(default=False, db_index=True, null=True)
     dua_file_path = models.TextField(blank=True, null=True)
-    repo_signatory_1 = models.ForeignKey(Users, on_delete=models.CASCADE, db_column='repo_signatory_1', null=False,
+    repo_signatory1 = models.ForeignKey(DupPeople, on_delete=models.SET_DEFAULT, db_column='repo_signatory_1', null=True,
                                          related_name='dua_repo_signatory_1', default=None,
-                                         db_constraint=IS_USERS_DB_CONSTRAINT)
-    repo_signatory_2 = models.ForeignKey(Users, on_delete=models.CASCADE, db_column='repo_signatory_2', null=False,
+                                         db_constraint=IS_RMS_DB_CONSTRAINT)
+    repo_signatory2 = models.ForeignKey(DupPeople, on_delete=models.SET_DEFAULT, db_column='repo_signatory_2', null=True,
                                          related_name='dua_repo_signatory_2', default=None,
-                                         db_constraint=IS_USERS_DB_CONSTRAINT)
-    provider_signatory_1 = models.ForeignKey(Users, on_delete=models.CASCADE, db_column='provider_signatory_1', null=False,
+                                         db_constraint=IS_RMS_DB_CONSTRAINT)
+    provider_signatory1 = models.ForeignKey(DupPeople, on_delete=models.SET_DEFAULT, db_column='provider_signatory_1', null=True,
                                              related_name='dua_provider_signatory_1', default=None,
-                                             db_constraint=IS_USERS_DB_CONSTRAINT)
-    provider_signatory_2 = models.ForeignKey(Users, on_delete=models.CASCADE, db_column='provider_signatory_2', null=False,
+                                             db_constraint=IS_RMS_DB_CONSTRAINT)
+    provider_signatory2 = models.ForeignKey(DupPeople, on_delete=models.SET_DEFAULT, db_column='provider_signatory_2', null=True,
                                              related_name='dua_provider_signatory_2', default=None,
-                                             db_constraint=IS_USERS_DB_CONSTRAINT)
-    requester_signatory_1 = models.ForeignKey(Users, on_delete=models.CASCADE, db_column='requester_signatory_1', null=False,
+                                             db_constraint=IS_RMS_DB_CONSTRAINT)
+    requester_signatory1 = models.ForeignKey(DupPeople, on_delete=models.SET_DEFAULT, db_column='requester_signatory_1', null=True,
                                               related_name='dua_requester_signatory_1', default=None,
-                                              db_constraint=IS_USERS_DB_CONSTRAINT)
-    requester_signatory_2 = models.ForeignKey(Users, on_delete=models.CASCADE, db_column='requester_signatory_2', null=False,
+                                              db_constraint=IS_RMS_DB_CONSTRAINT)
+    requester_signatory2 = models.ForeignKey(DupPeople, on_delete=models.SET_DEFAULT, db_column='requester_signatory_2', null=True,
                                               related_name='dua_requester_signatory_2', default=None,
-                                              db_constraint=IS_USERS_DB_CONSTRAINT)
+                                              db_constraint=IS_RMS_DB_CONSTRAINT)
     notes = models.TextField(blank=True, null=True)
     created_on = models.DateTimeField(db_index=True, default=datetime.datetime.utcnow)
 

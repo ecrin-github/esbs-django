@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from rms.models.dtp.dtas import DataTransferAccesses
-from users.serializers.users_dto import UsersSerializer
+from rms.serializers.dtp.dtp_people_dto import DtpPeopleOutputSerializer
 
 
 class DataTransferAccessesInputSerializer(serializers.ModelSerializer):
@@ -11,10 +11,10 @@ class DataTransferAccessesInputSerializer(serializers.ModelSerializer):
 
 
 class DataTransferAccessesOutputSerializer(serializers.ModelSerializer):
-    repo_signature1 = UsersSerializer(many=False, read_only=True)
-    repo_signature2 = UsersSerializer(many=False, read_only=True)
-    provider_signature1 = UsersSerializer(many=False, read_only=True)
-    provider_signature2 = UsersSerializer(many=False, read_only=True)
+    repo_signature1 = DtpPeopleOutputSerializer(many=False, read_only=True)
+    repo_signature2 = DtpPeopleOutputSerializer(many=False, read_only=True)
+    provider_signature1 = DtpPeopleOutputSerializer(many=False, read_only=True)
+    provider_signature2 = DtpPeopleOutputSerializer(many=False, read_only=True)
 
     class Meta:
         model = DataTransferAccesses

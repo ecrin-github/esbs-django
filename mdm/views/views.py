@@ -10,6 +10,7 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 
 from context.models.access_prereq_types import AccessPrereqTypes
 from context.models import TrialRegistries, StudyTypes, StudyStatuses, GenderEligibilityTypes, TimeUnits
+from context.serializers.access_prereq_types_dto import AccessPrereqTypesOutputSerializer
 from db_exports.export_context_and_general_data import get_data_from_table
 from general.models import Organisations
 from mdm.models import DataObjects, StudyContributors, Studies
@@ -221,7 +222,7 @@ class DtpObjectInvolvement(APIView):
             return Response({'error': f"Data object with the ID {object_id} does not exist."})
 
         d_object = DataObjects.objects.get(id=object_id)
-        data = DtpObjects.objects.filter(object_id=d_object)
+        data = DtpObjects.objects.filter(data_object=d_object)
         return Response({'isInvolved': data.exists(), 'count': data.count()})
 
 
@@ -240,7 +241,7 @@ class DupObjectInvolvement(APIView):
             return Response({'error': f"Data object with the ID {object_id} does not exist."})
 
         d_object = DataObjects.objects.get(id=object_id)
-        data = DupObjects.objects.filter(object_id=d_object)
+        data = DupObjects.objects.filter(data_object=d_object)
         return Response({'isInvolved': data.exists(), 'count': data.count()})
 
 
@@ -364,7 +365,7 @@ class DtpStudiesObjectsInvolvements(APIView):
 
         for rec in study_objects_check:
             data_obj = DataObjects.objects.get(id=rec.id)
-            dtp_objects_check = DtpObjects.objects.filter(object_id=data_obj, dtp_id=dtp)
+            dtp_objects_check = DtpObjects.objects.filter(data_object=data_obj, dtp_id=dtp)
             if not dtp_objects_check.exists():
                 continue
             else:
@@ -411,7 +412,7 @@ class DupStudiesObjectsInvolvements(APIView):
 
         for rec in study_objects_check:
             data_obj = DataObjects.objects.get(id=rec.id)
-            dup_objects_check = DupObjects.objects.filter(object_id=data_obj, dup_id=dup)
+            dup_objects_check = DupObjects.objects.filter(data_object=data_obj, dup_id=dup)
             if not dup_objects_check.exists():
                 continue
             else:
@@ -468,8 +469,8 @@ class DtpDupStudiesObjectsInvolvements(APIView):
 
         for rec in study_objects_check:
             data_obj = DataObjects.objects.get(id=rec.id)
-            dtp_objects_check = DtpObjects.objects.filter(object_id=data_obj, dtp_id=dtp)
-            dup_objects_check = DupObjects.objects.filter(object_id=data_obj, dup_id=dup)
+            dtp_objects_check = DtpObjects.objects.filter(data_object=data_obj, dtp_id=dtp)
+            dup_objects_check = DupObjects.objects.filter(data_object=data_obj, dup_id=dup)
             if dup_objects_check.exists():
                 data['DupTotal'] += dup_objects_check.count()
 

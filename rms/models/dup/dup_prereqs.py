@@ -14,7 +14,7 @@ class DupPrereqs(models.Model):
     id = models.UUIDField(primary_key=True, editable=False, unique=True, null=False, db_index=True, default=uuid.uuid4)
     dup_id = models.ForeignKey(DataUseProcesses, on_delete=models.CASCADE, db_column='dup_id',
                                related_name='dup_prereqs_dup_id', default=None, null=True, blank=True)
-    object_id = models.ForeignKey(DataObjects, on_delete=models.CASCADE, db_column='object_id',
+    data_object = models.ForeignKey(DataObjects, on_delete=models.CASCADE, db_column='object_id',
                                   related_name='dup_prereqs_object_id', default=None, null=True, blank=True,
                                   db_constraint=IS_MDM_DB_CONSTRAINT)
     prereq_type = models.ForeignKey(AccessPrereqTypes, on_delete=models.CASCADE, db_column='prereq_id',
