@@ -17,7 +17,7 @@ from mdm.models.data_object.object_rights import ObjectRights
 from mdm.models.data_object.object_titles import ObjectTitles
 from mdm.models.data_object.object_topics import ObjectTopics
 from mdm.models.data_object.object_number_sequence import ObjectNumberSeq
-from mdm.serializers.data_object.data_objects_dto import DataObjectsOutputSerializer, DataObjectsInputSerializer
+from mdm.serializers.data_object.data_objects_dto import DataObjectsOutputSerializer, DataObjectsInputSerializerCreate, DataObjectsInputSerializerUpdate
 from mdm.serializers.data_object.object_contributors_dto import ObjectContributorsOutputSerializer, \
     ObjectContributorsInputSerializer
 from mdm.serializers.data_object.object_datasets_dto import ObjectDatasetsOutputSerializer, \
@@ -44,8 +44,10 @@ class DataObjectsList(MultipleFieldLookupMixin, viewsets.ModelViewSet):
     lookup_fields = ['pk', 'sd_oid']
 
     def get_serializer_class(self):
-        if self.action in ["create", "update", "partial_update"]:
-            return DataObjectsInputSerializer
+        if self.action in ["create"]:
+            return DataObjectsInputSerializerCreate
+        elif self.action in ["update", "partial_update"]:
+            return DataObjectsInputSerializerUpdate
         return super().get_serializer_class()
 
 

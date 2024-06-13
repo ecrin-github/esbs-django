@@ -13,7 +13,7 @@ from mdm.models.study.study_relationships import StudyRelationships
 from mdm.models.study.study_titles import StudyTitles
 from mdm.models.study.study_topics import StudyTopics
 from mdm.models.study.study_number_sequence import StudyNumberSeq
-from mdm.serializers.study.studies_dto import StudiesOutputSerializer, StudiesInputSerializer
+from mdm.serializers.study.studies_dto import StudiesOutputSerializer, StudiesInputSerializerCreate, StudiesInputSerializerUpdate
 from mdm.serializers.study.study_contributors_dto import StudyContributorsOutputSerializer, \
     StudyContributorsInputSerializer
 from mdm.serializers.study.study_features_dto import StudyFeaturesOutputSerializer, StudyFeaturesInputSerializer
@@ -33,8 +33,10 @@ class StudiesList(MultipleFieldLookupMixin, viewsets.ModelViewSet):
     lookup_fields = ['pk', 'sd_sid']
 
     def get_serializer_class(self):
-        if self.action in ["create", "update", "partial_update"]:
-            return StudiesInputSerializer
+        if self.action in ["create"]:
+            return StudiesInputSerializerCreate
+        elif self.action in ["update", "partial_update"]:
+            return StudiesInputSerializerUpdate
         return super().get_serializer_class()
 
 

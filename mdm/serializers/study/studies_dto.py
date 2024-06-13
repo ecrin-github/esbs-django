@@ -19,7 +19,7 @@ from users.models import Users
 from users.serializers.users_dto import UsersSerializer
 
 
-class StudiesInputSerializer(serializers.ModelSerializer):
+class StudiesInputSerializerCreate(serializers.ModelSerializer):
     last_edited_by = serializers.PrimaryKeyRelatedField(
         default=serializers.CurrentUserDefault(),
         queryset=Users.objects.all()
@@ -33,6 +33,18 @@ class StudiesInputSerializer(serializers.ModelSerializer):
         # Before insert - get study ID here to avoid concurrency
         data['sd_sid'] = f'DSRS-{StudyNumberSeq.objects.raw("select 1 as id, last_value from study_number_seq")[0].last_value}'
         return super().to_internal_value(data)
+
+
+class StudiesInputSerializerUpdate(serializers.ModelSerializer):
+    last_edited_by = serializers.PrimaryKeyRelatedField(
+        default=serializers.CurrentUserDefault(),
+        queryset=Users.objects.all()
+    )
+
+    class Meta:
+        model = Studies
+        # Not updating sd_sid
+        exclude = ['sd_sid']
 
 
 class StudiesOutputSerializer(serializers.ModelSerializer):

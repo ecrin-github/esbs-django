@@ -23,7 +23,7 @@ from users.models import Users
 from users.serializers.users_dto import UsersSerializer
 
 
-class DataObjectsInputSerializer(serializers.ModelSerializer):
+class DataObjectsInputSerializerCreate(serializers.ModelSerializer):
     last_edited_by = serializers.PrimaryKeyRelatedField(
         default=serializers.CurrentUserDefault(),
         queryset=Users.objects.all()
@@ -37,6 +37,18 @@ class DataObjectsInputSerializer(serializers.ModelSerializer):
         # Before insert - get DO ID here to avoid concurrency
         data['sd_oid'] = f'DSRO-{ObjectNumberSeq.objects.raw("select 1 as id, last_value from object_number_seq")[0].last_value}'
         return super().to_internal_value(data)
+
+
+class DataObjectsInputSerializerUpdate(serializers.ModelSerializer):
+    last_edited_by = serializers.PrimaryKeyRelatedField(
+        default=serializers.CurrentUserDefault(),
+        queryset=Users.objects.all()
+    )
+
+    class Meta:
+        model = DataObjects
+        # Not updating sd_oid
+        exclude = ['sd_oid']
 
 
 class DataObjectsOutputSerializer(serializers.ModelSerializer):
