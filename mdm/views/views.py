@@ -680,15 +680,7 @@ class StudiesByTitleAndOrg(APIView):
         if title_query_string is None:
             return Response({'error': "title param is missing"})
 
-        study_contributors_check = StudyContributors.objects.filter(organisation=org_data)
-        if not study_contributors_check.exists():
-            return Response({'error': f'Organisation {org_data.default_name} does not have any related studies'})
-
-        studies_ids = []
-        for study_contrib in study_contributors_check:
-            studies_ids.append(study_contrib.study_id.id)
-
-        studies = Studies.objects.filter(display_title__icontains=title_query_string, id__in=studies_ids)
+        studies = Studies.objects.filter(display_title__icontains=title_query_string, organisation=org_data)
         serializer = StudiesOutputSerializer(studies, many=True)
 
         return Response(serializer.data)
@@ -714,7 +706,7 @@ class DataObjectsByTitleAndOrg(APIView):
         if title_query_string is None:
             return Response({'error': "title param is missing"})
 
-        data_objects = DataObjects.objects.filter(display_title__icontains=title_query_string, managing_org=org_data)
+        data_objects = DataObjects.objects.filter(display_title__icontains=title_query_string, organisation=org_data)
         serializer = DataObjectsOutputSerializer(data_objects, many=True)
 
         return Response(serializer.data)
