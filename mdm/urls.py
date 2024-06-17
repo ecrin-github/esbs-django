@@ -211,8 +211,11 @@ study_topics_detail = StudyTopicsList.as_view({
 urlpatterns = [
     path('data-objects', data_objects_list),
     path('data-objects/next-id', object_next_id),
+    path('data-objects/by-org', DataObjectsByOrg.as_view()),
+    path('data-objects/by-title-and-organisation', DataObjectsByTitleAndOrg.as_view()),
+    path('data-objects/mdr', MdrDataObjects.as_view()),
+    path('data-objects/by-title', DataObjectsByTitle.as_view()),
     path('data-objects/<uuid:pk>', data_objects_detail),
-    path('data-objects/<sd_oid>', data_objects_detail),
 
     path('data-objects/<uuid:objectId>/object-contributors', object_contributors_list),
     path('data-objects/<uuid:objectId>/object-contributors/<uuid:pk>', object_contributors_detail),
@@ -244,10 +247,18 @@ urlpatterns = [
     path('data-objects/<uuid:objectId>/object-topics', object_topics_list),
     path('data-objects/<uuid:objectId>/object-topics/<uuid:pk>', object_topics_detail),
 
+    # This needs to be put after the other /data-objects/something routes, otherwise it breaks them
+    path('data-objects/<sd_oid>', data_objects_detail),
+
     path('studies', studies_list),
+    path('studies/by-org', StudiesByOrg.as_view()),
     path('studies/next-id', study_next_id),
     path('studies/<uuid:pk>', studies_detail),
-    path('studies/<sd_sid>', studies_detail),
+    path('studies/by-title-and-organisation', StudiesByTitleAndOrg.as_view()),
+    path('studies/by-title', StudiesByTitle.as_view()),
+    path('studies/mdr/data', MdrStudiesData.as_view()),
+    path('studies/mdr', MdrStudies.as_view()),
+    path('studies/new-mdr', NewMdrStudies.as_view()),
 
     path('studies/<uuid:studyId>/study-contributors', study_contributors_list),
     path('studies/<uuid:studyId>/study-contributors/<uuid:pk>', study_contributors_detail),
@@ -267,13 +278,9 @@ urlpatterns = [
     path('studies/<uuid:studyId>/study-topics', study_topics_list),
     path('studies/<uuid:studyId>/study-topics/<uuid:pk>', study_topics_detail),
 
-    path('studies/mdr/data', MdrStudiesData.as_view()),
-    path('studies/mdr', MdrStudies.as_view()),
-    path('studies/new-mdr', NewMdrStudies.as_view()),
-    path('data-objects/mdr', MdrDataObjects.as_view()),
+    # This needs to be put after the other /studies/something routes, otherwise it breaks them
+    path('studies/<sd_sid>', studies_detail),
 
-    path('studies/by-org', StudiesByOrg.as_view()),
-    path('data-objects/by-org', DataObjectsByOrg.as_view()),
     path('dtp/by-org', DtpByOrg.as_view()),
     path('dup/by-org', DupByOrg.as_view()),
 
@@ -291,13 +298,9 @@ urlpatterns = [
     path('dup/<uuid:dupId>/study-involvement', DupStudiesObjectsInvolvements.as_view()),
     path('dtp/<uuid:dtpId>/dup/<uuid:dupId>/study-involvement', DtpDupStudiesObjectsInvolvements.as_view()),
 
-    path('studies/by-title', StudiesByTitle.as_view()),
-    path('data-objects/by-title', DataObjectsByTitle.as_view()),
     path('dtp/by-title', DtpByTitle.as_view()),
     path('dup/by-title', DupByTitle.as_view()),
 
-    path('studies/by-title-and-organisation', StudiesByTitleAndOrg.as_view()),
-    path('data-objects/by-title-and-organisation', DataObjectsByTitleAndOrg.as_view()),
     path('dtp/by-title-and-organisation', DtpByTitleAndOrg.as_view()),
     path('dup/by-title-and-organisation', DupByTitleAndOrg.as_view()),
 ]
