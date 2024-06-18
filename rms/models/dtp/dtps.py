@@ -18,18 +18,14 @@ class DataTransferProcesses(models.Model):
     status = models.ForeignKey(DtpStatusTypes, on_delete=models.CASCADE, db_column='status_id',
                                related_name='dtp_status_id', default=None, null=True, blank=True,
                                db_constraint=IS_CONTEXT_DB_CONSTRAINT)
-    initial_contact_date = models.DateTimeField(blank=True, null=True)
+    set_up_start_date = models.DateTimeField(blank=True, null=True)
     set_up_complete_date = models.DateTimeField(blank=True, null=True)
-    md_access_granted_date = models.DateTimeField(blank=True, null=True)
     md_complete_date = models.DateTimeField(blank=True, null=True)
     dta_agreed_date = models.DateTimeField(blank=True, null=True)
+    qc_checks_complete_date = models.DateTimeField(blank=True, null=True)
     upload_access_requested_date = models.DateTimeField(blank=True, null=True)
     upload_access_confirmed_date = models.DateTimeField(blank=True, null=True)
     upload_complete_date = models.DateTimeField(blank=True, null=True)
-    qc_checks_complete_date = models.DateTimeField(blank=True, null=True)
-    md_integrated_with_mdr_date = models.DateTimeField(blank=True, null=True)
-    availability_requested_date = models.DateTimeField(blank=True, null=True)
-    availability_confirmed_date = models.DateTimeField(blank=True, null=True)
     created_on = models.DateTimeField(default=datetime.datetime.utcnow)
 
     class Meta:
