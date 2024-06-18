@@ -242,27 +242,26 @@ class UserAccessData(APIView):
         if not user.exists():
             return Response(status=404, data="User not found")
 
-        user_profile = UserProfiles.objects.filter(user_id=userId)
+        user_profile = UserProfiles.objects.filter(user=userId)
         if not user_profile.exists():
             return Response(status=404, data="User profile not found")
 
-        org_id = user_profile[0].organisation_id
-        organisation = Organisations.objects.get(id=org_id)
+        org_id = user_profile[0].organisation
 
-        dups = DataUseProcesses.objects.filter(organisation=organisation)
-        dtps = DataTransferProcesses.objects.filter(organisation=organisation)
+        dups = DataUseProcesses.objects.filter(organisation=org_id)
+        dtps = DataTransferProcesses.objects.filter(organisation=org_id)
 
         study_id_list = []
 
         for dup in dups:
             dup_studies = DupStudies.objects.filter(dup_id=dup)
             for dup_study_obj in dup_studies:
-                study_id_list.append(dup_study_obj.study_id.id)
+                study_id_list.append(dup_study_obj.study.id)
 
         for dtp in dtps:
             dtp_studies = DtpStudies.objects.filter(dtp_id=dtp)
             for dtp_study_obj in dtp_studies:
-                study_id_list.append(dtp_study_obj.study_id.id)
+                study_id_list.append(dtp_study_obj.study.id)
 
         studies_id_set = set(study_id_list)
         studies = Studies.objects.filter(id__in=studies_id_set)
@@ -286,8 +285,8 @@ class UserAccessData(APIView):
                                     "sdOid": data_object.sd_oid,
                                     "url": object_instance.url,
                                     "urlAccessible": object_instance.url_accessible,
-                                    "repositoryOrgId": object_instance.repository_org.id,
-                                    "repositoryOrg": object_instance.repository_org.default_name,
+                                    "repositoryOrgId": object_instance.repository_org.id if object_instance.repository_org else '',
+                                    "repositoryOrg": object_instance.repository_org.default_name if object_instance.repository_org else '',
                                 })
                         data_objects_response.append({
                             "objectId": data_object.id,
