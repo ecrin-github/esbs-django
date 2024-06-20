@@ -23,8 +23,6 @@ class DataTransferProcesses(models.Model):
     md_complete_date = models.DateTimeField(blank=True, null=True)
     dta_agreed_date = models.DateTimeField(blank=True, null=True)
     qc_checks_complete_date = models.DateTimeField(blank=True, null=True)
-    upload_access_requested_date = models.DateTimeField(blank=True, null=True)
-    upload_access_confirmed_date = models.DateTimeField(blank=True, null=True)
     upload_complete_date = models.DateTimeField(blank=True, null=True)
     created_on = models.DateTimeField(default=datetime.datetime.utcnow)
 
