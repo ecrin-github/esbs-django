@@ -8,7 +8,7 @@ from general.models import Organisations
 from users.models import UserProfiles
 from users.models.users import Users
 from users.serializers.create_user_class import CreateUserDto
-from users.serializers.profiles_dto import UserProfilesOutputSerializer
+from users.serializers.profiles_dto import UserProfilesOutputSerializer, UserProfilesLimitedOutputSerializer
 
 
 class UsersSerializer(serializers.ModelSerializer):
@@ -17,6 +17,14 @@ class UsersSerializer(serializers.ModelSerializer):
     class Meta:
         model = Users
         fields = '__all__'
+
+
+class UsersLimitedSerializer(serializers.ModelSerializer):
+    user_profile = UserProfilesLimitedOutputSerializer(many=False, read_only=True)
+
+    class Meta:
+        model = Users
+        fields = ['id', 'user_profile', 'email', 'first_name', 'last_name']
 
 
 class CreateUserSerializer(serializers.Serializer):

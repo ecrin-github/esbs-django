@@ -20,9 +20,10 @@ class StudyRelationshipsInputSerializer(serializers.ModelSerializer):
 
 class StudyRelationshipsOutputSerializer(serializers.ModelSerializer):
     relationship_type = StudyRelationshipTypesOutputSerializer(many=False, read_only=True)
-    last_edited_by = UsersSerializer(many=False, read_only=True)
+    # last_edited_by = UsersSerializer(many=False, read_only=True)
     target_study = StudyMainDetailsSerializer(many=False, read_only=True)
 
     class Meta:
         model = StudyRelationships
-        fields = '__all__'
+        # fields = '__all__'
+        exclude = ['last_edited_by']

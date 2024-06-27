@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 
+from app.permissions import IsSuperUser, ReadOnlyForOwnOrg, WriteOnlyForOwnOrg, ReadOnly
 from context.models.access_prereq_types import AccessPrereqTypes
 from context.models import TrialRegistries, StudyTypes, StudyStatuses, GenderEligibilityTypes, TimeUnits
 from context.serializers.access_prereq_types_dto import AccessPrereqTypesOutputSerializer
@@ -53,6 +54,7 @@ class MdrStudiesData(APIView):
         if trial_registry_id is None:
             return Response({'error': "Trial registry does not exist in the MDR database"})
 
+        # TODO
         res = requests.get(
             f"https://api.ecrin-rms.org/api/studies/mdr/{trial_registry_id}/{sd_sid}/data",
             headers={'Authorization': request.META['HTTP_AUTHORIZATION']}
@@ -125,7 +127,7 @@ class MdrDataObjects(APIView):
 
 class DtpByOrg(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
 
     def get(self, request):
         org_id = self.request.query_params.get('orgId')
@@ -147,7 +149,7 @@ class DtpByOrg(APIView):
 
 class DupByOrg(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
 
     def get(self, request):
         org_id = self.request.query_params.get('orgId')
@@ -169,7 +171,7 @@ class DupByOrg(APIView):
 
 class DataObjectsByOrg(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
     def get(self, request):
         org_id = self.request.query_params.get('orgId')
@@ -189,7 +191,7 @@ class DataObjectsByOrg(APIView):
 
 class StudiesByOrg(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
     def get(self, request):
         org_id = self.request.query_params.get('orgId')
@@ -209,7 +211,7 @@ class StudiesByOrg(APIView):
 
 class DtpObjectInvolvement(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
 
     def get(self, request):
         object_id = self.request.query_params.get('objectId')
@@ -228,7 +230,7 @@ class DtpObjectInvolvement(APIView):
 
 class DupObjectInvolvement(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
 
     def get(self, request):
         object_id = self.request.query_params.get('objectId')
@@ -247,7 +249,7 @@ class DupObjectInvolvement(APIView):
 
 class DupStudyInvolvement(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
 
     def get(self, request):
         study_id = self.request.query_params.get('studyId')
@@ -266,7 +268,7 @@ class DupStudyInvolvement(APIView):
 
 class DtpStudyInvolvement(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
 
     def get(self, request):
         study_id = self.request.query_params.get('studyId')
@@ -290,7 +292,7 @@ class DtpStudyInvolvement(APIView):
 class DupPrereqs(APIView):
     # Fetches prereqs from DTP prereqs table
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated & ReadOnlyForOwnOrg]
 
     def get(self, request):
         dtp_prereqs = DtpPrereqs.objects.all()
@@ -301,7 +303,7 @@ class DupPrereqs(APIView):
 
 class MultiStudiesObjects(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.AllowAny]
 
     def get(self, request):
         studies_ids = self.request.query_params.get('studiesIds').split(',')
@@ -330,7 +332,7 @@ class MultiStudiesObjects(APIView):
 
 class DtpStudiesObjectsInvolvements(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
 
     def get(self, request, dtpId, format=None):
         if dtpId is None:
@@ -377,7 +379,7 @@ class DtpStudiesObjectsInvolvements(APIView):
 
 class DupStudiesObjectsInvolvements(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
 
     def get(self, request, dupId, format=None):
         if dupId is None:
@@ -424,7 +426,7 @@ class DupStudiesObjectsInvolvements(APIView):
 
 class DtpDupStudiesObjectsInvolvements(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
 
     def get(self, request, dtpId, dupId, format=None):
         if dtpId is None:
@@ -482,7 +484,7 @@ class DtpDupStudiesObjectsInvolvements(APIView):
 
 class NewMdrStudies(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
         reg_id = self.request.query_params.get('regId')
@@ -598,7 +600,7 @@ class NewMdrStudies(APIView):
 
 class StudiesByTitle(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.AllowAny]
 
     def get(self, request):
         title_query_string = self.request.query_params.get('title')
@@ -614,7 +616,7 @@ class StudiesByTitle(APIView):
 
 class DataObjectsByTitle(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.AllowAny]
 
     def get(self, request):
         title_query_string = self.request.query_params.get('title')
@@ -630,7 +632,7 @@ class DataObjectsByTitle(APIView):
 
 class DtpByTitle(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
 
     def get(self, request):
         title_query_string = self.request.query_params.get('title')
@@ -646,7 +648,7 @@ class DtpByTitle(APIView):
 
 class DupByTitle(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
 
     def get(self, request):
         title_query_string = self.request.query_params.get('title')
@@ -662,7 +664,7 @@ class DupByTitle(APIView):
 
 class StudiesByTitleAndOrg(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.AllowAny]
 
     def get(self, request):
         title_query_string = self.request.query_params.get('title')
@@ -688,7 +690,7 @@ class StudiesByTitleAndOrg(APIView):
 
 class DataObjectsByTitleAndOrg(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.AllowAny]
 
     def get(self, request):
         title_query_string = self.request.query_params.get('title')
@@ -714,7 +716,7 @@ class DataObjectsByTitleAndOrg(APIView):
 
 class DtpByTitleAndOrg(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
 
     def get(self, request):
         title_query_string = self.request.query_params.get('title')
@@ -740,7 +742,7 @@ class DtpByTitleAndOrg(APIView):
 
 class DupByTitleAndOrg(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
 
     def get(self, request):
         title_query_string = self.request.query_params.get('title')

@@ -2,6 +2,7 @@ from mozilla_django_oidc.contrib.drf import OIDCAuthentication
 from rest_framework import viewsets, permissions
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 
+from app.permissions import ReadOnlyForOwnOrg, IsSuperUser
 from rms.models.dtp.dtas import DataTransferAccesses
 from rms.models.dtp.dtp_datasets import DtpDatasets
 from rms.models.dtp.dtp_notes import DtpNotes
@@ -25,7 +26,7 @@ class DataTransferAccessesList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DataTransferAccesses.objects.all()
     serializer_class = DataTransferAccessesOutputSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -47,7 +48,7 @@ class DtpDatasetsList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DtpDatasets.objects.all()
     serializer_class = DtpDatasetsOutputSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -69,7 +70,7 @@ class DtpNotesList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DtpNotes.objects.all()
     serializer_class = DtpNotesOutputSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -91,7 +92,7 @@ class DtpObjectsList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DtpObjects.objects.all()
     serializer_class = DtpObjectsOutputSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -113,7 +114,7 @@ class DtpPeopleList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DtpPeople.objects.all()
     serializer_class = DtpPeopleOutputSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -135,7 +136,7 @@ class DtpPrereqsList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DtpPrereqs.objects.all()
     serializer_class = DtpPrereqsOutputSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -157,7 +158,7 @@ class DtpStudiesList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DtpStudies.objects.all()
     serializer_class = DtpStudiesOutputSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -179,7 +180,7 @@ class DataTransferProcessesList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DataTransferProcesses.objects.all()
     serializer_class = DataTransferProcessesOutputSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:

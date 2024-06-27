@@ -4,6 +4,7 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from app.permissions import WriteOnlyForOwnOrg, IsSuperUser, ReadOnly
 from mdm.views.common.mixins import MultipleFieldLookupMixin
 from mdm.models.study.studies import Studies
 from mdm.models.study.study_contributors import StudyContributors
@@ -29,7 +30,7 @@ class StudiesList(MultipleFieldLookupMixin, viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = Studies.objects.all()
     serializer_class = StudiesOutputSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [IsSuperUser | WriteOnlyForOwnOrg | ReadOnly]
     lookup_fields = ['pk', 'sd_sid']
 
     def get_serializer_class(self):
@@ -42,7 +43,7 @@ class StudiesList(MultipleFieldLookupMixin, viewsets.ModelViewSet):
 
 class StudyNextId(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated & ReadOnly]
 
     def get(self, request, format=None):
         # Get next id, incremented after every insert in the DB
@@ -56,7 +57,7 @@ class StudyContributorsList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = StudyContributors.objects.all()
     serializer_class = StudyContributorsOutputSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [IsSuperUser | WriteOnlyForOwnOrg | ReadOnly]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -78,7 +79,7 @@ class StudyFeaturesList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = StudyFeatures.objects.all()
     serializer_class = StudyFeaturesOutputSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [IsSuperUser | WriteOnlyForOwnOrg | ReadOnly]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -100,7 +101,7 @@ class StudyIdentifiersList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = StudyIdentifiers.objects.all()
     serializer_class = StudyIdentifiersOutputSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [IsSuperUser | WriteOnlyForOwnOrg | ReadOnly]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -122,7 +123,7 @@ class StudyRelationshipsList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = StudyRelationships.objects.all()
     serializer_class = StudyRelationshipsOutputSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [IsSuperUser | WriteOnlyForOwnOrg | ReadOnly]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -144,7 +145,7 @@ class StudyTitlesList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = StudyTitles.objects.all()
     serializer_class = StudyTitlesOutputSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [IsSuperUser | WriteOnlyForOwnOrg | ReadOnly]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -166,7 +167,7 @@ class StudyTopicsList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = StudyTopics.objects.all()
     serializer_class = StudyTopicsOutputSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [IsSuperUser | WriteOnlyForOwnOrg | ReadOnly]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:

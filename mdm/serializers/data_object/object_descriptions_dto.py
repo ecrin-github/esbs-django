@@ -21,8 +21,9 @@ class ObjectDescriptionsInputSerializer(serializers.ModelSerializer):
 class ObjectDescriptionsOutputSerializer(serializers.ModelSerializer):
     description_type = DescriptionTypesOutputSerializer(many=False, read_only=True)
     lang_code = LanguageCodesOutputSerializer(many=False, read_only=True)
-    last_edited_by = UsersSerializer(many=False, read_only=True)
+    # last_edited_by = UsersSerializer(many=False, read_only=True)
 
     class Meta:
         model = ObjectDescriptions
-        fields = '__all__'
+        # fields = '__all__'
+        exclude = ['last_edited_by']

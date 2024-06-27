@@ -23,8 +23,9 @@ class ObjectDatasetsOutputSerializer(serializers.ModelSerializer):
     recordkey_type = DatasetRecordkeyTypesOutputSerializer(many=False, read_only=True)
     deident_type = DatasetDeidentificationLevelsOutputSerializer(many=False, read_only=True)
     consent_type = DatasetConsentTypesOutputSerializer(many=False, read_only=True)
-    last_edited_by = UsersSerializer(many=False, read_only=True)
+    # last_edited_by = UsersSerializer(many=False, read_only=True)
 
     class Meta:
         model = ObjectDatasets
-        fields = '__all__'
+        # fields = '__all__'
+        exclude = ['last_edited_by']

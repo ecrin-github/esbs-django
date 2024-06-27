@@ -21,8 +21,9 @@ class StudyFeaturesInputSerializer(serializers.ModelSerializer):
 class StudyFeaturesOutputSerializer(serializers.ModelSerializer):
     feature_type = StudyFeatureTypesOutputSerializer(many=False, read_only=True)
     feature_value = StudyFeatureCategoriesOutputSerializer(many=False, read_only=True)
-    last_edited_by = UsersSerializer(many=False, read_only=True)
+    # last_edited_by = UsersSerializer(many=False, read_only=True)
 
     class Meta:
         model = StudyFeatures
-        fields = '__all__'
+        # fields = '__all__'
+        exclude = ['last_edited_by']

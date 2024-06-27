@@ -22,3 +22,11 @@ class UserProfilesOutputSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfiles
         fields = '__all__'
+
+
+class UserProfilesLimitedOutputSerializer(serializers.ModelSerializer):
+    organisation = OrganisationsOutputSerializer(many=False, read_only=True)
+
+    class Meta:
+        model = UserProfiles
+        fields = ['id', 'organisation']

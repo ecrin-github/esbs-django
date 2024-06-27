@@ -157,7 +157,7 @@ class LanguageCodesList(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
-class OrganisationsList(viewsets.ModelViewSet):
+class OrganisationsList(viewsets.ReadOnlyModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = Organisations.objects.all()
     serializer_class = OrganisationsOutputSerializer

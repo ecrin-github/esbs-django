@@ -19,8 +19,9 @@ class ObjectDatesInputSerializer(serializers.ModelSerializer):
 
 class ObjectDatesOutputSerializer(serializers.ModelSerializer):
     date_type = DateTypesOutputSerializer(many=False, read_only=True)
-    last_edited_by = UsersSerializer(many=False, read_only=True)
+    # last_edited_by = UsersSerializer(many=False, read_only=True)
 
     class Meta:
         model = ObjectDates
-        fields = '__all__'
+        # fields = '__all__'
+        exclude = ['last_edited_by']

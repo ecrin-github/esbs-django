@@ -20,9 +20,10 @@ class StudyTopicsInputSerializer(serializers.ModelSerializer):
 
 class StudyTopicsOutputSerializer(serializers.ModelSerializer):
     topic_type = TopicTypesOutputSerializer(many=False, read_only=True)
-    last_edited_by = UsersSerializer(many=False, read_only=True)
+    # last_edited_by = UsersSerializer(many=False, read_only=True)
     original_value = TopicVocabulariesOutputSerializer(many=False, read_only=True)
 
     class Meta:
         model = StudyTopics
-        fields = '__all__'
+        # fields = '__all__'
+        exclude = ['last_edited_by']

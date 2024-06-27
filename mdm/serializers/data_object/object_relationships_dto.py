@@ -20,9 +20,10 @@ class ObjectRelationshipsInputSerializer(serializers.ModelSerializer):
 
 class ObjectRelationshipsOutputSerializer(serializers.ModelSerializer):
     relationship_type = ObjectRelationshipTypesOutputSerializer(many=False, read_only=True)
-    last_edited_by = UsersSerializer(many=False, read_only=True)
+    # last_edited_by = UsersSerializer(many=False, read_only=True)
     target_object = ObjectMainDetailsSerializer(many=False, read_only=True)
 
     class Meta:
         model = ObjectRelationships
-        fields = '__all__'
+        # fields = '__all__'
+        exclude = ['last_edited_by']

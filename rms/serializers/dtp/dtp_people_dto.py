@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from rms.models.dtp.dtp_people import DtpPeople
-from users.serializers.users_dto import UsersSerializer
+from users.serializers.users_dto import UsersSerializer, UsersLimitedSerializer
 
 
 class DtpPeopleInputSerializer(serializers.ModelSerializer):
@@ -11,7 +11,7 @@ class DtpPeopleInputSerializer(serializers.ModelSerializer):
 
 
 class DtpPeopleOutputSerializer(serializers.ModelSerializer):
-    person = UsersSerializer(many=False, read_only=True)
+    person = UsersLimitedSerializer(many=False, read_only=True)
 
     class Meta:
         model = DtpPeople

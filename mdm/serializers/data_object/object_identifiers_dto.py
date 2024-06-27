@@ -21,8 +21,9 @@ class ObjectIdentifiersInputSerializer(serializers.ModelSerializer):
 class ObjectIdentifiersOutputSerializer(serializers.ModelSerializer):
     identifier_type = IdentifierTypesOutputSerializer(many=False, read_only=True)
     identifier_org = OrganisationsOutputSerializer(many=False, read_only=True)
-    last_edited_by = UsersSerializer(many=False, read_only=True)
+    # last_edited_by = UsersSerializer(many=False, read_only=True)
 
     class Meta:
         model = ObjectIdentifiers
-        fields = '__all__'
+        # fields = '__all__'
+        exclude = ['last_edited_by']

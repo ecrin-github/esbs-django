@@ -54,7 +54,7 @@ class StudiesOutputSerializer(serializers.ModelSerializer):
     study_gender_elig = GenderEligibilityTypesOutputSerializer(many=False, read_only=True)
     min_age_unit = TimeUnitsOutputSerializer(many=False, read_only=True)
     max_age_unit = TimeUnitsOutputSerializer(many=False, read_only=True)
-    last_edited_by = UsersSerializer(many=False, read_only=True)
+    # last_edited_by = UsersSerializer(many=False, read_only=True)
     organisation = OrganisationsOutputSerializer(many=False, read_only=True)
 
     study_contributors = StudyContributorsOutputSerializer(many=True, read_only=True)
@@ -71,6 +71,6 @@ class StudiesOutputSerializer(serializers.ModelSerializer):
         fields = ['id', 'sd_sid', 'display_title', 'title_lang_code', 'brief_description',
                   'data_sharing_statement', 'study_start_year', 'study_start_month', 'study_type',
                   'study_status', 'study_enrollment', 'study_gender_elig', 'min_age', 'min_age_unit',
-                  'max_age', 'max_age_unit', 'created_on', 'last_edited_by',
+                  'max_age', 'max_age_unit', 'created_on', 
                   'organisation', 'study_contributors', 'study_features',
                   'study_identifiers', 'study_relationships', 'study_titles', 'study_topics', 'linked_objects']

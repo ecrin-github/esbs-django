@@ -2,6 +2,7 @@ from mozilla_django_oidc.contrib.drf import OIDCAuthentication
 from rest_framework import viewsets, permissions
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 
+from app.permissions import ReadOnlyForOwnOrg, IsSuperUser
 from rms.models.dup.duas import DataUseAccesses
 from rms.models.dup.dup_notes import DupNotes
 from rms.models.dup.dup_objects import DupObjects
@@ -23,7 +24,7 @@ class DataUseAccessesList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DataUseAccesses.objects.all()
     serializer_class = DataUseAccessesOutputSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -45,7 +46,7 @@ class DupNotesList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DupNotes.objects.all()
     serializer_class = DupNotesOutputSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -67,7 +68,7 @@ class DupObjectsList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DupObjects.objects.all()
     serializer_class = DupObjectsOutputSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -89,7 +90,7 @@ class DupPeopleList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DupPeople.objects.all()
     serializer_class = DupPeopleOutputSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -111,7 +112,7 @@ class DupSecondaryUseList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DupSecondaryUse.objects.all()
     serializer_class = DupSecondaryUseOutputSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -133,7 +134,7 @@ class DupStudiesList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DupStudies.objects.all()
     serializer_class = DupStudiesOutputSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -155,7 +156,7 @@ class DataUseProcessesList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DataUseProcesses.objects.all()
     serializer_class = DataUseProcessesOutputSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:

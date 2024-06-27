@@ -7,23 +7,50 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 from rest_framework.parsers import JSONParser
 from rest_framework.views import APIView
+from rest_framework.response import Response
 
+from app.permissions import IsSuperUser, WriteOnlyForSelf
 from general.models import Organisations
 from mdm.models import Studies, DataObjects, ObjectInstances
 from rms.models import DataUseProcesses, DataTransferProcesses, DupStudies, DupObjects, DtpStudies, DtpObjects
 from users.models.profiles import UserProfiles
 from users.models.users import Users
 from users.serializers.profiles_dto import UserProfilesOutputSerializer, UserProfilesInputSerializer
-from users.serializers.users_dto import UsersSerializer, CreateUserSerializer
-
-from rest_framework.response import Response
+from users.serializers.users_dto import UsersSerializer, CreateUserSerializer, UsersLimitedSerializer
 
 
-class UsersList(viewsets.ModelViewSet):
+class UsersList(APIView):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
+    queryset = Users.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, format=None):
+        if not request.user.id:
+            return Response(status=404, data="Requesting user not found")
+
+        users = []
+        if request.user.is_superuser:
+            users = Users.objects.all()
+            serializer = UsersSerializer(users, many=True)
+        else:
+            try:
+                users_subquery = Users.objects.raw("SELECT u.id as id FROM users u LEFT JOIN "
+                                                    + "user_profiles up ON u.id=up.user_id "
+                                                    + f"WHERE up.organisation_id='{request.user.user_profile.organisation.id}';")
+                for user in users_subquery:
+                    users.append(user)
+            except AttributeError:
+                return Response(status=404, data='Error: no organisation for user')
+            serializer = UsersLimitedSerializer(users, many=True)
+
+        return Response({'count': len(serializer.data), 'results': serializer.data, 'statusCode': status.HTTP_200_OK})
+
+
+class UserView(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = Users.objects.all()
     serializer_class = UsersSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated & (WriteOnlyForSelf | IsSuperUser)]
 
     def get_serializer_class(self):
         if self.action in ["create"]:
@@ -51,7 +78,7 @@ class UserProfilesList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = UserProfiles.objects.all()
     serializer_class = UserProfilesOutputSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated & (WriteOnlyForSelf | IsSuperUser)]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -66,67 +93,67 @@ class UserProfilesList(viewsets.ModelViewSet):
         )
 
 
-class UserEntitiesApiView(APIView):
-    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+# class UserEntitiesApiView(APIView):
+#     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
+#     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request, userId, format=None):
-        # user_id = request.query_params["userId"]
-        # user_id = request.user.id
+#     def get(self, request, userId, format=None):
+#         # user_id = request.query_params["userId"]
+#         # user_id = request.user.id
 
-        user = Users.objects.filter(id=userId)
-        if not user.exists():
-            return Response(status=404, data="User not found")
+#         user = Users.objects.filter(id=userId)
+#         if not user.exists():
+#             return Response(status=404, data="User not found")
 
-        user_profile = UserProfiles.objects.filter(user_id=userId)
-        if not user_profile.exists():
-            return Response(status=404, data="User profile not found")
+#         user_profile = UserProfiles.objects.filter(user_id=userId)
+#         if not user_profile.exists():
+#             return Response(status=404, data="User profile not found")
 
-        org_id = user_profile[0].organisation_id
-        organisation = Organisations.objects.get(id=org_id)
+#         org_id = user_profile[0].organisation_id
+#         organisation = Organisations.objects.get(id=org_id)
 
-        dups = DataUseProcesses.objects.filter(org_id=organisation)
-        dtps = DataTransferProcesses.objects.filter(organisation=organisation)
+#         dups = DataUseProcesses.objects.filter(org_id=organisation)
+#         dtps = DataTransferProcesses.objects.filter(organisation=organisation)
 
-        study_id_list = []
-        data_object_id_list = []
+#         study_id_list = []
+#         data_object_id_list = []
 
-        for dup in dups:
-            dup_studies = DupStudies.objects.filter(dup_id=dup)
-            for dup_study_obj in dup_studies:
-                study_id_list.append(dup_study_obj.study_id)
+#         for dup in dups:
+#             dup_studies = DupStudies.objects.filter(dup_id=dup)
+#             for dup_study_obj in dup_studies:
+#                 study_id_list.append(dup_study_obj.study_id)
 
-            dup_data_objects = DupObjects.objects.filter(dup_id=dup)
-            for dup_data_object_obj in dup_data_objects:
-                data_object_id_list.append(dup_data_object_obj.object_id)
+#             dup_data_objects = DupObjects.objects.filter(dup_id=dup)
+#             for dup_data_object_obj in dup_data_objects:
+#                 data_object_id_list.append(dup_data_object_obj.object_id)
 
-        for dtp in dtps:
-            dtp_studies = DtpStudies.objects.filter(dtp_id=dtp)
-            for dtp_study_obj in dtp_studies:
-                study_id_list.append(dtp_study_obj.study_id)
-            dtp_data_objects = DtpObjects.objects.filter(dtp_id=dtp)
-            for dtp_data_object_obj in dtp_data_objects:
-                data_object_id_list.append(dtp_data_object_obj.object_id)
+#         for dtp in dtps:
+#             dtp_studies = DtpStudies.objects.filter(dtp_id=dtp)
+#             for dtp_study_obj in dtp_studies:
+#                 study_id_list.append(dtp_study_obj.study_id)
+#             dtp_data_objects = DtpObjects.objects.filter(dtp_id=dtp)
+#             for dtp_data_object_obj in dtp_data_objects:
+#                 data_object_id_list.append(dtp_data_object_obj.object_id)
 
-        studies_id_set = set(study_id_list)
-        data_objects_id_set = set(data_object_id_list)
+#         studies_id_set = set(study_id_list)
+#         data_objects_id_set = set(data_object_id_list)
 
-        studies = Studies.objects.filter(id__in=studies_id_set)
-        data_objects = DataObjects.objects.filter(id__in=data_objects_id_set)
+#         studies = Studies.objects.filter(id__in=studies_id_set)
+#         data_objects = DataObjects.objects.filter(id__in=data_objects_id_set)
 
-        data = {
-            "studies": studies,
-            "data_objects": data_objects,
-            "dups": dups,
-            "dtps": dtps
-        }
+#         data = {
+#             "studies": studies,
+#             "data_objects": data_objects,
+#             "dups": dups,
+#             "dtps": dtps
+#         }
 
-        return Response(data,  status=200)
+#         return Response(data,  status=200)
 
 
 class UsersByOrganisation(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [IsSuperUser]
 
     def get(self, request):
         org_id = self.request.query_params.get('orgId')
@@ -145,7 +172,7 @@ class UsersByOrganisation(APIView):
 
 class UsersByName(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [IsSuperUser]
 
     def get(self, request):
         name = self.request.query_params.get('name')
@@ -163,7 +190,7 @@ class UsersByName(APIView):
 
 class UsersByNameAndOrganisation(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [IsSuperUser]
 
     def get(self, request):
         name = self.request.query_params.get('name')
@@ -190,47 +217,47 @@ class UsersByNameAndOrganisation(APIView):
         return Response({'count': result.count(), 'results': serializer.data, 'statusCode': status.HTTP_200_OK})
 
 
-class UserByEmail(APIView):
-    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+# class UserByEmail(APIView):
+#     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
+#     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request):
-        email = self.request.query_params.get('email')
+#     def get(self, request):
+#         email = self.request.query_params.get('email')
 
-        if email is None:
-            return Response({'error': "email param is missing"})
+#         if email is None:
+#             return Response({'error': "email param is missing"})
 
-        user_check = Users.objects.filter(email=email)
-        if not user_check.exists():
-            return Response({'error': f'User with the Email {email} does not exist'})
+#         user_check = Users.objects.filter(email=email)
+#         if not user_check.exists():
+#             return Response({'error': f'User with the Email {email} does not exist'})
 
-        user_data = Users.objects.get(email=email)
+#         user_data = Users.objects.get(email=email)
 
-        serializer = UsersSerializer(user_data)
+#         serializer = UsersSerializer(user_data)
 
-        return Response(serializer.data)
+#         return Response(serializer.data)
 
 
-class UserByLsAaiId(APIView):
-    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+# class UserByLsAaiId(APIView):
+#     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
+#     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request):
-        ls_aai_id = self.request.query_params.get('id')
+#     def get(self, request):
+#         ls_aai_id = self.request.query_params.get('id')
 
-        if ls_aai_id is None:
-            return Response({'error': "id param is missing"})
+#         if ls_aai_id is None:
+#             return Response({'error': "id param is missing"})
 
-        user_check = UserProfiles.objects.filter(ls_aai_id=ls_aai_id)
-        if not user_check.exists():
-            return Response({'error': f'User with the LS AAI Id {ls_aai_id} does not exist'})
+#         user_check = UserProfiles.objects.filter(ls_aai_id=ls_aai_id)
+#         if not user_check.exists():
+#             return Response({'error': f'User with the LS AAI Id {ls_aai_id} does not exist'})
 
-        user_profile = UserProfiles.objects.get(ls_aai_id=ls_aai_id)
-        user_data = Users.objects.get(id=user_profile.user.id)
+#         user_profile = UserProfiles.objects.get(ls_aai_id=ls_aai_id)
+#         user_data = Users.objects.get(id=user_profile.user.id)
 
-        serializer = UsersSerializer(user_data)
+#         serializer = UsersSerializer(user_data)
 
-        return Response(serializer.data)
+#         return Response(serializer.data)
 
 
 class UserAccessData(APIView):

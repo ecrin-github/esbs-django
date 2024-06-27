@@ -4,6 +4,7 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from app.permissions import WriteOnlyForOwnOrg, IsSuperUser, ReadOnly
 from mdm.views.common.mixins import MultipleFieldLookupMixin
 from mdm.models.data_object.data_objects import DataObjects
 from mdm.models.data_object.object_contributors import ObjectContributors
@@ -40,7 +41,7 @@ class DataObjectsList(MultipleFieldLookupMixin, viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DataObjects.objects.all()
     serializer_class = DataObjectsOutputSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [IsSuperUser | WriteOnlyForOwnOrg | ReadOnly]
     lookup_fields = ['pk', 'sd_oid']
 
     def get_serializer_class(self):
@@ -53,7 +54,7 @@ class DataObjectsList(MultipleFieldLookupMixin, viewsets.ModelViewSet):
 
 class ObjectNextId(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated & ReadOnly]
 
     def get(self, request, format=None):
         # Get next id, incremented after every insert in the DB
@@ -67,7 +68,7 @@ class ObjectContributorsList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = ObjectContributors.objects.all()
     serializer_class = ObjectContributorsOutputSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [IsSuperUser | WriteOnlyForOwnOrg | ReadOnly]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -89,7 +90,7 @@ class ObjectDatasetsList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = ObjectDatasets.objects.all()
     serializer_class = ObjectDatasetsOutputSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [IsSuperUser | WriteOnlyForOwnOrg | ReadOnly]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -111,7 +112,7 @@ class ObjectDatesList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = ObjectDates.objects.all()
     serializer_class = ObjectDatesOutputSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [IsSuperUser | WriteOnlyForOwnOrg | ReadOnly]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -133,7 +134,7 @@ class ObjectDescriptionsList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = ObjectDescriptions.objects.all()
     serializer_class = ObjectDescriptionsOutputSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [IsSuperUser | WriteOnlyForOwnOrg | ReadOnly]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -155,7 +156,7 @@ class ObjectIdentifiersList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = ObjectIdentifiers.objects.all()
     serializer_class = ObjectIdentifiersOutputSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [IsSuperUser | WriteOnlyForOwnOrg | ReadOnly]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -177,7 +178,7 @@ class ObjectInstancesList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = ObjectInstances.objects.all()
     serializer_class = ObjectInstancesOutputSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [IsSuperUser | WriteOnlyForOwnOrg | ReadOnly]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -199,7 +200,7 @@ class ObjectRelationshipsList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = ObjectRelationships.objects.all()
     serializer_class = ObjectRelationshipsOutputSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [IsSuperUser | WriteOnlyForOwnOrg | ReadOnly]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -221,7 +222,7 @@ class ObjectRightsList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = ObjectRights.objects.all()
     serializer_class = ObjectRightsOutputSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [IsSuperUser | WriteOnlyForOwnOrg | ReadOnly]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -243,7 +244,7 @@ class ObjectTitlesList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = ObjectTitles.objects.all()
     serializer_class = ObjectTitlesOutputSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [IsSuperUser | WriteOnlyForOwnOrg | ReadOnly]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -265,7 +266,7 @@ class ObjectTopicsList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = ObjectTopics.objects.all()
     serializer_class = ObjectTopicsOutputSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [IsSuperUser | WriteOnlyForOwnOrg | ReadOnly]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:

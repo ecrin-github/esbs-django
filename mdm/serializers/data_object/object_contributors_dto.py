@@ -4,7 +4,7 @@ from context.serializers.contributor_types_dto import ContributorTypesOutputSeri
 from general.serializers.organisations_dto import OrganisationsOutputSerializer
 from mdm.models.data_object.object_contributors import ObjectContributors
 from users.models import Users
-from users.serializers.users_dto import UsersSerializer
+from users.serializers.users_dto import UsersSerializer, UsersLimitedSerializer
 
 
 class ObjectContributorsInputSerializer(serializers.ModelSerializer):
@@ -20,10 +20,11 @@ class ObjectContributorsInputSerializer(serializers.ModelSerializer):
 
 class ObjectContributorsOutputSerializer(serializers.ModelSerializer):
     contributor_type = ContributorTypesOutputSerializer(many=False, read_only=True)
-    person = UsersSerializer(many=False, read_only=True)
+    person = UsersLimitedSerializer(many=False, read_only=True)
     organisation = OrganisationsOutputSerializer(many=False, read_only=True)
-    last_edited_by = UsersSerializer(many=False, read_only=True)
+    # last_edited_by = UsersSerializer(many=False, read_only=True)
 
     class Meta:
         model = ObjectContributors
-        fields = '__all__'
+        # fields = '__all__'
+        exclude = ['last_edited_by']

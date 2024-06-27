@@ -23,8 +23,9 @@ class StudyTitlesOutputSerializer(serializers.ModelSerializer):
     title_type = TitleTypesOutputSerializer(many=False, read_only=True)
     lang_code = LanguageCodesOutputSerializer(many=False, read_only=True)
     lang_usage = LanguageUsageTypesOutputSerializer(many=False, read_only=True)
-    last_edited_by = UsersSerializer(many=False, read_only=True)
+    # last_edited_by = UsersSerializer(many=False, read_only=True)
 
     class Meta:
         model = StudyTitles
-        fields = '__all__'
+        # fields = '__all__'
+        exclude = ['last_edited_by']

@@ -17,8 +17,9 @@ class ObjectRightsInputSerializer(serializers.ModelSerializer):
 
 
 class ObjectRightsOutputSerializer(serializers.ModelSerializer):
-    last_edited_by = UsersSerializer(many=False, read_only=True)
+    # last_edited_by = UsersSerializer(many=False, read_only=True)
 
     class Meta:
         model = ObjectRights
-        fields = '__all__'
+        # fields = '__all__'
+        exclude = ['last_edited_by']
