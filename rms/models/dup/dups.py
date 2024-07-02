@@ -18,13 +18,12 @@ class DataUseProcesses(models.Model):
     status = models.ForeignKey(DupStatusTypes, models.DO_NOTHING, db_column='status_id',
                                related_name='dup_status_id', default=None, null=True, blank=True,
                                db_constraint=IS_CONTEXT_DB_CONSTRAINT)
-    initial_contact_date = models.DateTimeField(blank=True, null=True)
-    set_up_completed_date = models.DateTimeField(blank=True, null=True)
+    set_up_start_date = models.DateTimeField(blank=True, null=True)
+    set_up_complete_date = models.DateTimeField(blank=True, null=True)
     prereqs_met_date = models.DateTimeField(blank=True, null=True)
     dua_agreed_date = models.DateTimeField(blank=True, null=True)
     availability_requested_date = models.DateTimeField(blank=True, null=True)
-    availability_confirmed_date = models.DateTimeField(blank=True, null=True)
-    access_confirmed_date = models.DateTimeField(blank=True, null=True)
+    availability_expiry_date = models.DateTimeField(blank=True, null=True)
     created_on = models.DateTimeField(default=datetime.datetime.utcnow)
 
     class Meta:
