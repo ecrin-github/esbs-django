@@ -2,7 +2,7 @@ from mozilla_django_oidc.contrib.drf import OIDCAuthentication
 from rest_framework import viewsets, permissions
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 
-from app.permissions import ReadOnlyForOwnOrg, IsSuperUser
+from app.permissions import ReadOnly, ReadOnlyForOwnOrg, IsSuperUser
 from rms.models.dtp.dtas import DataTransferAccesses
 from rms.models.dtp.dtp_datasets import DtpDatasets
 from rms.models.dtp.dtp_notes import DtpNotes
@@ -180,9 +180,27 @@ class DataTransferProcessesList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DataTransferProcesses.objects.all()
     serializer_class = DataTransferProcessesOutputSerializer
-    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnly)]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
             return DataTransferProcessesInputSerializer
         return super().get_serializer_class()
+    
+    def get_queryset(self, *args, **kwargs):
+        user = self.request.user
+        if user.is_superuser:
+            return (
+                super()
+                .get_queryset(*args, **kwargs)
+            )
+        else:
+            if user.user_profile and user.user_profile.organisation:
+                organisation = user.user_profile.organisation.id
+            else:
+                organisation = None
+            return (
+                super()
+                .get_queryset(*args, **kwargs)
+                .filter(organisation=organisation)
+            )

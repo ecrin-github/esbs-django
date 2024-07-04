@@ -26,13 +26,6 @@ class ReadOnlyForOwnOrg(BasePermission):
 
     def has_object_permission(self, request, view, obj):
         if request.method == 'GET':
-            # For DTP and DUP objects
-            try:
-                if request.user.user_profile.organisation.id == obj.organisation.id:
-                    return True
-            except AttributeError:
-                pass
-
             # For DTP sub-objects
             try:
                 if request.user.user_profile.organisation.id == obj.dtp_id.organisation.id:
