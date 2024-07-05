@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from app.permissions import IsSuperUser, WriteOnlyForSelf
 from general.models import Organisations
 from mdm.models import Studies, DataObjects, ObjectInstances
-from rms.models import DataUseProcesses, DataTransferProcesses, DupStudies, DupObjects, DtpStudies, DtpObjects
+from rms.models import DataUseProcesses, DataTransferProcesses, DupStudies, DupObjects, DtpStudies, DtpObjects, DtpPeople
 from users.models.profiles import UserProfiles
 from users.models.users import Users
 from users.serializers.profiles_dto import UserProfilesOutputSerializer, UserProfilesInputSerializer
@@ -273,20 +273,12 @@ class UserAccessData(APIView):
         if not user_profile.exists():
             return Response(status=404, data="User profile not found")
 
-        org_id = user_profile[0].organisation
-
-        dups = DataUseProcesses.objects.filter(organisation=org_id)
-        dtps = DataTransferProcesses.objects.filter(organisation=org_id)
+        dtp_users = DtpPeople.objects.filter(person=userId)
 
         study_id_list = []
 
-        for dup in dups:
-            dup_studies = DupStudies.objects.filter(dup_id=dup)
-            for dup_study_obj in dup_studies:
-                study_id_list.append(dup_study_obj.study.id)
-
-        for dtp in dtps:
-            dtp_studies = DtpStudies.objects.filter(dtp_id=dtp)
+        for dtp_user in dtp_users:
+            dtp_studies = DtpStudies.objects.filter(dtp_id=dtp_user.dtp_id)
             for dtp_study_obj in dtp_studies:
                 study_id_list.append(dtp_study_obj.study.id)
 
