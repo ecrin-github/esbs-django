@@ -39,64 +39,69 @@ class CreateUserSerializer(serializers.Serializer):
     organisation = serializers.CharField(required=False, max_length=150, allow_blank=True, default='')
     is_superuser = serializers.BooleanField(required=False, default=False)
 
-    def create(self, validated_data):
-        user_dto = CreateUserDto(**validated_data)
-
-        user_check = Users.objects.filter(email=user_dto.email)
-
-        if user_check.exists():
-            if user_dto.sub:
-                user_data = Users.objects.get(email=user_dto.email)
-                user_data.is_active = True
-                user_data.save()
-                user_profile_data_check = UserProfiles.objects.filter(user=user_data)
-                if user_profile_data_check.exists():
-                    user_profile_data = UserProfiles.objects.get(user=user_data)
-                    user_profile_data.ls_aai_id = user_dto.sub
-                    user_profile_data.save()
-                else:
-                    user_profile_data = UserProfiles(user=user_data, ls_aai_id=user_dto.sub)
-                    user_profile_data.save()
-                return CreateUserDto(**validated_data)
-            else:
-                raise BadRequest()
-
-        password = ''.join(random.choices(string.ascii_uppercase + string.digits, k=7))
-
+    def update_user_data(self, user_data, user_dto):
+        user_data.is_active = (user_dto.sub != '')
+        user_data.email = user_dto.email
+        user_data.username = user_dto.email
         if user_dto.first_name or user_dto.last_name:
-            user = Users(username=user_dto.email, email=user_dto.email, first_name=user_dto.first_name,
-                         last_name=user_dto.last_name, is_superuser=user_dto.is_superuser, is_active=(user_dto.sub != ''))
+            user_data.first_name = user_dto.first_name
+            user_data.last_name = user_dto.last_name
         else:
-            user = Users(username=user_dto.email, email=user_dto.email, last_name=user_dto.family_name,
-                     first_name=user_dto.name.split(' ')[0], is_superuser=user_dto.is_superuser, is_active=(user_dto.sub != ''))
-
-        email_split = user_dto.email.split('@')
-        email_domain = email_split[1]
-        if 'ecrin' in email_domain or 'ecrin.org' in email_domain or 'tsd' in email_domain:
-            user.is_superuser = True
-            user.is_staff = True
-
-        user.set_password(password)
-        user.save()
-
-        added = False
+            user_data.first_name = user_dto.name.split(' ')[0]
+            user_data.last_name = user_dto.family_name
+        user_data.save()
+    
+    def update_user_profile_data(self, user_profile_data, user_dto):
         if user_dto.organisation:
             organisation = Organisations.objects.get(id=user_dto.organisation)
             if organisation:
-                user_profile = UserProfiles(user=user, ls_aai_id=user_dto.sub, organisation=Organisations.objects.get(id=user_dto.organisation),
-                                    prof_title=user_dto.prof_title, designation=user_dto.designation)
-                added = True
-        if not added:
-            user_profile = UserProfiles(user=user, ls_aai_id=user_dto.sub, prof_title=user_dto.prof_title, designation=user_dto.designation)
-        
-        user_profile.save()
+                user_profile_data.organisation = organisation  
+        if user_dto.prof_title:   
+            user_profile_data.prof_title = user_dto.prof_title
+        if user_dto.designation:
+            user_profile_data.designation = user_dto.designation
+        user_profile_data.save()
 
-        return CreateUserDto(**validated_data)
+    def create(self, validated_data):
+        user_dto = CreateUserDto(**validated_data)
+
+        user_profile_data_check = UserProfiles.objects.filter(ls_aai_id=user_dto.sub)
+        if user_profile_data_check.exists():
+            # Note: if both User with email and UserProfile with LS AAI ID exist, we use the User associated with the UserProfile
+            user_profile_data = UserProfiles.objects.get(ls_aai_id=user_dto.sub)
+            if user_profile_data.user:
+                # Update user data
+                if user_profile_data.user.id:
+                    user_data = Users.objects.get(id=user_profile_data.user.id)
+                    if user_data:
+                        self.update_user_data(user_data, user_dto)
+            else:
+                raise BadRequest()
+            self.update_user_profile_data(user_profile_data, user_dto)
+        else:
+            user_check_email = Users.objects.filter(email=user_dto.email)
+            if user_check_email.exists():
+                # Update user data
+                user_data = Users.objects.get(email=user_dto.email)
+                self.update_user_data(user_data, user_dto)
+            else:
+                # Create user
+                user_data = Users(username=user_dto.email)
+                password = ''.join(random.choices(string.ascii_uppercase + string.digits, k=7))
+                user_data.set_password(password)
+                self.update_user_data(user_data, user_dto)
+
+            # Test to see if user profile exists and was created with user interface without ls aai id
+            user_profile_data_check = UserProfiles.objects.filter(user=user_data.id)
+            if user_profile_data_check.exists():
+                user_profile_data = UserProfiles.objects.get(user=user_data.id)
+                user_profile_data.ls_aai_id = user_dto.sub
+            else:
+                # Create user profile with user id
+                user_profile_data = UserProfiles(user=user_data, ls_aai_id=user_dto.sub)
+            self.update_user_profile_data(user_profile_data, user_dto)
+        return user_data
 
     def update(self, instance, validated_data):
-        instance.email = validated_data.get('email', instance.email)
-        instance.sub = validated_data.get('sub', instance.sub)
-        instance.name = validated_data.get('name', instance.name)
-        instance.family_name = validated_data.get('family_name', instance.family_name)
         instance.save()
         return instance

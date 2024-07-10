@@ -67,10 +67,9 @@ class UserView(viewsets.ModelViewSet):
             output_serializer = UsersSerializer(user)
             return Response(output_serializer.data)
         except BadRequest as e:
-            return JsonResponse({'statusCode': 400, 'message': 'Email address already exists in the Users database.'})
+            return JsonResponse({'statusCode': 400, 'message': 'User profile exists but cannot find associated user.'})
 
     def perform_create(self, serializer):
-        family_name_val = self.request.data.get("family_name")
         serializer.save()
 
 

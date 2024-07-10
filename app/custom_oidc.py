@@ -5,6 +5,8 @@ from rest_framework import authentication, exceptions
 from requests.exceptions import HTTPError
 from mozilla_django_oidc.utils import import_from_settings, parse_www_authenticate_header
 
+from users.models import UserProfiles
+
 
 class CustomAuthenticationBackend(OIDCAuthenticationBackend):
     def create_user(self, claims):
@@ -13,7 +15,7 @@ class CustomAuthenticationBackend(OIDCAuthenticationBackend):
             If nothing found matching the email, then try the username.
         """
         user = super(CustomAuthenticationBackend, self).create_user(claims)
-        user.first_name = claims.get('given_name', '')
+        user.first_name = claims.get('name', '').split(' ')[0]
         user.last_name = claims.get('family_name', '')
         user.email = claims.get('email')
         user.username = claims.get('email')
@@ -21,29 +23,35 @@ class CustomAuthenticationBackend(OIDCAuthenticationBackend):
         return user
 
     def filter_users_by_claims(self, claims):
-        """ Return all users matching the specified email.
-            If nothing found matching the email, then try the username
+        """ Attempting to match users by LS AAI ID first, then by email
         """
+        ls_aai_id = claims.get('sub')
         email = claims.get('email')
-        preferred_username = claims.get('email')
 
-        if not email:
-            return self.UserModel.objects.none()
-        users = self.UserModel.objects.filter(email__iexact=email)
+        users = None
 
-        if len(users) < 1:
-            if not preferred_username:
-                return self.UserModel.objects.none()
-            users = self.UserModel.objects.filter(username__iexact=preferred_username)
+        if ls_aai_id:
+            # Attempting to find user with ls_aai_id first (with user profiles)
+            user_profiles_check = UserProfiles.objects.filter(ls_aai_id=ls_aai_id)
+            if user_profiles_check.exists():
+                user_profile = UserProfiles.objects.get(ls_aai_id=ls_aai_id)
+                if user_profile.user and user_profile.user.id:
+                    # Finding the user associated to the found user profile
+                    users = self.UserModel.objects.filter(id=user_profile.user.id)
+            # Attempting to find user with email if no matching ls_aai_id in user profiles
+            if not (users and users.exists()):
+                if email:
+                    users = self.UserModel.objects.filter(email=email)
+
         return users
 
-    def update_user(self, user, claims):
-        user.first_name = claims.get('given_name', '')
-        user.last_name = claims.get('family_name', '')
-        user.email = claims.get('email')
-        user.username = claims.get('email')
-        user.save()
-        return user
+    # def update_user(self, user, claims):
+    #     user.first_name = claims.get('given_name', '')
+    #     user.last_name = claims.get('family_name', '')
+    #     user.email = claims.get('email')
+    #     user.username = claims.get('email')
+    #     user.save()
+    #     return user
 
 
 class CustomAuthentication(OIDCAuthentication):
