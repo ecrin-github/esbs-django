@@ -78,8 +78,8 @@ class DataObjectsOutputSerializer(serializers.ModelSerializer):
         model = DataObjects
         fields = ['id', 'sd_oid', 'display_title', 'version', 'doi', 'publication_year', 'access_details',
                   'access_details_url', 'url_last_checked', 'add_study_contributors',
-                  'add_study_topics', 'created_on', 'organisation',
-                  'doi_status', 'object_class', 'object_type', 'managing_org', 'lang_code', 'access_type',
+                  'add_study_topics', 'created_on', 'organisation', 'doi_status', 'object_class', 
+                  'object_type', 'managing_org', 'lang_code', 'access_type', 'embargo_expiry',
                   'object_contributors', 'object_datasets', 'object_dates', 'object_descriptions',
-                  'object_identifiers', 'object_instances', 'object_relationships', 'object_rights', 'object_titles',
-                  'object_topics', 'linked_study']
+                  'object_identifiers', 'object_instances', 'object_relationships', 'object_rights', 
+                  'object_titles', 'object_topics', 'linked_study']
