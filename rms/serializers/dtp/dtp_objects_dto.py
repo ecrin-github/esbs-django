@@ -4,7 +4,7 @@ from context.serializers.check_status_types_dto import CheckStatusTypesOutputSer
 from context.serializers.object_access_types_dto import ObjectAccessTypesOutputSerializer
 from rms.models.dtp.dtp_objects import DtpObjects
 from rms.serializers.dtp.dtp_people_dto import DtpPeopleOutputSerializer
-from mdm.serializers.data_object.data_objects_main_details_dto import ObjectMainDetailsSerializer
+from mdm.serializers.data_object.data_objects_dto import DataObjectsOutputSerializer
 
 
 class DtpObjectsInputSerializer(serializers.ModelSerializer):
@@ -19,7 +19,7 @@ class DtpObjectsOutputSerializer(serializers.ModelSerializer):
     access_check_by = DtpPeopleOutputSerializer(many=False, read_only=True)
     md_check_status = CheckStatusTypesOutputSerializer(many=False, read_only=True)
     md_check_by = DtpPeopleOutputSerializer(many=False, read_only=True)
-    data_object = ObjectMainDetailsSerializer(many=False, read_only=True)
+    data_object = DataObjectsOutputSerializer(many=False, read_only=True)
 
     class Meta:
         model = DtpObjects
