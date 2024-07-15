@@ -24,7 +24,6 @@ class DataUseProcesses(models.Model):
     dua_agreed_date = models.DateTimeField(blank=True, null=True)
     availability_requested_date = models.DateTimeField(blank=True, null=True)
     availability_expiry_date = models.DateTimeField(blank=True, null=True)
-    secondary_use_reason = models.TextField(blank=True, null=True)
     created_on = models.DateTimeField(default=datetime.datetime.utcnow)
 
     class Meta:
