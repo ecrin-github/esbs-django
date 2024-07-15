@@ -25,7 +25,7 @@ class UsersList(APIView):
     permission_classes = [permissions.AllowAny]
 
     def get(self, request, format=None):
-        user = None
+        serializer = None
         if "sub" in request.GET:
             sub = request.GET['sub']
             user_profile_check = UserProfiles.objects.filter(ls_aai_id=sub)
@@ -51,7 +51,7 @@ class UsersList(APIView):
                     return Response(status=404, data='Error: no organisation for user')
                 serializer = UsersLimitedSerializer(users, many=True)
 
-        if not user:
+        if not serializer:
             return Response(status=404, data="Requesting user not found")
         return Response({'count': len(serializer.data), 'results': serializer.data, 'statusCode': status.HTTP_200_OK})
 
