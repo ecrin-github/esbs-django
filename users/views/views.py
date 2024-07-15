@@ -22,27 +22,37 @@ from users.serializers.users_dto import UsersSerializer, CreateUserSerializer, U
 class UsersList(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = Users.objects.all()
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
     def get(self, request, format=None):
-        if not request.user.id:
+        user = None
+        if "sub" in request.GET:
+            sub = request.GET['sub']
+            user_profile_check = UserProfiles.objects.filter(ls_aai_id=sub)
+            if user_profile_check.exists():
+                user_profile = UserProfiles.objects.get(ls_aai_id=sub)
+                user_check = Users.objects.filter(id=user_profile.user.id)
+                if user_check.exists():
+                    user = Users.objects.get(id=user_profile.user.id)
+                    serializer = UsersSerializer(user, many=False)
+        elif request.user.id:
+            users = []
+            if request.user.is_superuser:
+                users = Users.objects.all()
+                serializer = UsersSerializer(users, many=True)
+            else:
+                try:
+                    users_subquery = Users.objects.raw("SELECT u.id as id FROM users u LEFT JOIN "
+                                                        + "user_profiles up ON u.id=up.user_id "
+                                                        + f"WHERE up.organisation_id='{request.user.user_profile.organisation.id}';")
+                    for user in users_subquery:
+                        users.append(user)
+                except AttributeError:
+                    return Response(status=404, data='Error: no organisation for user')
+                serializer = UsersLimitedSerializer(users, many=True)
+
+        if not user:
             return Response(status=404, data="Requesting user not found")
-
-        users = []
-        if request.user.is_superuser:
-            users = Users.objects.all()
-            serializer = UsersSerializer(users, many=True)
-        else:
-            try:
-                users_subquery = Users.objects.raw("SELECT u.id as id FROM users u LEFT JOIN "
-                                                    + "user_profiles up ON u.id=up.user_id "
-                                                    + f"WHERE up.organisation_id='{request.user.user_profile.organisation.id}';")
-                for user in users_subquery:
-                    users.append(user)
-            except AttributeError:
-                return Response(status=404, data='Error: no organisation for user')
-            serializer = UsersLimitedSerializer(users, many=True)
-
         return Response({'count': len(serializer.data), 'results': serializer.data, 'statusCode': status.HTTP_200_OK})
 
 
