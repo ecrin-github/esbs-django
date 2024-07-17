@@ -22,7 +22,6 @@ class ObjectInstancesInputSerializer(serializers.ModelSerializer):
 
 class ObjectInstancesOutputSerializer(serializers.ModelSerializer):
     instance_type = ObjectInstanceTypesOutputSerializer(many=False, read_only=True)
-    repository_org = OrganisationsOutputSerializer(many=False, read_only=True)
     resource_type = ResourceTypesOutputSerializer(many=False, read_only=True)
     resource_size_unit = SizeUnitsOutputSerializer(many=False, read_only=True)
     # last_edited_by = UsersSerializer(many=False, read_only=True)

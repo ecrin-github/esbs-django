@@ -313,8 +313,7 @@ class UserAccessData(APIView):
                                     "sdOid": data_object.sd_oid,
                                     "url": object_instance.url,
                                     "urlAccessible": object_instance.url_accessible,
-                                    "repositoryOrgId": object_instance.repository_org.id if object_instance.repository_org else '',
-                                    "repositoryOrg": object_instance.repository_org.default_name if object_instance.repository_org else '',
+                                    "repository": object_instance.repository,
                                 })
                         data_objects_response.append({
                             "objectId": data_object.id,

@@ -21,10 +21,7 @@ class ObjectInstances(models.Model):
     instance_type = models.ForeignKey(ObjectInstanceTypes, on_delete=models.CASCADE, db_index=True,
                                       related_name='object_instances_instance_type_id', default=None, null=True,
                                       blank=True, db_column='instance_type_id', db_constraint=IS_CONTEXT_DB_CONSTRAINT)
-    repository_org = models.ForeignKey(Organisations, on_delete=models.CASCADE, db_index=True,
-                                       related_name='object_instances_repository_org_id', default=None, null=True,
-                                       blank=True, db_column='repository_org_id',
-                                       db_constraint=IS_GENERAL_DB_CONSTRAINT)
+    repository = models.CharField(max_length=200, db_index=True, null=True, blank=True)
     url = models.URLField(max_length=2000, null=True, blank=True)
     url_accessible = models.BooleanField(default=False, null=True, blank=True)
     url_last_checked = models.DateTimeField(null=True, blank=True)
