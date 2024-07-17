@@ -66,7 +66,7 @@ class CreateUserSerializer(serializers.Serializer):
         user_dto = CreateUserDto(**validated_data)
 
         user_profile_data_check = UserProfiles.objects.filter(ls_aai_id=user_dto.sub)
-        if user_profile_data_check.exists():
+        if user_dto.sub and user_profile_data_check.exists():
             # Note: if both User with email and UserProfile with LS AAI ID exist, we use the User associated with the UserProfile
             user_profile_data = UserProfiles.objects.get(ls_aai_id=user_dto.sub)
             if user_profile_data.user:
