@@ -6,9 +6,10 @@ from mozilla_django_oidc.contrib.drf import OIDCAuthentication
 from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.generics import GenericAPIView
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 
-from app.permissions import IsSuperUser, ReadOnlyForOwnOrg, WriteOnlyForOwnOrg, ReadOnly
+from app.permissions import IsSuperUser, WriteOnlyForOwnOrg, ReadOnly
 from context.models.access_prereq_types import AccessPrereqTypes
 from context.models import TrialRegistries, StudyTypes, StudyStatuses, GenderEligibilityTypes, TimeUnits
 from context.serializers.access_prereq_types_dto import AccessPrereqTypesOutputSerializer
@@ -17,6 +18,7 @@ from general.models import Organisations
 from mdm.models import DataObjects, StudyContributors, Studies
 from mdm.serializers.data_object.data_objects_dto import DataObjectsOutputSerializer, DataObjectsLimitedOutputSerializer
 from mdm.serializers.study.studies_dto import StudiesLimitedOutputSerializer
+from mdm.views.common.mixins import GetAuthFilteringMixin
 from rms.models import DataTransferProcesses, DataUseProcesses, DtpObjects, DupObjects, DupStudies, DtpStudies
 from rms.models.dtp.dtp_prereqs import DtpPrereqs
 from rms.serializers.dtp.dtp_prereqs_dto import DtpPrereqsOutputSerializer
@@ -125,11 +127,14 @@ class MdrDataObjects(APIView):
         return Response(json_res)
 
 
-class DtpByOrg(APIView):
+class DtpByOrg(GetAuthFilteringMixin, GenericAPIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
+    queryset = DataTransferProcesses.objects.all()
+    object_class = DataTransferProcesses
+    serializer_class = DataTransferProcessesOutputSerializer
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnly)]
 
-    def get(self, request):
+    def get(self, request, *args, **kwargs):
         org_id = self.request.query_params.get('orgId')
 
         if org_id is None:
@@ -141,17 +146,20 @@ class DtpByOrg(APIView):
 
         org_data = Organisations.objects.get(id=org_id)
 
-        data = DataTransferProcesses.objects.filter(organisation=org_data)
-        serializer = DataTransferProcessesOutputSerializer(data, many=True)
+        data = self.get_queryset(*args, **kwargs).filter(organisation=org_data)
+        serializer = self.get_serializer_class()(data, many=True)
 
         return Response(serializer.data)
 
 
-class DupByOrg(APIView):
+class DupByOrg(GetAuthFilteringMixin, GenericAPIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
+    queryset = DataUseProcesses.objects.all()
+    object_class = DataUseProcesses
+    serializer_class = DataUseProcessesOutputSerializer
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnly)]
 
-    def get(self, request):
+    def get(self, request, *args, **kwargs):
         org_id = self.request.query_params.get('orgId')
 
         if org_id is None:
@@ -163,8 +171,8 @@ class DupByOrg(APIView):
 
         org_data = Organisations.objects.get(id=org_id)
 
-        data = DataUseProcesses.objects.filter(organisation=org_data)
-        serializer = DataUseProcessesOutputSerializer(data, many=True)
+        data = self.get_queryset(*args, **kwargs).filter(organisation=org_data)
+        serializer = self.get_serializer_class()(data, many=True)
 
         return Response(serializer.data)
 
@@ -211,8 +219,9 @@ class StudiesByOrg(APIView):
 
 
 class DtpObjectInvolvement(APIView):
+    # TODO: add GetAuthFilteringMixin here once dtp studies are added by dtp organisation
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnly)]
 
     def get(self, request):
         object_id = self.request.query_params.get('objectId')
@@ -230,8 +239,9 @@ class DtpObjectInvolvement(APIView):
 
 
 class DupObjectInvolvement(APIView):
+    # TODO: add GetAuthFilteringMixin here once dup studies are added by dup organisation
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnly)]
 
     def get(self, request):
         object_id = self.request.query_params.get('objectId')
@@ -249,8 +259,9 @@ class DupObjectInvolvement(APIView):
 
 
 class DupStudyInvolvement(APIView):
+    # TODO: add GetAuthFilteringMixin here once dup studies are added by dup organisation
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnly)]
 
     def get(self, request):
         study_id = self.request.query_params.get('studyId')
@@ -268,8 +279,9 @@ class DupStudyInvolvement(APIView):
 
 
 class DtpStudyInvolvement(APIView):
+    # TODO: add GetAuthFilteringMixin here once dtp studies are added by dtp organisation
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnly)]
 
     def get(self, request):
         study_id = self.request.query_params.get('studyId')
@@ -290,14 +302,17 @@ class DtpStudyInvolvement(APIView):
             })
 
 
-class DupPrereqs(APIView):
+class DupPrereqs(GetAuthFilteringMixin, GenericAPIView):
     # Fetches prereqs from DTP prereqs table
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticated & ReadOnlyForOwnOrg]
+    queryset = DtpPrereqs.objects.all()
+    object_class = DtpPrereqs
+    serializer_class = DtpPrereqsOutputSerializer
+    permission_classes = [permissions.IsAuthenticated & ReadOnly]
 
-    def get(self, request):
-        dtp_prereqs = DtpPrereqs.objects.all()
-        serialized_data = DtpPrereqsOutputSerializer(dtp_prereqs, many=True)
+    def get(self, request, *args, **kwargs):
+        dtp_prereqs = self.get_queryset(*args, **kwargs)
+        serialized_data = self.get_serializer_class()(dtp_prereqs, many=True)
 
         return Response({'data': serialized_data.data})
 
@@ -333,7 +348,7 @@ class MultiStudiesObjects(APIView):
 
 class DtpStudiesObjectsInvolvements(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
+    permission_classes = [IsSuperUser]
 
     def get(self, request, dtpId, format=None):
         if dtpId is None:
@@ -380,7 +395,7 @@ class DtpStudiesObjectsInvolvements(APIView):
 
 class DupStudiesObjectsInvolvements(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
+    permission_classes = [IsSuperUser]
 
     def get(self, request, dupId, format=None):
         if dupId is None:
@@ -425,62 +440,62 @@ class DupStudiesObjectsInvolvements(APIView):
         return Response(data)
 
 
-class DtpDupStudiesObjectsInvolvements(APIView):
-    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
+# class DtpDupStudiesObjectsInvolvements(APIView):
+#     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
+#     permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnly)]
 
-    def get(self, request, dtpId, dupId, format=None):
-        if dtpId is None:
-            return Response({'error': "dtpId param is missing"})
+#     def get(self, request, dtpId, dupId, format=None):
+#         if dtpId is None:
+#             return Response({'error': "dtpId param is missing"})
 
-        dtp_check = DataTransferProcesses.objects.filter(id=dtpId)
-        if not dtp_check.exists():
-            return Response({'error': f"Data transfer process with the ID {dtpId} does not exist."})
+#         dtp_check = DataTransferProcesses.objects.filter(id=dtpId)
+#         if not dtp_check.exists():
+#             return Response({'error': f"Data transfer process with the ID {dtpId} does not exist."})
 
-        dtp = DataTransferProcesses.objects.get(id=dtpId)
+#         dtp = DataTransferProcesses.objects.get(id=dtpId)
 
-        if dupId is None:
-            return Response({'error': "dupId param is missing"})
+#         if dupId is None:
+#             return Response({'error': "dupId param is missing"})
 
-        dup_check = DataUseProcesses.objects.filter(id=dupId)
-        if not dup_check.exists():
-            return Response({'error': f"Data use process with the ID {dupId} does not exist."})
+#         dup_check = DataUseProcesses.objects.filter(id=dupId)
+#         if not dup_check.exists():
+#             return Response({'error': f"Data use process with the ID {dupId} does not exist."})
 
-        dup = DataUseProcesses.objects.get(id=dupId)
+#         dup = DataUseProcesses.objects.get(id=dupId)
 
-        study_id = self.request.query_params.get('studyId')
+#         study_id = self.request.query_params.get('studyId')
 
-        if study_id is None:
-            return Response({'error': "studyId param is missing"})
+#         if study_id is None:
+#             return Response({'error': "studyId param is missing"})
 
-        study_check = Studies.objects.filter(id=study_id)
-        if not study_check.exists():
-            return Response({'error': f"Study with the ID {study_id} does not exist."})
-        study = Studies.objects.get(id=study_id)
+#         study_check = Studies.objects.filter(id=study_id)
+#         if not study_check.exists():
+#             return Response({'error': f"Study with the ID {study_id} does not exist."})
+#         study = Studies.objects.get(id=study_id)
 
-        dtp_studies_check = DtpStudies.objects.filter(study_id=study, dtp_id=dtp)
-        dup_studies_check = DupStudies.objects.filter(study_id=study, dup_id=dup)
+#         dtp_studies_check = DtpStudies.objects.filter(study_id=study, dtp_id=dtp)
+#         dup_studies_check = DupStudies.objects.filter(study_id=study, dup_id=dup)
 
-        data = {
-            "DtpTotal": dtp_studies_check.count(),
-            "DupTotal": dup_studies_check.count(),
-        }
+#         data = {
+#             "DtpTotal": dtp_studies_check.count(),
+#             "DupTotal": dup_studies_check.count(),
+#         }
 
-        study_objects_check = DataObjects.objects.filter(linked_study=study)
-        if not study_objects_check.exists():
-            return Response(data)
+#         study_objects_check = DataObjects.objects.filter(linked_study=study)
+#         if not study_objects_check.exists():
+#             return Response(data)
 
-        for rec in study_objects_check:
-            data_obj = DataObjects.objects.get(id=rec.id)
-            dtp_objects_check = DtpObjects.objects.filter(data_object=data_obj, dtp_id=dtp)
-            dup_objects_check = DupObjects.objects.filter(data_object=data_obj, dup_id=dup)
-            if dup_objects_check.exists():
-                data['DupTotal'] += dup_objects_check.count()
+#         for rec in study_objects_check:
+#             data_obj = DataObjects.objects.get(id=rec.id)
+#             dtp_objects_check = DtpObjects.objects.filter(data_object=data_obj, dtp_id=dtp)
+#             dup_objects_check = DupObjects.objects.filter(data_object=data_obj, dup_id=dup)
+#             if dup_objects_check.exists():
+#                 data['DupTotal'] += dup_objects_check.count()
 
-            if dtp_objects_check.exists():
-                data['DtpTotal'] += dtp_objects_check.count()
+#             if dtp_objects_check.exists():
+#                 data['DtpTotal'] += dtp_objects_check.count()
 
-        return Response(data)
+#         return Response(data)
 
 
 class NewMdrStudies(APIView):
@@ -632,36 +647,36 @@ class DataObjectsByTitle(APIView):
         return Response(serializer.data)
 
 
-class DtpByTitle(APIView):
-    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
+# class DtpByTitle(APIView):
+#     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
+#     permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnly)]
 
-    def get(self, request):
-        title_query_string = self.request.query_params.get('title')
+#     def get(self, request):
+#         title_query_string = self.request.query_params.get('title')
 
-        if title_query_string is None:
-            return Response({'error': "title param is missing"})
+#         if title_query_string is None:
+#             return Response({'error': "title param is missing"})
 
-        dtps = DataTransferProcesses.objects.filter(display_name__icontains=title_query_string)
-        serializer = DataTransferProcessesOutputSerializer(dtps, many=True)
+#         dtps = DataTransferProcesses.objects.filter(display_name__icontains=title_query_string)
+#         serializer = DataTransferProcessesOutputSerializer(dtps, many=True)
 
-        return Response(serializer.data)
+#         return Response(serializer.data)
 
 
-class DupByTitle(APIView):
-    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
+# class DupByTitle(APIView):
+#     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
+#     permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnly)]
 
-    def get(self, request):
-        title_query_string = self.request.query_params.get('title')
+#     def get(self, request):
+#         title_query_string = self.request.query_params.get('title')
 
-        if title_query_string is None:
-            return Response({'error': "title param is missing"})
+#         if title_query_string is None:
+#             return Response({'error': "title param is missing"})
 
-        dups = DataUseProcesses.objects.filter(display_name__icontains=title_query_string)
-        serializer = DataUseProcessesOutputSerializer(dups, many=True)
+#         dups = DataUseProcesses.objects.filter(display_name__icontains=title_query_string)
+#         serializer = DataUseProcessesOutputSerializer(dups, many=True)
 
-        return Response(serializer.data)
+#         return Response(serializer.data)
 
 
 class StudiesByTitleAndOrg(APIView):
@@ -716,53 +731,53 @@ class DataObjectsByTitleAndOrg(APIView):
         return Response(serializer.data)
 
 
-class DtpByTitleAndOrg(APIView):
-    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
+# class DtpByTitleAndOrg(APIView):
+#     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
+#     permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnly)]
 
-    def get(self, request):
-        title_query_string = self.request.query_params.get('title')
-        org_id = self.request.query_params.get('orgId')
+#     def get(self, request):
+#         title_query_string = self.request.query_params.get('title')
+#         org_id = self.request.query_params.get('orgId')
 
-        if org_id is None:
-            return Response({'error': 'orgId param is missing'})
+#         if org_id is None:
+#             return Response({'error': 'orgId param is missing'})
 
-        org_check = Organisations.objects.filter(id=org_id)
-        if not org_check.exists():
-            return Response({'error': f'Organisation with the ID {org_id} does not exist'})
+#         org_check = Organisations.objects.filter(id=org_id)
+#         if not org_check.exists():
+#             return Response({'error': f'Organisation with the ID {org_id} does not exist'})
 
-        org_data = Organisations.objects.get(id=org_id)
+#         org_data = Organisations.objects.get(id=org_id)
 
-        if title_query_string is None:
-            return Response({'error': "title param is missing"})
+#         if title_query_string is None:
+#             return Response({'error': "title param is missing"})
 
-        dtps = DataTransferProcesses.objects.filter(display_name__icontains=title_query_string, organisation=org_data)
-        serializer = DataTransferProcessesOutputSerializer(dtps, many=True)
+#         dtps = DataTransferProcesses.objects.filter(display_name__icontains=title_query_string, organisation=org_data)
+#         serializer = DataTransferProcessesOutputSerializer(dtps, many=True)
 
-        return Response(serializer.data)
+#         return Response(serializer.data)
 
 
-class DupByTitleAndOrg(APIView):
-    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
+# class DupByTitleAndOrg(APIView):
+#     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
+#     permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnly)]
 
-    def get(self, request):
-        title_query_string = self.request.query_params.get('title')
-        org_id = self.request.query_params.get('orgId')
+#     def get(self, request):
+#         title_query_string = self.request.query_params.get('title')
+#         org_id = self.request.query_params.get('orgId')
 
-        if org_id is None:
-            return Response({'error': 'orgId param is missing'})
+#         if org_id is None:
+#             return Response({'error': 'orgId param is missing'})
 
-        org_check = Organisations.objects.filter(id=org_id)
-        if not org_check.exists():
-            return Response({'error': f'Organisation with the ID {org_id} does not exist'})
+#         org_check = Organisations.objects.filter(id=org_id)
+#         if not org_check.exists():
+#             return Response({'error': f'Organisation with the ID {org_id} does not exist'})
 
-        org_data = Organisations.objects.get(id=org_id)
+#         org_data = Organisations.objects.get(id=org_id)
 
-        if title_query_string is None:
-            return Response({'error': "title param is missing"})
+#         if title_query_string is None:
+#             return Response({'error': "title param is missing"})
 
-        dups = DataUseProcesses.objects.filter(display_name__icontains=title_query_string, organisation=org_data)
-        serializer = DataUseProcessesOutputSerializer(dups, many=True)
+#         dups = DataUseProcesses.objects.filter(display_name__icontains=title_query_string, organisation=org_data)
+#         serializer = DataUseProcessesOutputSerializer(dups, many=True)
 
-        return Response(serializer.data)
+#         return Response(serializer.data)

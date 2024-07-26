@@ -256,9 +256,7 @@ urlpatterns = [
     path('studies/<uuid:pk>', studies_detail),
     path('studies/by-title-and-organisation', StudiesByTitleAndOrg.as_view()),
     path('studies/by-title', StudiesByTitle.as_view()),
-    path('studies/mdr/data', MdrStudiesData.as_view()),
     path('studies/mdr', MdrStudies.as_view()),
-    path('studies/new-mdr', NewMdrStudies.as_view()),
 
     path('studies/<uuid:studyId>/study-contributors', study_contributors_list),
     path('studies/<uuid:studyId>/study-contributors/<uuid:pk>', study_contributors_detail),
@@ -296,11 +294,11 @@ urlpatterns = [
 
     path('dtp/<uuid:dtpId>/study-involvement', DtpStudiesObjectsInvolvements.as_view()),
     path('dup/<uuid:dupId>/study-involvement', DupStudiesObjectsInvolvements.as_view()),
-    path('dtp/<uuid:dtpId>/dup/<uuid:dupId>/study-involvement', DtpDupStudiesObjectsInvolvements.as_view()),
+    # path('dtp/<uuid:dtpId>/dup/<uuid:dupId>/study-involvement', DtpDupStudiesObjectsInvolvements.as_view()),
 
-    path('dtp/by-title', DtpByTitle.as_view()),
-    path('dup/by-title', DupByTitle.as_view()),
+    # path('dtp/by-title', DtpByTitle.as_view()),
+    # path('dup/by-title', DupByTitle.as_view()),
 
-    path('dtp/by-title-and-organisation', DtpByTitleAndOrg.as_view()),
-    path('dup/by-title-and-organisation', DupByTitleAndOrg.as_view()),
+    # path('dtp/by-title-and-organisation', DtpByTitleAndOrg.as_view()),
+    # path('dup/by-title-and-organisation', DupByTitleAndOrg.as_view()),
 ]

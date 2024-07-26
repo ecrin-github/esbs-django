@@ -2,7 +2,8 @@ from mozilla_django_oidc.contrib.drf import OIDCAuthentication
 from rest_framework import viewsets, permissions
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 
-from app.permissions import ReadOnly, ReadOnlyForOwnOrg, IsSuperUser
+from app.permissions import ReadOnly, IsSuperUser
+from mdm.views.common.mixins import GetAuthFilteringMixin
 from rms.models.dtp.dtas import DataTransferAccesses
 from rms.models.dtp.dtp_datasets import DtpDatasets
 from rms.models.dtp.dtp_notes import DtpNotes
@@ -22,11 +23,12 @@ from rms.serializers.dtp.dtps_dto import DataTransferProcessesOutputSerializer, 
     DataTransferProcessesDetailsOutputSerializer, DataTransferProcessesInputSerializer
 
 
-class DataTransferAccessesList(viewsets.ModelViewSet):
+class DataTransferAccessesList(GetAuthFilteringMixin, viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DataTransferAccesses.objects.all()
+    object_class = DataTransferAccesses
     serializer_class = DataTransferAccessesOutputSerializer
-    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnly)]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -34,9 +36,6 @@ class DataTransferAccessesList(viewsets.ModelViewSet):
         return super().get_serializer_class()
 
     def get_queryset(self, *args, **kwargs):
-        if getattr(self, 'swagger_fake_view', False):
-            # queryset just for schema generation metadata
-            return DataTransferAccesses.objects.none()
         return (
             super()
             .get_queryset(*args, **kwargs)
@@ -44,11 +43,12 @@ class DataTransferAccessesList(viewsets.ModelViewSet):
         )
 
 
-class DtpDatasetsList(viewsets.ModelViewSet):
+class DtpDatasetsList(GetAuthFilteringMixin, viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DtpDatasets.objects.all()
+    object_class = DtpDatasets
     serializer_class = DtpDatasetsOutputSerializer
-    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnly)]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -56,9 +56,6 @@ class DtpDatasetsList(viewsets.ModelViewSet):
         return super().get_serializer_class()
 
     def get_queryset(self, *args, **kwargs):
-        if getattr(self, 'swagger_fake_view', False):
-            # queryset just for schema generation metadata
-            return DtpDatasets.objects.none()
         return (
             super()
             .get_queryset(*args, **kwargs)
@@ -66,11 +63,12 @@ class DtpDatasetsList(viewsets.ModelViewSet):
         )
 
 
-class DtpNotesList(viewsets.ModelViewSet):
+class DtpNotesList(GetAuthFilteringMixin, viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DtpNotes.objects.all()
+    object_class = DtpNotes
     serializer_class = DtpNotesOutputSerializer
-    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnly)]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -78,9 +76,6 @@ class DtpNotesList(viewsets.ModelViewSet):
         return super().get_serializer_class()
 
     def get_queryset(self, *args, **kwargs):
-        if getattr(self, 'swagger_fake_view', False):
-            # queryset just for schema generation metadata
-            return DtpNotes.objects.none()
         return (
             super()
             .get_queryset(*args, **kwargs)
@@ -88,11 +83,12 @@ class DtpNotesList(viewsets.ModelViewSet):
         )
 
 
-class DtpObjectsList(viewsets.ModelViewSet):
+class DtpObjectsList(GetAuthFilteringMixin, viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DtpObjects.objects.all()
+    object_class = DtpObjects
     serializer_class = DtpObjectsOutputSerializer
-    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnly)]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -100,9 +96,6 @@ class DtpObjectsList(viewsets.ModelViewSet):
         return super().get_serializer_class()
 
     def get_queryset(self, *args, **kwargs):
-        if getattr(self, 'swagger_fake_view', False):
-            # queryset just for schema generation metadata
-            return DtpObjects.objects.none()
         return (
             super()
             .get_queryset(*args, **kwargs)
@@ -110,11 +103,12 @@ class DtpObjectsList(viewsets.ModelViewSet):
         )
 
 
-class DtpPeopleList(viewsets.ModelViewSet):
+class DtpPeopleList(GetAuthFilteringMixin, viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DtpPeople.objects.all()
+    object_class = DtpPeople
     serializer_class = DtpPeopleOutputSerializer
-    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnly)]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -122,9 +116,6 @@ class DtpPeopleList(viewsets.ModelViewSet):
         return super().get_serializer_class()
 
     def get_queryset(self, *args, **kwargs):
-        if getattr(self, 'swagger_fake_view', False):
-            # queryset just for schema generation metadata
-            return DtpPeople.objects.none()
         return (
             super()
             .get_queryset(*args, **kwargs)
@@ -132,11 +123,12 @@ class DtpPeopleList(viewsets.ModelViewSet):
         )
 
 
-class DtpPrereqsList(viewsets.ModelViewSet):
+class DtpPrereqsList(GetAuthFilteringMixin, viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DtpPrereqs.objects.all()
+    object_class = DtpPrereqs
     serializer_class = DtpPrereqsOutputSerializer
-    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnly)]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -144,9 +136,6 @@ class DtpPrereqsList(viewsets.ModelViewSet):
         return super().get_serializer_class()
 
     def get_queryset(self, *args, **kwargs):
-        if getattr(self, 'swagger_fake_view', False):
-            # queryset just for schema generation metadata
-            return DtpPrereqs.objects.none()
         return (
             super()
             .get_queryset(*args, **kwargs)
@@ -154,11 +143,12 @@ class DtpPrereqsList(viewsets.ModelViewSet):
         )
 
 
-class DtpStudiesList(viewsets.ModelViewSet):
+class DtpStudiesList(GetAuthFilteringMixin, viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DtpStudies.objects.all()
+    object_class = DtpStudies
     serializer_class = DtpStudiesOutputSerializer
-    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnly)]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -166,9 +156,6 @@ class DtpStudiesList(viewsets.ModelViewSet):
         return super().get_serializer_class()
 
     def get_queryset(self, *args, **kwargs):
-        if getattr(self, 'swagger_fake_view', False):
-            # queryset just for schema generation metadata
-            return DtpStudies.objects.none()
         return (
             super()
             .get_queryset(*args, **kwargs)
@@ -176,9 +163,10 @@ class DtpStudiesList(viewsets.ModelViewSet):
         )
 
 
-class DataTransferProcessesList(viewsets.ModelViewSet):
+class DataTransferProcessesList(GetAuthFilteringMixin, viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DataTransferProcesses.objects.all()
+    object_class = DataTransferProcesses
     serializer_class = DataTransferProcessesOutputSerializer
     permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnly)]
 
@@ -186,21 +174,3 @@ class DataTransferProcessesList(viewsets.ModelViewSet):
         if self.action in ["create", "update", "partial_update"]:
             return DataTransferProcessesInputSerializer
         return super().get_serializer_class()
-    
-    def get_queryset(self, *args, **kwargs):
-        user = self.request.user
-        if user.is_superuser:
-            return (
-                super()
-                .get_queryset(*args, **kwargs)
-            )
-        else:
-            if user.user_profile and user.user_profile.organisation:
-                organisation = user.user_profile.organisation.id
-            else:
-                organisation = None
-            return (
-                super()
-                .get_queryset(*args, **kwargs)
-                .filter(organisation=organisation)
-            )

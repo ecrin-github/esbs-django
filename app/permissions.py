@@ -17,31 +17,6 @@ class ReadOnly(BasePermission):
         return False
 
 
-class ReadOnlyForOwnOrg(BasePermission):
-    """ Read-only permissions for own organisation, cannot read objects from other orgs """
-    def has_permission(self, request, view):
-        if request.method in ['GET']:
-            return True
-        return False
-
-    def has_object_permission(self, request, view, obj):
-        if request.method == 'GET':
-            # For DTP sub-objects
-            try:
-                if request.user.user_profile.organisation.id == obj.dtp_id.organisation.id:
-                    return True
-            except AttributeError:
-                pass
-            
-            # For DUP sub-objects
-            try:
-                if request.user.user_profile.organisation.id == obj.dup_id.organisation.id:
-                    return True
-            except AttributeError:
-                pass
-        return False
-
-
 class WriteOnlyForOwnOrg(BasePermission):
     """ Write permissions for own organisation only """
     def has_permission(self, request, view):
@@ -77,7 +52,7 @@ class WriteOnlyForOwnOrg(BasePermission):
 
 
 class WriteOnlyForSelf(BasePermission):
-    """ Write permissions for own user/user profile only """
+    """ Write permissions for own user/user profile only TODO """
     def has_permission(self, request, view):
         if request.method in ['GET', 'POST', 'PUT', 'PATCH']:
             return True
@@ -86,7 +61,7 @@ class WriteOnlyForSelf(BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.method == 'GET':
             return True
-        elif request.method in ['POST', 'PUT', 'PATCH']:
+        elif request.method in ['PUT', 'PATCH']:
             return False
             # try:
             #     if request.user.id == obj.id:

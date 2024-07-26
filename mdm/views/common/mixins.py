@@ -1,4 +1,9 @@
 from django.shortcuts import get_object_or_404
+from django.core.exceptions import FieldError
+from django.http import HttpResponseForbidden
+from rest_framework.response import Response
+
+from rms.models import DataUseProcesses, DataTransferProcesses
 
 
 class MultipleFieldLookupMixin:
@@ -16,3 +21,56 @@ class MultipleFieldLookupMixin:
         obj = get_object_or_404(queryset, **filter)  # Lookup the object
         self.check_object_permissions(self.request, obj)
         return obj
+
+
+class GetAuthFilteringMixin:
+    """
+    Proper filtering of GET requests where users should only see items from their organisations, or none if they don't have an org
+    This class requires defining an "object_class", the "queryset", and the "serializer" class variables
+    """
+    def get_dtp_dup_id(self, obj):
+        return obj.id
+
+    def get_queryset(self, *args, **kwargs):
+        if getattr(self, 'swagger_fake_view', False):
+            # queryset just for schema generation metadata
+            return self.object_class.objects.none()
+        user = self.request.user
+        if user.is_superuser:
+            return (
+                super()
+                .get_queryset(*args, **kwargs)
+            )
+        elif user.user_profile and user.user_profile.organisation:
+            organisation = user.user_profile.organisation.id
+            if hasattr(self.object_class, 'organisation'):
+                return (
+                    super()
+                    .get_queryset(*args, **kwargs)
+                    .filter(organisation=organisation)
+                )
+            elif hasattr(self.object_class, 'dtp_id'):
+                # Class is sub-component of DTP class, need to test organisation on DTP
+                dtp_id_set = set(map(self.get_dtp_dup_id, DataTransferProcesses.objects.filter(organisation=organisation)))
+                return (
+                    super()
+                    .get_queryset(*args, **kwargs)
+                    .filter(dtp_id__in=dtp_id_set)
+                )
+            elif hasattr(self.object_class, 'dup_id'):
+                # Class is sub-component of DUP class, need to test organisation on DUP
+                dup_id_set = set(map(self.get_dtp_dup_id, DataUseProcesses.objects.filter(organisation=organisation)))
+                return (
+                    super()
+                    .get_queryset(*args, **kwargs)
+                    .filter(dup_id__in=dup_id_set)
+                )
+        return self.object_class.objects.none()
+    
+    def retrieve(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+        except Exception:
+            return HttpResponseForbidden('You do not have permission to perform this action.')
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)

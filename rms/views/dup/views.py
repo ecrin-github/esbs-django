@@ -2,7 +2,8 @@ from mozilla_django_oidc.contrib.drf import OIDCAuthentication
 from rest_framework import viewsets, permissions
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 
-from app.permissions import ReadOnly, ReadOnlyForOwnOrg, IsSuperUser
+from app.permissions import ReadOnly, IsSuperUser
+from mdm.views.common.mixins import GetAuthFilteringMixin
 from rms.models.dup.duas import DataUseAccesses
 from rms.models.dup.dup_notes import DupNotes
 from rms.models.dup.dup_objects import DupObjects
@@ -20,11 +21,12 @@ from rms.serializers.dup.dup_studies_dto import DupStudiesOutputSerializer, DupS
 from rms.serializers.dup.dups_dto import DataUseProcessesOutputSerializer, DataUseProcessesInputSerializer
 
 
-class DataUseAccessesList(viewsets.ModelViewSet):
+class DataUseAccessesList(GetAuthFilteringMixin, viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DataUseAccesses.objects.all()
+    object_class = DataUseAccesses
     serializer_class = DataUseAccessesOutputSerializer
-    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnly)]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -32,9 +34,7 @@ class DataUseAccessesList(viewsets.ModelViewSet):
         return super().get_serializer_class()
 
     def get_queryset(self, *args, **kwargs):
-        if getattr(self, 'swagger_fake_view', False):
-            # queryset just for schema generation metadata
-            return DataUseAccesses.objects.none()
+        # TODO (for multiple views): return unauthorised error if trying to get DUAs for a unauthorised DUP instead of empty result set
         return (
             super()
             .get_queryset(*args, **kwargs)
@@ -42,11 +42,12 @@ class DataUseAccessesList(viewsets.ModelViewSet):
         )
 
 
-class DupNotesList(viewsets.ModelViewSet):
+class DupNotesList(GetAuthFilteringMixin, viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DupNotes.objects.all()
+    object_class = DupNotes
     serializer_class = DupNotesOutputSerializer
-    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnly)]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -54,9 +55,6 @@ class DupNotesList(viewsets.ModelViewSet):
         return super().get_serializer_class()
 
     def get_queryset(self, *args, **kwargs):
-        if getattr(self, 'swagger_fake_view', False):
-            # queryset just for schema generation metadata
-            return DupNotes.objects.none()
         return (
             super()
             .get_queryset(*args, **kwargs)
@@ -64,11 +62,12 @@ class DupNotesList(viewsets.ModelViewSet):
         )
 
 
-class DupObjectsList(viewsets.ModelViewSet):
+class DupObjectsList(GetAuthFilteringMixin, viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DupObjects.objects.all()
+    object_class = DupObjects
     serializer_class = DupObjectsOutputSerializer
-    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnly)]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -76,9 +75,6 @@ class DupObjectsList(viewsets.ModelViewSet):
         return super().get_serializer_class()
 
     def get_queryset(self, *args, **kwargs):
-        if getattr(self, 'swagger_fake_view', False):
-            # queryset just for schema generation metadata
-            return DupObjects.objects.none()
         return (
             super()
             .get_queryset(*args, **kwargs)
@@ -86,11 +82,12 @@ class DupObjectsList(viewsets.ModelViewSet):
         )
 
 
-class DupPeopleList(viewsets.ModelViewSet):
+class DupPeopleList(GetAuthFilteringMixin, viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DupPeople.objects.all()
+    object_class = DupPeople
     serializer_class = DupPeopleOutputSerializer
-    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnly)]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -98,9 +95,6 @@ class DupPeopleList(viewsets.ModelViewSet):
         return super().get_serializer_class()
 
     def get_queryset(self, *args, **kwargs):
-        if getattr(self, 'swagger_fake_view', False):
-            # queryset just for schema generation metadata
-            return DupPeople.objects.none()
         return (
             super()
             .get_queryset(*args, **kwargs)
@@ -108,11 +102,12 @@ class DupPeopleList(viewsets.ModelViewSet):
         )
 
 
-class DupSecondaryUseList(viewsets.ModelViewSet):
+class DupSecondaryUseList(GetAuthFilteringMixin, viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DupSecondaryUse.objects.all()
+    obejct_class = DupSecondaryUse
     serializer_class = DupSecondaryUseOutputSerializer
-    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnly)]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -120,9 +115,6 @@ class DupSecondaryUseList(viewsets.ModelViewSet):
         return super().get_serializer_class()
 
     def get_queryset(self, *args, **kwargs):
-        if getattr(self, 'swagger_fake_view', False):
-            # queryset just for schema generation metadata
-            return DupSecondaryUse.objects.none()
         return (
             super()
             .get_queryset(*args, **kwargs)
@@ -130,11 +122,12 @@ class DupSecondaryUseList(viewsets.ModelViewSet):
         )
 
 
-class DupStudiesList(viewsets.ModelViewSet):
+class DupStudiesList(GetAuthFilteringMixin, viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DupStudies.objects.all()
+    object_class = DupStudies
     serializer_class = DupStudiesOutputSerializer
-    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnlyForOwnOrg)]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnly)]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -142,9 +135,6 @@ class DupStudiesList(viewsets.ModelViewSet):
         return super().get_serializer_class()
 
     def get_queryset(self, *args, **kwargs):
-        if getattr(self, 'swagger_fake_view', False):
-            # queryset just for schema generation metadata
-            return DupStudies.objects.none()
         return (
             super()
             .get_queryset(*args, **kwargs)
@@ -152,9 +142,10 @@ class DupStudiesList(viewsets.ModelViewSet):
         )
 
 
-class DataUseProcessesList(viewsets.ModelViewSet):
+class DataUseProcessesList(GetAuthFilteringMixin, viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DataUseProcesses.objects.all()
+    object_class = DataUseProcesses
     serializer_class = DataUseProcessesOutputSerializer
     permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnly)]
 
@@ -162,21 +153,3 @@ class DataUseProcessesList(viewsets.ModelViewSet):
         if self.action in ["create", "update", "partial_update"]:
             return DataUseProcessesInputSerializer
         return super().get_serializer_class()
-    
-    def get_queryset(self, *args, **kwargs):
-        user = self.request.user
-        if user.is_superuser:
-            return (
-                super()
-                .get_queryset(*args, **kwargs)
-            )
-        else:
-            if user.user_profile and user.user_profile.organisation:
-                organisation = user.user_profile.organisation.id
-            else:
-                organisation = None
-            return (
-                super()
-                .get_queryset(*args, **kwargs)
-                .filter(organisation=organisation)
-            )
