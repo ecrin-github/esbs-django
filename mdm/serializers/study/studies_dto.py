@@ -7,8 +7,8 @@ from context.serializers.time_units_dto import TimeUnitsOutputSerializer
 from general.serializers.language_codes_dto import LanguageCodesOutputSerializer
 from general.serializers.organisations_dto import OrganisationsOutputSerializer
 from mdm.models.study.studies import Studies
-from mdm.serializers.data_object.data_objects_dto import DataObjectsOutputSerializer
-from mdm.serializers.study.study_contributors_dto import StudyContributorsOutputSerializer
+from mdm.serializers.data_object.data_objects_dto import DataObjectsOutputSerializer, DataObjectsLimitedOutputSerializer
+from mdm.serializers.study.study_contributors_dto import StudyContributorsOutputSerializer, StudyContributorsLimitedOutputSerializer
 from mdm.serializers.study.study_features_dto import StudyFeaturesOutputSerializer
 from mdm.serializers.study.study_identifiers_dto import StudyIdentifiersOutputSerializer
 from mdm.serializers.study.study_relationships_dto import StudyRelationshipsOutputSerializer
@@ -73,4 +73,32 @@ class StudiesOutputSerializer(serializers.ModelSerializer):
                   'study_status', 'study_enrollment', 'study_gender_elig', 'min_age', 'min_age_unit',
                   'max_age', 'max_age_unit', 'created_on', 
                   'organisation', 'study_contributors', 'study_features',
+                  'study_identifiers', 'study_relationships', 'study_titles', 'study_topics', 'linked_objects']
+
+
+class StudiesLimitedOutputSerializer(serializers.ModelSerializer):
+    title_lang_code = LanguageCodesOutputSerializer(many=False, read_only=True)
+    study_type = StudyTypesOutputSerializer(many=False, read_only=True)
+    study_status = StudyStatusesOutputSerializer(many=False, read_only=True)
+    study_gender_elig = GenderEligibilityTypesOutputSerializer(many=False, read_only=True)
+    min_age_unit = TimeUnitsOutputSerializer(many=False, read_only=True)
+    max_age_unit = TimeUnitsOutputSerializer(many=False, read_only=True)
+    # last_edited_by = UsersSerializer(many=False, read_only=True)
+    organisation = OrganisationsOutputSerializer(many=False, read_only=True)
+
+    study_contributors = StudyContributorsLimitedOutputSerializer(many=True, read_only=True)
+    study_features = StudyFeaturesOutputSerializer(many=True, read_only=True)
+    study_identifiers = StudyIdentifiersOutputSerializer(many=True, read_only=True)
+    study_relationships = StudyRelationshipsOutputSerializer(many=True, read_only=True)
+    study_titles = StudyTitlesOutputSerializer(many=True, read_only=True)
+    study_topics = StudyTopicsOutputSerializer(many=True, read_only=True)
+    linked_objects = DataObjectsLimitedOutputSerializer(many=True, read_only=True)
+
+
+    class Meta:
+        model = Studies
+        fields = ['id', 'sd_sid', 'display_title', 'title_lang_code', 'brief_description',
+                  'data_sharing_statement', 'study_start_year', 'study_start_month', 'study_type',
+                  'study_status', 'study_enrollment', 'study_gender_elig', 'min_age', 'min_age_unit',
+                  'max_age', 'max_age_unit', 'created_on', 'organisation', 'study_contributors', 'study_features',
                   'study_identifiers', 'study_relationships', 'study_titles', 'study_topics', 'linked_objects']

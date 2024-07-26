@@ -1,5 +1,7 @@
+from django.db.models import Q
+from django.shortcuts import get_object_or_404
 from mozilla_django_oidc.contrib.drf import OIDCAuthentication
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, status
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -18,9 +20,10 @@ from mdm.models.data_object.object_rights import ObjectRights
 from mdm.models.data_object.object_titles import ObjectTitles
 from mdm.models.data_object.object_topics import ObjectTopics
 from mdm.models.data_object.object_number_sequence import ObjectNumberSeq
-from mdm.serializers.data_object.data_objects_dto import DataObjectsOutputSerializer, DataObjectsInputSerializerCreate, DataObjectsInputSerializerUpdate
+from mdm.serializers.data_object.data_objects_dto import DataObjectsOutputSerializer, DataObjectsLimitedOutputSerializer, \
+    DataObjectsInputSerializerCreate, DataObjectsInputSerializerUpdate
 from mdm.serializers.data_object.object_contributors_dto import ObjectContributorsOutputSerializer, \
-    ObjectContributorsInputSerializer
+    ObjectContributorsLimitedOutputSerializer, ObjectContributorsInputSerializer
 from mdm.serializers.data_object.object_datasets_dto import ObjectDatasetsOutputSerializer, \
     ObjectDatasetsInputSerializer
 from mdm.serializers.data_object.object_dates_dto import ObjectDatesOutputSerializer, ObjectDatesInputSerializer
@@ -40,9 +43,60 @@ from mdm.serializers.data_object.object_topics_dto import ObjectTopicsOutputSeri
 class DataObjectsList(MultipleFieldLookupMixin, viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DataObjects.objects.all()
-    serializer_class = DataObjectsOutputSerializer
+    serializer_class = DataObjectsLimitedOutputSerializer
     permission_classes = [IsSuperUser | WriteOnlyForOwnOrg | ReadOnly]
     lookup_fields = ['pk', 'sd_oid']
+
+    def list(self, request):
+        """ Not returning person field in object contributors if no org/DO not from same org """
+        queryset_full = None
+        queryset_limited = None
+        serializer_full = None
+        serializer_limited = None
+        has_org = False
+        is_superuser = False
+        count = 0
+
+        try:
+            if request.user.is_superuser:
+                is_superuser = True
+            if request.user.user_profile.organisation.id:
+                has_org = True
+        except AttributeError:
+            pass
+
+        if is_superuser:
+            queryset_full = DataObjects.objects.all()
+        elif has_org:
+            queryset_full = DataObjects.objects.filter(organisation=request.user.user_profile.organisation.id)
+            queryset_limited = DataObjects.objects.filter(~Q(organisation=request.user.user_profile.organisation.id))
+        else:
+            queryset_limited = DataObjects.objects.all()
+        
+        if queryset_full is not None:
+            serializer_full = DataObjectsOutputSerializer(queryset_full, many=True)
+            count += queryset_full.count()
+        if queryset_limited is not None:
+            serializer_limited = DataObjectsLimitedOutputSerializer(queryset_limited, many=True)
+            count += queryset_limited.count()
+        
+        return Response({'count': count, 'results': list(serializer_full.data if serializer_full is not None else []) 
+                                                    + list(serializer_limited.data if serializer_limited is not None else []), 'statusCode': status.HTTP_200_OK})
+
+    def retrieve(self, request, **kwargs):
+        """ Not returning person field in object contributors if no org/DO not from same org """
+        data_object = self.get_object()
+
+        serializer = None
+        try:
+            if request.user.is_superuser or request.user.user_profile.organisation.id == data_object.organisation.id:
+                serializer = DataObjectsOutputSerializer(data_object)
+        except AttributeError:
+            pass
+        if serializer is None:
+            serializer = DataObjectsLimitedOutputSerializer(data_object)
+
+        return Response(serializer.data)
 
     def get_serializer_class(self):
         if self.action in ["create"]:
@@ -67,14 +121,23 @@ class ObjectNextId(APIView):
 class ObjectContributorsList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = ObjectContributors.objects.all()
-    serializer_class = ObjectContributorsOutputSerializer
+    serializer_class = ObjectContributorsLimitedOutputSerializer
     permission_classes = [IsSuperUser | WriteOnlyForOwnOrg | ReadOnly]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
             return ObjectContributorsInputSerializer
+        elif self.action in ["list", "retrieve"]:
+            data_object_check = DataObjects.objects.filter(id=self.kwargs['objectId'])
+            if data_object_check.exists():
+                data_object = DataObjects.objects.get(id=self.kwargs['objectId'])
+                try:
+                    if self.request.user.is_superuser or self.request.user.user_profile.organisation.id == data_object.organisation.id:
+                        return ObjectContributorsOutputSerializer
+                except AttributeError:
+                    pass
         return super().get_serializer_class()
-
+    
     def get_queryset(self, *args, **kwargs):
         if getattr(self, 'swagger_fake_view', False):
             # queryset just for schema generation metadata

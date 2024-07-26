@@ -27,3 +27,14 @@ class ObjectContributorsOutputSerializer(serializers.ModelSerializer):
         model = ObjectContributors
         # fields = '__all__'
         exclude = ['last_edited_by']
+
+
+class ObjectContributorsLimitedOutputSerializer(serializers.ModelSerializer):
+    contributor_type = ContributorTypesOutputSerializer(many=False, read_only=True)
+    organisation = OrganisationsOutputSerializer(many=False, read_only=True)
+    # last_edited_by = UsersSerializer(many=False, read_only=True)
+
+    class Meta:
+        model = ObjectContributors
+        # fields = '__all__'
+        exclude = ['last_edited_by', 'person']

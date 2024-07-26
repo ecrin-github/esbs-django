@@ -15,8 +15,8 @@ from context.serializers.access_prereq_types_dto import AccessPrereqTypesOutputS
 from db_exports.export_context_and_general_data import get_data_from_table
 from general.models import Organisations
 from mdm.models import DataObjects, StudyContributors, Studies
-from mdm.serializers.data_object.data_objects_dto import DataObjectsOutputSerializer
-from mdm.serializers.study.studies_dto import StudiesOutputSerializer
+from mdm.serializers.data_object.data_objects_dto import DataObjectsOutputSerializer, DataObjectsLimitedOutputSerializer
+from mdm.serializers.study.studies_dto import StudiesLimitedOutputSerializer
 from rms.models import DataTransferProcesses, DataUseProcesses, DtpObjects, DupObjects, DupStudies, DtpStudies
 from rms.models.dtp.dtp_prereqs import DtpPrereqs
 from rms.serializers.dtp.dtp_prereqs_dto import DtpPrereqsOutputSerializer
@@ -184,7 +184,7 @@ class DataObjectsByOrg(APIView):
             return Response({'error': f"Organisation with the orgId {org_id} does not exist."})
 
         data = DataObjects.objects.filter(organisation=org_id)
-        serializer = DataObjectsOutputSerializer(data, many=True)
+        serializer = DataObjectsLimitedOutputSerializer(data, many=True)
 
         return Response(serializer.data)
 
@@ -204,7 +204,8 @@ class StudiesByOrg(APIView):
             return Response({'error': f"Organisation with the orgId {org_id} does not exist."})
 
         studies = Studies.objects.filter(organisation=org_id)
-        serializer = StudiesOutputSerializer(studies, many=True)
+
+        serializer = StudiesLimitedOutputSerializer(studies, many=True)
 
         return Response(serializer.data)
 
@@ -323,7 +324,7 @@ class MultiStudiesObjects(APIView):
             study = Studies.objects.get(id=studyId)
             data_objects = DataObjects.objects.filter(linked_study=study)
             if data_objects.exists():
-                serialized_data = DataObjectsOutputSerializer(data_objects, many=True)
+                serialized_data = DataObjectsLimitedOutputSerializer(data_objects, many=True)
                 for rec in serialized_data.data:
                     data.append(rec)
 
@@ -609,7 +610,8 @@ class StudiesByTitle(APIView):
             return Response({'error': "title param is missing"})
 
         studies = Studies.objects.filter(display_title__icontains=title_query_string)
-        serializer = StudiesOutputSerializer(studies, many=True)
+
+        serializer = StudiesLimitedOutputSerializer(studies, many=True)
 
         return Response(serializer.data)
 
@@ -625,7 +627,7 @@ class DataObjectsByTitle(APIView):
             return Response({'error': "title param is missing"})
 
         data_objects = DataObjects.objects.filter(display_title__icontains=title_query_string)
-        serializer = DataObjectsOutputSerializer(data_objects, many=True)
+        serializer = DataObjectsLimitedOutputSerializer(data_objects, many=True)
 
         return Response(serializer.data)
 
@@ -683,7 +685,7 @@ class StudiesByTitleAndOrg(APIView):
             return Response({'error': "title param is missing"})
 
         studies = Studies.objects.filter(display_title__icontains=title_query_string, organisation=org_data)
-        serializer = StudiesOutputSerializer(studies, many=True)
+        serializer = StudiesLimitedOutputSerializer(studies, many=True)
 
         return Response(serializer.data)
 
@@ -709,7 +711,7 @@ class DataObjectsByTitleAndOrg(APIView):
             return Response({'error': "title param is missing"})
 
         data_objects = DataObjects.objects.filter(display_title__icontains=title_query_string, organisation=org_data)
-        serializer = DataObjectsOutputSerializer(data_objects, many=True)
+        serializer = DataObjectsLimitedOutputSerializer(data_objects, many=True)
 
         return Response(serializer.data)
 
