@@ -20,7 +20,6 @@ class StudyContributorsInputSerializer(serializers.ModelSerializer):
 
 class StudyContributorsOutputSerializer(serializers.ModelSerializer):
     contributor_type = ContributorTypesOutputSerializer(many=False, read_only=True)
-    person = UsersLimitedSerializer(many=False, read_only=True)
     organisation = OrganisationsOutputSerializer(many=False, read_only=True)
     # last_edited_by = UsersSerializer(many=False, read_only=True)
 

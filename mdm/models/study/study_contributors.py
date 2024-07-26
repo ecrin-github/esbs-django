@@ -20,9 +20,7 @@ class StudyContributors(models.Model):
                                          related_name='study_contributors_contributor_type_id', default=None,
                                          null=True, blank=True, db_constraint=IS_CONTEXT_DB_CONSTRAINT)
     is_individual = models.BooleanField(default=False)
-    person = models.ForeignKey(Users, null=True, blank=True, on_delete=models.CASCADE, db_column='person_id',
-                               related_name='study_contributors_person_id', default=None,
-                               db_constraint=IS_USERS_DB_CONSTRAINT)
+    person = models.TextField(blank=True, null=True)
     organisation = models.ForeignKey(Organisations, null=True, blank=True, on_delete=models.CASCADE,
                                      db_column='organisation_id', default=None,
                                      related_name='study_contributors_organisation_id',
