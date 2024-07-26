@@ -272,6 +272,7 @@ class UsersByNameAndOrganisation(APIView):
 class UserAccessData(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     permission_classes = [permissions.IsAuthenticated]
+    # TODO: after service account setup, change permission to superuser
 
     def get(self, request, userId):
         user = Users.objects.filter(id=userId)

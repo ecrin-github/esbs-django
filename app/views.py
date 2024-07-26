@@ -6,6 +6,7 @@ from rest_framework.authentication import BasicAuthentication
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from app.permissions import IsSuperUser
 from app.serializers import MailSerializer
 from mdm.models import Studies, DataObjects
 from rms.models import DataUseProcesses, DataTransferProcesses
@@ -47,14 +48,14 @@ class RmsStatistics(APIView):
 
 class PushNotifications(APIView):
     authentication_classes = [BasicAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsSuperUser]
 
     def post(self, request):
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
             f"push_notifications", {"type": "send_notification",
                                     "message": "The following Data object has been updated "
-                                               "on the TSD side: " + request.data["object_id"]}
+                                               "on the TSD side: " + request.data["display_title"]}
         )
 
         return Response({"status": True}, status=status.HTTP_201_CREATED)
