@@ -7,6 +7,7 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 from rest_framework.parsers import JSONParser
 from rest_framework.views import APIView
+from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
 from app.permissions import IsSuperUser, WriteOnlyForSelf
@@ -19,32 +20,33 @@ from users.serializers.profiles_dto import UserProfilesOutputSerializer, UserPro
 from users.serializers.users_dto import UsersSerializer, CreateUserSerializer, UsersLimitedSerializer
 
 
-class UsersList(APIView):
+class UsersList(GenericAPIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    queryset = Users.objects.all()
+    queryset = Users.objects.filter(~Q(username='tsd'))
     permission_classes = [permissions.AllowAny]
 
-    def get(self, request, format=None):
+    def get(self, request, *args, **kwargs):
         serializer = None
         if "sub" in request.GET:
             sub = request.GET['sub']
             user_profile_check = UserProfiles.objects.filter(ls_aai_id=sub)
             if user_profile_check.exists():
                 user_profile = UserProfiles.objects.get(ls_aai_id=sub)
-                user_check = Users.objects.filter(id=user_profile.user.id)
+                user_check = self.get_queryset(*args, **kwargs).filter(id=user_profile.user.id)
                 if user_check.exists():
-                    user = Users.objects.get(id=user_profile.user.id)
+                    user = self.get_queryset(*args, **kwargs).get(id=user_profile.user.id)
                     serializer = UsersSerializer(user, many=False)
         elif request.user.id:
             users = []
             if request.user.is_superuser:
-                users = Users.objects.all()
+                users = self.get_queryset(*args, **kwargs)
                 serializer = UsersSerializer(users, many=True)
             else:
                 try:
-                    users_subquery = Users.objects.raw("SELECT u.id as id FROM users u LEFT JOIN "
-                                                        + "user_profiles up ON u.id=up.user_id "
-                                                        + f"WHERE up.organisation_id='{request.user.user_profile.organisation.id}';")
+                    # Unused
+                    users_subquery = self.get_queryset(*args, **kwargs).raw("SELECT u.id as id FROM users u LEFT JOIN "
+                                        + "user_profiles up ON u.id=up.user_id "
+                                        + f"WHERE up.organisation_id='{request.user.user_profile.organisation.id}';")
                     for user in users_subquery:
                         users.append(user)
                 except AttributeError:
