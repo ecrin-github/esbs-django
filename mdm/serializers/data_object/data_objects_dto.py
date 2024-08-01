@@ -47,8 +47,8 @@ class DataObjectsInputSerializerUpdate(serializers.ModelSerializer):
 
     class Meta:
         model = DataObjects
-        # Not updating sd_oid
-        exclude = ['sd_oid']
+        # Not updating sd_oid nor total_instances
+        exclude = ['sd_oid', 'total_instances']
 
 
 class DataObjectsOutputSerializer(serializers.ModelSerializer):
@@ -77,7 +77,7 @@ class DataObjectsOutputSerializer(serializers.ModelSerializer):
     class Meta:
         model = DataObjects
         fields = ['id', 'sd_oid', 'display_title', 'version', 'doi', 'publication_year', 'access_details',
-                  'access_details_url', 'url_last_checked', 'add_study_contributors',
+                  'access_details_url', 'url_last_checked', 'add_study_contributors', 'total_instances',
                   'add_study_topics', 'created_on', 'organisation', 'doi_status', 'object_class', 
                   'object_type', 'managing_org', 'lang_code', 'access_type', 'embargo_expiry',
                   'object_contributors', 'object_datasets', 'object_dates', 'object_descriptions',
@@ -111,7 +111,7 @@ class DataObjectsLimitedOutputSerializer(serializers.ModelSerializer):
     class Meta:
         model = DataObjects
         fields = ['id', 'sd_oid', 'display_title', 'version', 'doi', 'publication_year', 'access_details',
-                  'access_details_url', 'url_last_checked', 'add_study_contributors',
+                  'access_details_url', 'url_last_checked', 'add_study_contributors', 'total_instances',
                   'add_study_topics', 'created_on', 'organisation', 'doi_status', 'object_class', 
                   'object_type', 'managing_org', 'lang_code', 'access_type', 'embargo_expiry',
                   'object_contributors', 'object_datasets', 'object_dates', 'object_descriptions',

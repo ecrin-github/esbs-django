@@ -57,7 +57,8 @@ class DataObjects(models.Model):
                                      db_index=True, db_column='linked_study', related_name='linked_objects')
     organisation = models.ForeignKey(Organisations, on_delete=models.CASCADE, db_column='organisation_id',
                                      blank=True, null=True, related_name='data_objects_organisation_id', default=None,
-                                     db_constraint=IS_GENERAL_DB_CONSTRAINT)                             
+                                     db_constraint=IS_GENERAL_DB_CONSTRAINT)
+    total_instances = models.IntegerField(default=0)
 
     class Meta:
         db_table = 'data_objects'

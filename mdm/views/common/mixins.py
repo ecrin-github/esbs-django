@@ -23,6 +23,34 @@ class MultipleFieldLookupMixin:
         return obj
 
 
+class ParentMultipleFieldLookupMixin:
+    """
+    Apply this mixin to any nested view or viewset to get multiple field filtering on the parent class.
+    This class requires defining a `parent_lookup_fields` attribute for the filtering,
+    a `fk_lookup_field` attribute which is the foreign key field name of the parent class in the child class,
+    and a 'parent_queryset' attribute, which is all the objects (queryset) of the parent class.
+    """
+    def get_parent_object(self):
+        parent_queryset = self.parent_queryset
+        filter = {}
+        for field in self.parent_lookup_fields:
+            if self.kwargs.get(field): # Ignore empty fields.
+                filter[self.parent_lookup_fields[field]] = self.kwargs[field]
+        obj = get_object_or_404(parent_queryset, **filter)  # Lookup the object
+        self.check_object_permissions(self.request, obj)
+        return obj
+    
+    def get_queryset(self, *args, **kwargs):
+        if getattr(self, 'swagger_fake_view', False):
+            # queryset just for schema generation metadata
+            return self.object_class.objects.none()
+        return (
+            super()
+            .get_queryset(*args, **kwargs)
+            .filter(**{self.fk_lookup_field: self.get_parent_object().id})
+        )
+
+
 class GetAuthFilteringMixin:
     """
     Proper filtering of GET requests where users should only see items from their organisations, or none if they don't have an org

@@ -234,6 +234,10 @@ urlpatterns = [
 
     path('data-objects/<uuid:objectId>/object-instances', object_instances_list),
     path('data-objects/<uuid:objectId>/object-instances/<uuid:pk>', object_instances_detail),
+    path('data-objects/<uuid:objectId>/object-instances/<sd_iid>', object_instances_detail),
+    path('data-objects/<sd_oid>/object-instances', object_instances_list),
+    path('data-objects/<sd_oid>/object-instances/<uuid:pk>', object_instances_detail),
+    path('data-objects/<sd_oid>/object-instances/<sd_iid>', object_instances_detail),
 
     path('data-objects/<uuid:objectId>/object-relationships', object_relationships_list),
     path('data-objects/<uuid:objectId>/object-relationships/<uuid:pk>', object_relationships_detail),

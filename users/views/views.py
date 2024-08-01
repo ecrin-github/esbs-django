@@ -307,11 +307,12 @@ class UserAccessData(APIView):
                 data_objects_response = []
                 if data_objects.exists():
                     for data_object in data_objects:
-                        object_instances = ObjectInstances.objects.filter(object_id=data_object)
+                        object_instances = ObjectInstances.objects.filter(data_object=data_object)
                         object_instances_response = []
                         if object_instances.exists():
                             for object_instance in object_instances:
                                 object_instances_response.append({
+                                    # TODO: change id to sd_iid for TSD?
                                     "id": object_instance.id,
                                     "sdOid": data_object.sd_oid,
                                     "url": object_instance.url,

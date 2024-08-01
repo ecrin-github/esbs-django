@@ -16,7 +16,8 @@ from users.models.users import Users
 
 class ObjectInstances(models.Model):
     id = models.UUIDField(primary_key=True, editable=False, unique=True, db_index=True, default=uuid.uuid4)
-    object_id = models.ForeignKey(DataObjects, on_delete=models.CASCADE, db_column='object_id',
+    sd_iid = models.CharField(max_length=255, blank=True, null=True)
+    data_object = models.ForeignKey(DataObjects, on_delete=models.CASCADE, db_column='object_id',
                                   related_name='object_instances', default=None, null=True, blank=True)
     instance_type = models.ForeignKey(ObjectInstanceTypes, on_delete=models.CASCADE, db_index=True,
                                       related_name='object_instances_instance_type_id', default=None, null=True,
@@ -42,3 +43,13 @@ class ObjectInstances(models.Model):
     class Meta:
         db_table = 'object_instances'
         ordering = ['created_on']
+
+    def save(self, *args, **kwargs):
+        if self._state.adding:
+            # On insert - build instance ID
+            data_object = DataObjects.objects.get(id=self.data_object.id)
+            self.sd_iid = f'DSRI-{data_object.sd_oid[5:]}.{data_object.total_instances+1}'
+            data_object.total_instances = models.F("total_instances") + 1
+            data_object.save()
+            data_object.refresh_from_db()
+        super(ObjectInstances, self).save(*args, **kwargs)

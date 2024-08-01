@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from app.permissions import WriteOnlyForOwnOrg, IsSuperUser, ReadOnly
-from mdm.views.common.mixins import MultipleFieldLookupMixin
+from mdm.views.common.mixins import MultipleFieldLookupMixin, ParentMultipleFieldLookupMixin
 from mdm.models.data_object.data_objects import DataObjects
 from mdm.models.data_object.object_contributors import ObjectContributors
 from mdm.models.data_object.object_datasets import ObjectDatasets
@@ -32,7 +32,7 @@ from mdm.serializers.data_object.object_descriptions_dto import ObjectDescriptio
 from mdm.serializers.data_object.object_identifiers_dto import ObjectIdentifiersOutputSerializer, \
     ObjectIdentifiersInputSerializer
 from mdm.serializers.data_object.object_instances_dto import ObjectInstancesOutputSerializer, \
-    ObjectInstancesInputSerializer
+    ObjectInstancesInputSerializerCreate, ObjectInstancesInputSerializerUpdate
 from mdm.serializers.data_object.object_relationships_dto import ObjectRelationshipsOutputSerializer, \
     ObjectRelationshipsInputSerializer
 from mdm.serializers.data_object.object_rights_dto import ObjectRightsOutputSerializer, ObjectRightsInputSerializer
@@ -237,26 +237,26 @@ class ObjectIdentifiersList(viewsets.ModelViewSet):
         )
 
 
-class ObjectInstancesList(viewsets.ModelViewSet):
+class ObjectInstancesList(ParentMultipleFieldLookupMixin, MultipleFieldLookupMixin, viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    queryset = ObjectInstances.objects.all()
-    serializer_class = ObjectInstancesOutputSerializer
     permission_classes = [IsSuperUser | WriteOnlyForOwnOrg | ReadOnly]
+    serializer_class = ObjectInstancesOutputSerializer
+    queryset = ObjectInstances.objects.all()
+    object_class = ObjectInstances
+    lookup_fields = ["pk", "sd_iid"]
+    parent_lookup_fields = {
+        "objectId": "id",
+        "sd_oid": "sd_oid",
+    }
+    parent_queryset = DataObjects.objects.all()
+    fk_lookup_field = "data_object"
 
     def get_serializer_class(self):
-        if self.action in ["create", "update", "partial_update"]:
-            return ObjectInstancesInputSerializer
+        if self.action in ["create"]:
+            return ObjectInstancesInputSerializerCreate
+        elif self.action in ["update", "partial_update"]:
+            return ObjectInstancesInputSerializerUpdate
         return super().get_serializer_class()
-
-    def get_queryset(self, *args, **kwargs):
-        if getattr(self, 'swagger_fake_view', False):
-            # queryset just for schema generation metadata
-            return ObjectInstances.objects.none()
-        return (
-            super()
-            .get_queryset(*args, **kwargs)
-            .filter(object_id=self.kwargs['objectId'])
-        )
 
 
 class ObjectRelationshipsList(viewsets.ModelViewSet):
