@@ -312,8 +312,8 @@ class UserAccessData(APIView):
                         if object_instances.exists():
                             for object_instance in object_instances:
                                 object_instances_response.append({
-                                    # TODO: change id to sd_iid for TSD?
                                     "id": object_instance.id,
+                                    "sdIid": object_instance.sd_iid,
                                     "sdOid": data_object.sd_oid,
                                     "url": object_instance.url,
                                     "urlAccessible": object_instance.url_accessible,
