@@ -1,8 +1,8 @@
-from asgiref.sync import async_to_sync
+import time
+from asgiref.sync import async_to_sync, sync_to_async
 from channels.layers import get_channel_layer
 from rest_framework import permissions, status
 from rest_framework.authentication import BasicAuthentication
-
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -10,7 +10,9 @@ from app.permissions import IsSuperUser
 from app.serializers import MailSerializer
 from mdm.models import Studies, DataObjects
 from rms.models import DataUseProcesses, DataTransferProcesses
-from users.models import Users
+from users.models import Users, Notifications
+
+import logging
 
 
 class EmailSender(APIView):
@@ -51,11 +53,28 @@ class PushNotifications(APIView):
     permission_classes = [IsSuperUser]
 
     def post(self, request):
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-            f"push_notifications", {"type": "send_notification",
-                                    "message": "The following Data object has been updated "
-                                               "on the TSD side: " + request.data["display_title"]}
-        )
-
-        return Response({"status": True}, status=status.HTTP_201_CREATED)
+        if "message" in request.POST:
+            message = request.POST['message']
+            if "target_users" in request.POST:
+                target_users = request.POST['target_users']
+                user_ids = target_users.split(",")
+                channel_layer = get_channel_layer()
+                for uid in user_ids:
+                    user = Users.objects.get(id=uid)
+                    if user.online > 0:
+                        # Send notification immediately if user is online
+                        async_to_sync(channel_layer.group_send)(
+                            f"push_notifications_{uid.strip()}",
+                            {
+                                "type": "send.notification",
+                                "time": time.time(),
+                                "message": message,
+                            },
+                        )
+                    else:
+                        # Store message to display for next connection
+                        Notifications.objects.create(user=user, message=message)
+                        
+                return Response(status=status.HTTP_201_CREATED, data="Message sent")
+            return Response(status=400, data="Target users to send notifications to are missing")
+        return Response(status=400, data="Message to send to users is missing")
