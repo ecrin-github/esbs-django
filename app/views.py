@@ -1,6 +1,7 @@
 import time
 from asgiref.sync import async_to_sync, sync_to_async
 from channels.layers import get_channel_layer
+from django.db.models import Q
 from rest_framework import permissions, status
 from rest_framework.authentication import BasicAuthentication
 from rest_framework.response import Response
@@ -44,7 +45,7 @@ class RmsStatistics(APIView):
                 "total": DataTransferProcesses.objects.all().count(),
                 "completed": DataTransferProcesses.objects.filter(status__name='Complete').count()
             },
-            "total_users": Users.objects.all().count()
+            "total_users": Users.objects.filter(~Q(username__iexact="tsd")).count()
         })
 
 
