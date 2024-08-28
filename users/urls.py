@@ -32,6 +32,7 @@ urlpatterns = [
     # path('by-email', UserByEmail.as_view()),
 
     path('<uuid:userId>/access-data', UserAccessData.as_view()),
+    path('users-to-notify/<sd_oid>', UsersToNotify.as_view()),
 
     path('<uuid:pk>', users_detail),
 

@@ -335,3 +335,24 @@ class UserAccessData(APIView):
                 })
 
         return Response(response, status=200)
+
+
+class UsersToNotify(APIView):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
+    permission_classes = [IsSuperUser]
+
+    def get(self, request, sd_oid):
+        do_check = DataObjects.objects.filter(sd_oid=sd_oid)
+
+        if not do_check.exists():
+             return Response(status=404, data="Data Object not found")
+        else:
+            do = DataObjects.objects.get(sd_oid=sd_oid)
+            # Get DTPs where DO is linked as associated object (should be only 1 in practice)
+            dtp_ids = list(DtpObjects.objects.filter(data_object=do).values_list('dtp_id', flat=True))
+            # Get DTP associated people
+            dtp_users = list(DtpPeople.objects.filter(dtp_id__in=dtp_ids).values_list('person_id', flat=True))
+            # Get users only and not people
+            users_to_notify = list(UserProfiles.objects.filter(user_id__in=dtp_users).filter(~Q(ls_aai_id='')).values_list('user_id', flat=True))
+
+            return Response({"user_ids": users_to_notify}, status=200)
