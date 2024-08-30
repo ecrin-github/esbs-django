@@ -273,8 +273,8 @@ class UsersByNameAndOrganisation(APIView):
 
 class UserAccessData(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
+    # TODO: change permission to superuser next TSD meeting
     permission_classes = [permissions.IsAuthenticated]
-    # TODO: after service account setup, change permission to superuser
 
     def get(self, request, userId):
         user = Users.objects.filter(id=userId)
@@ -324,9 +324,10 @@ class UserAccessData(APIView):
                             "sdOid": data_object.sd_oid,
                             "objectTitle": data_object.display_title,
                             "objectDescription": "",
-                            "objectInstances": object_instances_response
+                            "objectInstances": object_instances_response,
+                            "accessType": data_object.access_type.name if data_object.access_type else "",
+                            "embargoExpiry": data_object.embargo_expiry,
                         })
-
                 response["studies"].append({
                     "studyId": study.id,
                     "sdSid": study.sd_sid,
