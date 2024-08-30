@@ -13,8 +13,6 @@ from mdm.models import Studies, DataObjects
 from rms.models import DataUseProcesses, DataTransferProcesses
 from users.models import Users, Notifications
 
-import logging
-
 
 class EmailSender(APIView):
     permission_classes = [permissions.AllowAny]
@@ -54,10 +52,10 @@ class PushNotifications(APIView):
     permission_classes = [IsSuperUser]
 
     def post(self, request):
-        if "message" in request.POST:
-            message = request.POST['message']
-            if "target_users" in request.POST:
-                target_users = request.POST['target_users']
+        if "message" in request.data:
+            message = request.data['message']
+            if "target_users" in request.data:
+                target_users = request.data['target_users']
                 user_ids = target_users.split(",")
                 channel_layer = get_channel_layer()
                 for uid in user_ids:
