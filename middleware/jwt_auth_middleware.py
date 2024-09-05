@@ -22,6 +22,7 @@ class JWTAuthMiddleware(BaseMiddleware):
         if token != None:
             user_id = await self.get_user_from_token(token) 
             if user_id:
+                scope['token'] = token
                 scope['user_id'] = user_id
             else:
                 scope['error'] = 'Invalid token'
