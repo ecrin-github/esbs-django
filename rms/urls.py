@@ -4,11 +4,11 @@ from rms.views.dtp.views import *
 from rms.views.dup.views import *
 
 
-dta_list = DataTransferAccessesList.as_view({
+dta_list = DataTransferAgreementsList.as_view({
     'get': 'list',
     'post': 'create'
 })
-dta_detail = DataTransferAccessesList.as_view({
+dta_detail = DataTransferAgreementsList.as_view({
     'get': 'retrieve',
     'put': 'update',
     'patch': 'partial_update',
@@ -92,11 +92,11 @@ dtp_detail = DataTransferProcessesList.as_view({
     'delete': 'destroy'
 })
 
-dua_list = DataUseAccessesList.as_view({
+dua_list = DataUseAgreementsList.as_view({
     'get': 'list',
     'post': 'create'
 })
-dua_detail = DataUseAccessesList.as_view({
+dua_detail = DataUseAgreementsList.as_view({
     'get': 'retrieve',
     'put': 'update',
     'patch': 'partial_update',

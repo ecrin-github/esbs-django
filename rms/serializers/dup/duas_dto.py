@@ -1,16 +1,16 @@
 from rest_framework import serializers
 
-from rms.models.dup.duas import DataUseAccesses
+from rms.models.dup.duas import DataUseAgreements
 from rms.serializers.dup.dup_people_dto import DupPeopleOutputSerializer
 
 
-class DataUseAccessesInputSerializer(serializers.ModelSerializer):
+class DataUseAgreementsInputSerializer(serializers.ModelSerializer):
     class Meta:
-        model = DataUseAccesses
+        model = DataUseAgreements
         fields = '__all__'
 
 
-class DataUseAccessesOutputSerializer(serializers.ModelSerializer):
+class DataUseAgreementsOutputSerializer(serializers.ModelSerializer):
     repo_signatory1 = DupPeopleOutputSerializer(many=False, read_only=True)
     repo_signatory2 = DupPeopleOutputSerializer(many=False, read_only=True)
     provider_signatory1 = DupPeopleOutputSerializer(many=False, read_only=True)
@@ -19,5 +19,5 @@ class DataUseAccessesOutputSerializer(serializers.ModelSerializer):
     requester_signatory2 = DupPeopleOutputSerializer(many=False, read_only=True)
 
     class Meta:
-        model = DataUseAccesses
+        model = DataUseAgreements
         fields = '__all__'

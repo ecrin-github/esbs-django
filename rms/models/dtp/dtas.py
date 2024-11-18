@@ -8,7 +8,7 @@ from rms.models.dtp.dtps import DataTransferProcesses
 from rms.models.dtp.dtp_people import DtpPeople
 
 
-class DataTransferAccesses(models.Model):
+class DataTransferAgreements(models.Model):
     id = models.UUIDField(primary_key=True, editable=False, unique=True, default=uuid.uuid4, db_index=True)
     dtp_id = models.ForeignKey(DataTransferProcesses, on_delete=models.CASCADE, db_column='dtp_id',
                                related_name='dta_dtp_id', default=None, null=True, blank=True)

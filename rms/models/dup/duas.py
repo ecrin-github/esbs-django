@@ -8,7 +8,7 @@ from rms.models.dup.dups import DataUseProcesses
 from rms.models.dup.dup_people import DupPeople
 
 
-class DataUseAccesses(models.Model):
+class DataUseAgreements(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, db_index=True)
     dup_id = models.ForeignKey(DataUseProcesses, on_delete=models.CASCADE, db_index=True,
                                related_name='dua_dup_id', default=None, null=True, blank=True, db_column='dup_id')

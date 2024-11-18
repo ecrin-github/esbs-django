@@ -1,4 +1,4 @@
-from rms.models.dtp.dtas import DataTransferAccesses
+from rms.models.dtp.dtas import DataTransferAgreements
 from rms.models.dtp.dtp_datasets import DtpDatasets
 from rms.models.dtp.dtp_notes import DtpNotes
 from rms.models.dtp.dtp_objects import DtpObjects
@@ -7,7 +7,7 @@ from rms.models.dtp.dtp_prereqs import DtpPrereqs
 from rms.models.dtp.dtp_studies import DtpStudies
 from rms.models.dtp.dtps import DataTransferProcesses
 
-from rms.models.dup.duas import DataUseAccesses
+from rms.models.dup.duas import DataUseAgreements
 from rms.models.dup.dup_notes import DupNotes
 from rms.models.dup.dup_objects import DupObjects
 from rms.models.dup.dup_people import DupPeople
@@ -20,7 +20,7 @@ from rms.models.rms_record_changes import RmsRecordChanges
 
 
 __all__ = [
-    "DataTransferAccesses",
+    "DataTransferAgreements",
     "DtpDatasets",
     "DtpNotes",
     "DtpObjects",
@@ -29,7 +29,7 @@ __all__ = [
     "DtpStudies",
     "DataTransferProcesses",
 
-    "DataUseAccesses",
+    "DataUseAgreements",
     "DupNotes",
     "DupObjects",
     "DupPeople",

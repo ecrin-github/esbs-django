@@ -4,7 +4,7 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 
 from app.permissions import ReadOnly, IsSuperUser
 from mdm.views.common.mixins import GetAuthFilteringMixin
-from rms.models.dtp.dtas import DataTransferAccesses
+from rms.models.dtp.dtas import DataTransferAgreements
 from rms.models.dtp.dtp_datasets import DtpDatasets
 from rms.models.dtp.dtp_notes import DtpNotes
 from rms.models.dtp.dtp_objects import DtpObjects
@@ -12,7 +12,7 @@ from rms.models.dtp.dtp_people import DtpPeople
 from rms.models.dtp.dtp_prereqs import DtpPrereqs
 from rms.models.dtp.dtp_studies import DtpStudies
 from rms.models.dtp.dtps import DataTransferProcesses
-from rms.serializers.dtp.dtas_dto import DataTransferAccessesOutputSerializer, DataTransferAccessesInputSerializer
+from rms.serializers.dtp.dtas_dto import DataTransferAgreementsOutputSerializer, DataTransferAgreementsInputSerializer
 from rms.serializers.dtp.dtp_datasets_dto import DtpDatasetsOutputSerializer, DtpDatasetsInputSerializer
 from rms.serializers.dtp.dtp_notes_dto import DtpNotesOutputSerializer, DtpNotesInputSerializer
 from rms.serializers.dtp.dtp_objects_dto import DtpObjectsOutputSerializer, DtpObjectsInputSerializer
@@ -23,16 +23,16 @@ from rms.serializers.dtp.dtps_dto import DataTransferProcessesOutputSerializer, 
     DataTransferProcessesDetailsOutputSerializer, DataTransferProcessesInputSerializer
 
 
-class DataTransferAccessesList(GetAuthFilteringMixin, viewsets.ModelViewSet):
+class DataTransferAgreementsList(GetAuthFilteringMixin, viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    queryset = DataTransferAccesses.objects.all()
-    object_class = DataTransferAccesses
-    serializer_class = DataTransferAccessesOutputSerializer
+    queryset = DataTransferAgreements.objects.all()
+    object_class = DataTransferAgreements
+    serializer_class = DataTransferAgreementsOutputSerializer
     permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnly)]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
-            return DataTransferAccessesInputSerializer
+            return DataTransferAgreementsInputSerializer
         return super().get_serializer_class()
 
     def get_queryset(self, *args, **kwargs):

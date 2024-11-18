@@ -4,7 +4,7 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 
 from app.permissions import ReadOnly, IsSuperUser
 from mdm.views.common.mixins import GetAuthFilteringMixin
-from rms.models.dup.duas import DataUseAccesses
+from rms.models.dup.duas import DataUseAgreements
 from rms.models.dup.dup_notes import DupNotes
 from rms.models.dup.dup_objects import DupObjects
 from rms.models.dup.dup_people import DupPeople
@@ -12,7 +12,7 @@ from rms.models.dup.dup_prereqs import DupPrereqs
 from rms.models.dup.dup_secondary_use import DupSecondaryUse
 from rms.models.dup.dup_studies import DupStudies
 from rms.models.dup.dups import DataUseProcesses
-from rms.serializers.dup.duas_dto import DataUseAccessesOutputSerializer, DataUseAccessesInputSerializer
+from rms.serializers.dup.duas_dto import DataUseAgreementsOutputSerializer, DataUseAgreementsInputSerializer
 from rms.serializers.dup.dup_notes_dto import DupNotesOutputSerializer, DupNotesInputSerializer
 from rms.serializers.dup.dup_objects_dto import DupObjectsOutputSerializer, DupObjectsInputSerializer
 from rms.serializers.dup.dup_people_dto import DupPeopleOutputSerializer, DupPeopleInputSerializer
@@ -21,16 +21,16 @@ from rms.serializers.dup.dup_studies_dto import DupStudiesOutputSerializer, DupS
 from rms.serializers.dup.dups_dto import DataUseProcessesOutputSerializer, DataUseProcessesInputSerializer
 
 
-class DataUseAccessesList(GetAuthFilteringMixin, viewsets.ModelViewSet):
+class DataUseAgreementsList(GetAuthFilteringMixin, viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    queryset = DataUseAccesses.objects.all()
-    object_class = DataUseAccesses
-    serializer_class = DataUseAccessesOutputSerializer
+    queryset = DataUseAgreements.objects.all()
+    object_class = DataUseAgreements
+    serializer_class = DataUseAgreementsOutputSerializer
     permission_classes = [permissions.IsAuthenticated & (IsSuperUser | ReadOnly)]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
-            return DataUseAccessesInputSerializer
+            return DataUseAgreementsInputSerializer
         return super().get_serializer_class()
 
     def get_queryset(self, *args, **kwargs):
