@@ -1,3 +1,5 @@
+import datetime
+
 from django.db.models import Value, Q
 from django.db.models.functions import Concat
 from django.core.exceptions import BadRequest
@@ -11,9 +13,10 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
 from app.permissions import IsSuperUser, WriteOnlyForSelf
+from context.models import ObjectAccessTypes
 from general.models import Organisations
 from mdm.models import Studies, DataObjects, ObjectInstances
-from rms.models import DataUseProcesses, DataTransferProcesses, DupStudies, DupObjects, DtpStudies, DtpObjects, DtpPeople
+from rms.models import DataUseProcesses, DataTransferProcesses, DupStudies, DupObjects, DtpStudies, DtpObjects, DtpPeople, DupPeople
 from users.models.profiles import UserProfiles
 from users.models.users import Users
 from users.serializers.profiles_dto import UserProfilesOutputSerializer, UserProfilesInputSerializer
@@ -273,7 +276,6 @@ class UsersByNameAndOrganisation(APIView):
 
 class UserAccessData(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    # TODO: change permission to superuser next TSD meeting
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, userId):
@@ -285,17 +287,41 @@ class UserAccessData(APIView):
         if not user_profile.exists():
             return Response(status=404, data="User profile not found")
 
+        """ Write perms (DTP) """
+        # List of DTP IDs 
         dtp_users = DtpPeople.objects.filter(person=userId)
 
-        study_id_list = []
+        write_do_id_list = []
 
         for dtp_user in dtp_users:
-            dtp_studies = DtpStudies.objects.filter(dtp_id=dtp_user.dtp_id)
-            for dtp_study_obj in dtp_studies:
-                study_id_list.append(dtp_study_obj.study.id)
+            dtp_dos = DtpObjects.objects.filter(dtp_id=dtp_user.dtp_id)
+            for dtp_do in dtp_dos:
+                write_do_id_list.append(dtp_do.data_object.id)
 
-        studies_id_set = set(study_id_list)
-        studies = Studies.objects.filter(id__in=studies_id_set)
+        write_do_id_set = set(write_do_id_list)
+
+        """ Access perms (DUP) """
+        # List of DUP IDs
+        # TODO: to be changed?
+        dup_users = DupPeople.objects.filter(person=userId)
+
+        read_do_id_list = []
+
+        for dup_user in dup_users:
+            dup_objects = DupObjects.objects.filter(dup_id=dup_user.dup_id)
+            for dup_do in dup_objects:
+                read_do_id_list.append(dup_do.data_object.id)
+        
+        read_do_id_set = set(read_do_id_list)
+
+        """ Public DOs """
+        public_access_type = ObjectAccessTypes.objects.get(name="Public")
+        public_dos_set = set(DataObjects.objects.filter(access_type=public_access_type.id).values_list('id', flat=True))
+
+        all_do_ids_set = read_do_id_set.union(write_do_id_set).union(public_dos_set)
+        data_objects = DataObjects.objects.filter(id__in=all_do_ids_set)
+        linked_studies = set(data_objects.values_list('linked_study', flat=True))
+        studies = Studies.objects.filter(id__in=linked_studies)
 
         response = {
             "studies": []
@@ -307,33 +333,40 @@ class UserAccessData(APIView):
                 data_objects_response = []
                 if data_objects.exists():
                     for data_object in data_objects:
-                        object_instances = ObjectInstances.objects.filter(data_object=data_object)
-                        object_instances_response = []
-                        if object_instances.exists():
-                            for object_instance in object_instances:
-                                object_instances_response.append({
-                                    "id": object_instance.id,
-                                    "sdIid": object_instance.sd_iid,
+                        if data_object.id in all_do_ids_set:
+                            # Embargo check
+                            # TODO: still include embargoed DOs for submittors?
+                            if not bool(data_object.embargo_expiry) or data_object.embargo_expiry.replace(tzinfo=None) <= datetime.datetime.now():
+                                object_instances = ObjectInstances.objects.filter(data_object=data_object)
+                                object_instances_response = []
+                                if object_instances.exists():
+                                    for object_instance in object_instances:
+                                        object_instances_response.append({
+                                            "id": object_instance.id,
+                                            "sdIid": object_instance.sd_iid,
+                                            "sdOid": data_object.sd_oid,
+                                            "url": object_instance.url,
+                                            "urlAccessible": object_instance.url_accessible,
+                                            "repository": object_instance.repository,
+                                        })
+                                data_objects_response.append({
+                                    "objectId": data_object.id,
                                     "sdOid": data_object.sd_oid,
-                                    "url": object_instance.url,
-                                    "urlAccessible": object_instance.url_accessible,
-                                    "repository": object_instance.repository,
+                                    "objectTitle": data_object.display_title,
+                                    "objectDescription": "",
+                                    "objectInstances": object_instances_response,
+                                    "accessType": data_object.access_type.name if data_object.access_type else "",
+                                    "embargoExpiry": data_object.embargo_expiry,
+                                    "userPerms": "rw" if data_object.id in write_do_id_set else "r"
                                 })
-                        data_objects_response.append({
-                            "objectId": data_object.id,
-                            "sdOid": data_object.sd_oid,
-                            "objectTitle": data_object.display_title,
-                            "objectDescription": "",
-                            "objectInstances": object_instances_response,
-                            "accessType": data_object.access_type.name if data_object.access_type else "",
-                            "embargoExpiry": data_object.embargo_expiry,
-                        })
-                response["studies"].append({
-                    "studyId": study.id,
-                    "sdSid": study.sd_sid,
-                    "studyTitle": study.display_title,
-                    "dataObjects": data_objects_response
-                })
+
+                if len(data_objects_response) > 0:
+                    response["studies"].append({
+                        "studyId": study.id,
+                        "sdSid": study.sd_sid,
+                        "studyTitle": study.display_title,
+                        "dataObjects": data_objects_response
+                    })
 
         return Response(response, status=200)
 
