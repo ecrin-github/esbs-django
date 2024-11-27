@@ -48,6 +48,11 @@ class WriteOnlyForOwnOrg(BasePermission):
                     return True
             except AttributeError:
                 pass
+            try:
+                if request.user.user_profile.organisation.id == obj.data_object.organisation.id:
+                    return True
+            except AttributeError:
+                pass
         return False
 
 
