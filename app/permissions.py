@@ -20,14 +20,14 @@ class ReadOnly(BasePermission):
 class WriteOnlyForOwnOrg(BasePermission):
     """ Write permissions for own organisation only """
     def has_permission(self, request, view):
-        if request.method in ['GET', 'POST', 'PUT', 'PATCH']:
+        if request.method in ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']:
             return True
         return False
 
     def has_object_permission(self, request, view, obj):
         if request.method == 'GET':
             return True
-        elif request.method in ['POST', 'PUT', 'PATCH']:
+        elif request.method in ['POST', 'PUT', 'PATCH', 'DELETE']:
             # For studies and data objects
             try:
                 if request.user.user_profile.organisation.id == obj.organisation.id:
