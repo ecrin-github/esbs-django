@@ -19,6 +19,7 @@ class ObjectInstances(models.Model):
     sd_iid = models.CharField(max_length=255, blank=True, null=True)
     data_object = models.ForeignKey(DataObjects, on_delete=models.CASCADE, db_column='object_id',
                                   related_name='object_instances', default=None, null=True, blank=True)
+    title = models.CharField(max_length=200, db_index=True, null=True, blank=True)
     instance_type = models.ForeignKey(ObjectInstanceTypes, on_delete=models.CASCADE, db_index=True,
                                       related_name='object_instances_instance_type_id', default=None, null=True,
                                       blank=True, db_column='instance_type_id', db_constraint=IS_CONTEXT_DB_CONSTRAINT)
