@@ -43,3 +43,19 @@ class ObjectInstancesOutputSerializer(serializers.ModelSerializer):
         model = ObjectInstances
         # fields = '__all__'
         exclude = ['last_edited_by']
+
+
+class ObjectInstancesLimitedOutputSerializer(serializers.ModelSerializer):
+    instance_type = ObjectInstanceTypesOutputSerializer(many=False, read_only=True)
+    resource_type = ResourceTypesOutputSerializer(many=False, read_only=True)
+    resource_size_unit = SizeUnitsOutputSerializer(many=False, read_only=True)
+    url = serializers.SerializerMethodField()
+    # last_edited_by = UsersSerializer(many=False, read_only=True)
+
+    def get_url(self, obj):
+        return '[hidden]' if obj.url != '' else obj.url
+
+    class Meta:
+        model = ObjectInstances
+        # fields = '__all__'
+        exclude = ['last_edited_by']

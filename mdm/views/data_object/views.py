@@ -32,7 +32,7 @@ from mdm.serializers.data_object.object_descriptions_dto import ObjectDescriptio
 from mdm.serializers.data_object.object_identifiers_dto import ObjectIdentifiersOutputSerializer, \
     ObjectIdentifiersInputSerializer
 from mdm.serializers.data_object.object_instances_dto import ObjectInstancesOutputSerializer, \
-    ObjectInstancesInputSerializerCreate, ObjectInstancesInputSerializerUpdate
+    ObjectInstancesLimitedOutputSerializer, ObjectInstancesInputSerializerCreate, ObjectInstancesInputSerializerUpdate
 from mdm.serializers.data_object.object_relationships_dto import ObjectRelationshipsOutputSerializer, \
     ObjectRelationshipsInputSerializer
 from mdm.serializers.data_object.object_rights_dto import ObjectRightsOutputSerializer, ObjectRightsInputSerializer
@@ -239,7 +239,7 @@ class ObjectIdentifiersList(viewsets.ModelViewSet):
 
 class ObjectInstancesList(ParentMultipleFieldLookupMixin, MultipleFieldLookupMixin, viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
-    permission_classes = [IsSuperUser | WriteOnlyForOwnOrg | ReadOnly]
+    permission_classes = [permissions.IsAuthenticated & (IsSuperUser | WriteOnlyForOwnOrg)]
     serializer_class = ObjectInstancesOutputSerializer
     queryset = ObjectInstances.objects.all()
     object_class = ObjectInstances
@@ -258,6 +258,42 @@ class ObjectInstancesList(ParentMultipleFieldLookupMixin, MultipleFieldLookupMix
             return ObjectInstancesInputSerializerUpdate
         return super().get_serializer_class()
 
+
+class ObjectInstancesPublicList(ParentMultipleFieldLookupMixin, MultipleFieldLookupMixin, viewsets.ModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
+    permission_classes = [IsSuperUser | WriteOnlyForOwnOrg | ReadOnly]
+    serializer_class = ObjectInstancesLimitedOutputSerializer
+    queryset = ObjectInstances.objects.all()
+    object_class = ObjectInstances
+    lookup_fields = ["pk", "sd_iid"]
+    parent_lookup_fields = {
+        "objectId": "id",
+        "sd_oid": "sd_oid",
+    }
+    parent_queryset = DataObjects.objects.all()
+    fk_lookup_field = "data_object"
+
+    def get_serializer_class(self):
+        if self.action in ["list", "retrieve"]:
+            data_object_check = DataObjects.objects.filter(id=self.kwargs['objectId'])
+            if data_object_check.exists():
+                data_object = DataObjects.objects.get(id=self.kwargs['objectId'])
+                try:
+                    if data_object.access_type.name.lower() == 'public':
+                        return ObjectInstancesOutputSerializer
+                except AttributeError:
+                    pass
+        return super().get_serializer_class()
+    
+    def get_queryset(self, *args, **kwargs):
+        if getattr(self, 'swagger_fake_view', False):
+            # queryset just for schema generation metadata
+            return ObjectInstances.objects.none()
+        return (
+            super()
+            .get_queryset(*args, **kwargs)
+            .filter(data_object_id=self.kwargs['objectId'])
+        )
 
 class ObjectRelationshipsList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]

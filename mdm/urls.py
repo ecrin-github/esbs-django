@@ -83,6 +83,9 @@ object_instances_detail = ObjectInstancesList.as_view({
     'patch': 'partial_update',
     'delete': 'destroy'
 })
+object_instances_public_list = ObjectInstancesPublicList.as_view({
+    'get': 'list'
+})
 
 object_relationships_list = ObjectRelationshipsList.as_view({
     'get': 'list',
@@ -235,9 +238,11 @@ urlpatterns = [
     path('data-objects/<uuid:objectId>/object-instances', object_instances_list),
     path('data-objects/<uuid:objectId>/object-instances/<uuid:pk>', object_instances_detail),
     path('data-objects/<uuid:objectId>/object-instances/<sd_iid>', object_instances_detail),
+    path('data-objects/<uuid:objectId>/object-instances-public', object_instances_public_list),
     path('data-objects/<sd_oid>/object-instances', object_instances_list),
     path('data-objects/<sd_oid>/object-instances/<uuid:pk>', object_instances_detail),
     path('data-objects/<sd_oid>/object-instances/<sd_iid>', object_instances_detail),
+    path('data-objects/<sd_oid>/object-instances-public', object_instances_public_list),
 
     path('data-objects/<uuid:objectId>/object-relationships', object_relationships_list),
     path('data-objects/<uuid:objectId>/object-relationships/<uuid:pk>', object_relationships_detail),
