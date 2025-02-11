@@ -288,7 +288,7 @@ class UserAccessData(APIView):
             return Response(status=404, data="User profile not found")
 
         """ Write perms (DTP) """
-        # List of DTP IDs 
+        # List of DTP IDs for one user
         dtp_users = DtpPeople.objects.filter(person=userId)
 
         write_do_id_list = []
@@ -301,16 +301,19 @@ class UserAccessData(APIView):
         write_do_id_set = set(write_do_id_list)
 
         """ Access perms (DUP) """
-        # List of DUP IDs
-        # TODO: to be changed?
+        # List of DUP IDs for one user
         dup_users = DupPeople.objects.filter(person=userId)
 
         read_do_id_list = []
 
         for dup_user in dup_users:
-            dup_objects = DupObjects.objects.filter(dup_id=dup_user.dup_id)
-            for dup_do in dup_objects:
-                read_do_id_list.append(dup_do.data_object.id)
+            # May be false if somehow a deletion of a DUP didn't delete records in DUP People table
+            if DataUseProcesses.objects.filter(id=dup_user.dup_id.id).exists():
+                dup = DataUseProcesses.objects.get(id=dup_user.dup_id.id)
+                if dup.dua_agreed_date: # Read perm only if DUP is at "availability of the data" step
+                    dup_objects = DupObjects.objects.filter(dup_id=dup_user.dup_id)
+                    for dup_do in dup_objects:
+                        read_do_id_list.append(dup_do.data_object.id)
         
         read_do_id_set = set(read_do_id_list)
 
