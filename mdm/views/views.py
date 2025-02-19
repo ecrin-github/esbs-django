@@ -301,20 +301,37 @@ class DtpStudyInvolvement(APIView):
                 'count': data.count()
             })
 
-
 class DupPrereqs(GetAuthFilteringMixin, GenericAPIView):
     # Fetches prereqs from DTP prereqs table
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DtpPrereqs.objects.all()
     object_class = DtpPrereqs
+    # TODO: use a smaller serializer (for objects)
     serializer_class = DtpPrereqsOutputSerializer
     permission_classes = [permissions.IsAuthenticated & ReadOnly]
+    
+    def get(self, request):
+        do_ids = self.request.query_params.get('dataObjectIds').split(',')
 
-    def get(self, request, *args, **kwargs):
-        dtp_prereqs = self.get_queryset(*args, **kwargs)
-        serialized_data = self.get_serializer_class()(dtp_prereqs, many=True)
+        if do_ids is None:
+            return Response({'error': "dataObjectIds param is missing"})
 
-        return Response({'data': serialized_data.data})
+        data = []
+
+        for do_id in do_ids:
+            do_check = DataObjects.objects.filter(id=do_id)
+            if not do_check.exists():
+                return Response({'error': f"Data Object with the ID {do_id} does not exist."})
+
+            dtp_dos = DtpObjects.objects.filter(data_object=do_id)
+            if dtp_dos.exists():
+                prereqs = DtpPrereqs.objects.filter(dtp_data_object__in=dtp_dos)
+                if prereqs.exists():
+                    serialized_data = self.get_serializer_class()(prereqs, many=True)
+                    for rec in serialized_data.data:
+                        data.append(rec)
+
+        return Response({'data': data})
 
 
 class MultiStudiesObjects(APIView):
