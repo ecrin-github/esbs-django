@@ -107,3 +107,7 @@ There are various options for permissions, like:
 All services' endpoints are listed on the `Swagger` and `Redoc` pages, available on:
 - `http://host:port/swagger` (Swagger UI);
 - `http://host:port/redoc` (Redoc UI).
+
+## Instructions for DSR WebSocket
+- install daphne and supervisor in venv
+- add daphne config in supervisor following this https://stackoverflow.com/questions/53304883/configuring-supervisor-for-daphne-django-channels
