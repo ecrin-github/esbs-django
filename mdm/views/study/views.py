@@ -7,6 +7,7 @@ from rest_framework.views import APIView
 
 from app.permissions import WriteOnlyForOwnOrg, IsSuperUser, ReadOnly
 from mdm.views.common.mixins import MultipleFieldLookupMixin
+from rms.models import DtpObjects
 from mdm.models.study.studies import Studies
 from mdm.models.study.study_contributors import StudyContributors
 from mdm.models.study.study_features import StudyFeatures
@@ -67,7 +68,7 @@ class StudiesList(MultipleFieldLookupMixin, viewsets.ModelViewSet):
         if queryset_limited is not None:
             serializer_limited = StudiesLimitedOutputSerializer(queryset_limited, many=True)
             count += queryset_limited.count()
-        
+
         return Response({'count': count, 'results': list(serializer_full.data if serializer_full is not None else []) 
                                                     + list(serializer_limited.data if serializer_limited is not None else []), 'statusCode': status.HTTP_200_OK})
 
@@ -83,8 +84,23 @@ class StudiesList(MultipleFieldLookupMixin, viewsets.ModelViewSet):
             pass
         if serializer is None:
             serializer = StudiesLimitedOutputSerializer(study)
+        
+        augmented_serializer_data = dict(serializer.data)
+        for linked_do in augmented_serializer_data["linked_objects"]:
+            if linked_do["object_type"] is not None and linked_do["object_type"]["name"].lower() == "individual participant data":
+                # Adding DO release date
+                release_date = ""
+                dtp_dos = DtpObjects.objects.filter(data_object=linked_do["id"])
+                if dtp_dos.exists():
+                    for dtp_do in dtp_dos:
+                        linked_do["test1"] = "yes"
+                        if dtp_do.dtp_id.upload_complete_date:
+                            release_date = dtp_do.dtp_id.upload_complete_date
+                            break
+                linked_do["release_date"] = release_date
+                augmented_serializer_data["linked_objects"]
 
-        return Response(serializer.data)
+        return Response(augmented_serializer_data)
 
     def get_serializer_class(self):
         if self.action in ["create"]:
