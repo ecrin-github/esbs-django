@@ -9,6 +9,7 @@ from rest_framework.views import APIView
 from app.permissions import WriteOnlyForOwnOrg, IsSuperUser, ReadOnly
 from mdm.views.common.mixins import MultipleFieldLookupMixin, ParentMultipleFieldLookupMixin
 from mdm.models.data_object.data_objects import DataObjects
+from rms.models import DtpObjects
 from mdm.models.data_object.object_contributors import ObjectContributors
 from mdm.models.data_object.object_datasets import ObjectDatasets
 from mdm.models.data_object.object_dates import ObjectDates
@@ -95,8 +96,20 @@ class DataObjectsList(MultipleFieldLookupMixin, viewsets.ModelViewSet):
             pass
         if serializer is None:
             serializer = DataObjectsLimitedOutputSerializer(data_object)
+        
+        # Adding DO release date
+        release_date = ""
+        dtp_dos = DtpObjects.objects.filter(data_object=data_object.id)
+        if dtp_dos.exists():
+            for dtp_do in dtp_dos:
+                if dtp_do.dtp_id.upload_complete_date:
+                    release_date = dtp_do.dtp_id.upload_complete_date
+                    break
+        
+        augmented_serializer_data = {'release_date': release_date}
+        augmented_serializer_data.update(serializer.data)
 
-        return Response(serializer.data)
+        return Response(augmented_serializer_data)
 
     def get_serializer_class(self):
         if self.action in ["create"]:
