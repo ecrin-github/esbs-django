@@ -12,4 +12,10 @@ class OrganisationsInputSerializer(serializers.ModelSerializer):
 class OrganisationsOutputSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organisations
-        fields = '__all__'
+        fields = ['id', 'default_name', 'city', 'country_name'] # Too many organisations to afford all fields
+
+
+# class OrganisationsOutputSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Organisations
+#         fields = '__all__'
