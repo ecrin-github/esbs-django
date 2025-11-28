@@ -102,3 +102,15 @@ class StudiesLimitedOutputSerializer(serializers.ModelSerializer):
                   'study_status', 'study_enrollment', 'study_gender_elig', 'min_age', 'min_age_unit',
                   'max_age', 'max_age_unit', 'created_on', 'organisation', 'study_contributors', 'study_features',
                   'study_identifiers', 'study_relationships', 'study_titles', 'study_topics', 'linked_objects']
+
+
+class StudyDUPSerializer(serializers.ModelSerializer):
+    dos_access_granted = DataObjectsOutputSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Studies
+        fields = ['id', 'sd_sid', 'display_title', 'brief_description',
+                 'organisation', 'linked_objects', 'dos_access_granted']
+
+    def get_dos_access_granted(self, obj):
+        return obj.dos_access_granted

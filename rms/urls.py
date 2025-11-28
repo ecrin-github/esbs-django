@@ -92,6 +92,11 @@ dtp_detail = DataTransferProcessesList.as_view({
     'delete': 'destroy'
 })
 
+data_access_request_list = DataAccessRequestSubmission.as_view()    # GET + POST
+data_access_request_detail = DataAccessRequestView.as_view({
+    'get': 'retrieve'
+})
+
 dua_list = DataUseAgreementsList.as_view({
     'get': 'list',
     'post': 'create'
@@ -194,6 +199,9 @@ urlpatterns = [
 
     path('dtp', dtp_list),
     path('dtp/<uuid:pk>', dtp_detail),
+
+    path('data-access-requests', data_access_request_list),
+    path('data-access-requests/<uuid:pk>', data_access_request_detail),
 
     path('dup/<uuid:dupId>/dua', dua_list),
     path('dup/<uuid:dupId>/dua/<uuid:pk>', dua_detail),

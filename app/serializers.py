@@ -1,3 +1,6 @@
+import mimetypes
+import os
+
 from django.core.mail import EmailMultiAlternatives
 from rest_framework import serializers
 
@@ -7,13 +10,15 @@ class EmailMessageClass:
     message: str
     recipients: str
     sender: str
+    cv: str
     cc: str
 
-    def __init__(self, subject: str, message: str, recipients: str, sender: str, cc: str):
+    def __init__(self, subject: str, message: str, recipients: str, sender: str, cc: str, *args, **kwargs):
         self.subject = subject
         self.message = message
         self.recipients = recipients
         self.sender = sender
+        self.cv = kwargs.get('cv', None)
         self.cc = cc
 
 
@@ -22,7 +27,8 @@ class MailSerializer(serializers.Serializer):
     message = serializers.CharField()
     recipients = serializers.CharField()
     sender = serializers.EmailField()
-    cc = serializers.EmailField()
+    cv = serializers.CharField(required=False, allow_blank=True)
+    cc = serializers.CharField()
 
     def create(self, validated_data):
         email = EmailMessageClass(**validated_data)
@@ -32,10 +38,26 @@ class MailSerializer(serializers.Serializer):
             body=email.message,
             from_email=email.sender,
             to=email.recipients.split(','),
-            cc=[email.cc],
+            cc=email.cc.split(','),
             reply_to=[email.sender]
         )
         message.attach_alternative(email.message, "text/html")
+
+        if email.cv:    # TODO: verify that this is the proper check
+            # Open the file in binary mode
+            file_path = ('.' + email.cv)
+            with open(file_path, 'rb') as f:
+                file_content = f.read()
+
+                # Extract the filename from the file path
+                file_name = os.path.basename(file_path)
+
+                # Guess the MIME type of the file (fallback to application/octet-stream)
+                mime_type, _ = mimetypes.guess_type(file_path)
+                if mime_type is None:
+                    mime_type = 'application/octet-stream'
+
+                message.attach(file_name, file_content, mime_type)
 
         message.send()
 
