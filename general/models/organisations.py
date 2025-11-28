@@ -18,6 +18,7 @@ class Organisations(models.Model):
     country_code = models.CharField(max_length=50, null=True, db_index=True)
     country_name = models.CharField(max_length=255, null=True, db_index=True)
     created_on = models.DateField(default=datetime.date.today)
+    manual_entry = models.BooleanField(default=False, db_index=True)    # False = loaded with ROR, True = user input from UI
 
     class Meta:
         db_table = "organisations"

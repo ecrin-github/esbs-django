@@ -69,8 +69,11 @@ published_journals_detail = PublishedJournalsList.as_view({
 organisations_list = OrganisationsList.as_view({
     'get': 'list',
 })
-organisations_detail = OrganisationsList.as_view({
+organisations_detail = OrganisationView.as_view({
     'get': 'retrieve',
+    'put': 'update',
+    'patch': 'partial_update',
+    'delete': 'destroy'
 })
 
 language_codes_list = LanguageCodesList.as_view({

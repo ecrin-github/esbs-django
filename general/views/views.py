@@ -2,6 +2,7 @@ from mozilla_django_oidc.contrib.drf import OIDCAuthentication
 from rest_framework import viewsets, permissions
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 
+from app.permissions import IsSuperUser
 from general.models.geog_entities import GeogEntities
 from general.models.language_codes import LanguageCodes
 from general.models.mesh_lookup import MeshLookup
@@ -158,7 +159,13 @@ class LanguageCodesList(viewsets.ReadOnlyModelViewSet):
 
 
 class OrganisationsList(viewsets.ReadOnlyModelViewSet):
+    queryset = Organisations.objects.all()
+    serializer_class = OrganisationsOutputSerializer
+    permission_classes = [permissions.AllowAny]
+
+
+class OrganisationView(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = Organisations.objects.all()
     serializer_class = OrganisationsOutputSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [IsSuperUser]
