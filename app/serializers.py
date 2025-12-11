@@ -4,19 +4,19 @@ import os
 from django.core.mail import EmailMultiAlternatives
 from rest_framework import serializers
 
+from configs.app_settings import EMAIL_MAIN_RECIPIENT
+
 
 class EmailMessageClass:
     subject: str
     message: str
-    recipients: str
     sender: str
     cv: str
     cc: str
 
-    def __init__(self, subject: str, message: str, recipients: str, sender: str, cc: str, *args, **kwargs):
+    def __init__(self, subject: str, message: str, sender: str, cc: str, *args, **kwargs):
         self.subject = subject
         self.message = message
-        self.recipients = recipients
         self.sender = sender
         self.cv = kwargs.get('cv', None)
         self.cc = cc
@@ -25,7 +25,6 @@ class EmailMessageClass:
 class MailSerializer(serializers.Serializer):
     subject = serializers.CharField(max_length=100)
     message = serializers.CharField()
-    recipients = serializers.CharField()
     sender = serializers.EmailField()
     cv = serializers.CharField(required=False, allow_blank=True)
     cc = serializers.CharField()
@@ -37,7 +36,7 @@ class MailSerializer(serializers.Serializer):
             subject=email.subject,
             body=email.message,
             from_email=email.sender,
-            to=email.recipients.split(','),
+            to=[EMAIL_MAIN_RECIPIENT],
             cc=email.cc.split(','),
             reply_to=[email.sender]
         )

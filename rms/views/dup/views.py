@@ -10,6 +10,8 @@ from rest_framework.views import APIView
 from app.permissions import ReadOnly, IsSuperUser
 from app.serializers import MailSerializer
 from configs.app_settings import EMAIL_MAIN_RECIPIENT
+from context.models.dup_status_types import DupStatusTypes
+from context.serializers.dup_status_types_dto import DupStatusTypesOutputSerializer
 from general.models.organisations import Organisations
 from general.serializers.organisations_dto import OrganisationsInputSerializer
 from mdm.views.common.mixins import GetAuthFilteringMixin
@@ -203,12 +205,11 @@ class DataAccessRequestView(GetAuthFilteringMixin, viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         # Handling organisation
         if 'organisation' in request.data:
-            if 'id' in request.data['organisation'] and not request.data['organisation']['id']: # TODO: correct check in Python?
+            if 'id' in request.data['organisation'] and not request.data['organisation']['id']:
                 org = OrganisationsInputSerializer(data=request.data['organisation'])
                 org.is_valid()
                 org.save()
 
-                # TODO: not enough to do it on 1 field
                 org_check = Organisations.objects.filter(default_name=request.data['organisation']['default_name'], 
                                                             city=request.data['organisation']['city'],
                                                             country_name=request.data['organisation']['country_name'])
@@ -385,9 +386,33 @@ class DataAccessRequestSubmission(APIView):
 
         output_serializer = DataAccessRequestOutputSerializer(input_serializer.instance)
 
+        # Creating a DUP instance
+        dup_status = None
+        if DupStatusTypes.objects.filter(list_order=0).exists():   # Request under review status
+            dup_status = DupStatusTypes.objects.get(list_order=0).id
+        
+        dup_data = {
+            "display_name": "Data Access Request",
+            "organisation": output_serializer.data["organisation"]["id"], 
+            "status": dup_status, # Need a new status?
+            "data_access_request": output_serializer.data["id"]
+        }
+        dup_serializer = DataUseProcessesInputSerializer(data=dup_data)
+        dup_serializer.is_valid(raise_exception=True)
+        dup_instance = dup_serializer.save()
+
+        if "id" in output_serializer.data["principal_secondary_user"]:
+            dup_people_serializer = DupPeopleInputSerializer(data={"dup_id": dup_instance.id, "person": output_serializer.data["principal_secondary_user"]["id"]})
+            dup_people_serializer.is_valid(raise_exception=True)
+            dup_serializer.save()
+        for additional_user_id in additional_user_ids:
+            dup_people_serializer = DupPeopleInputSerializer(data={"dup_id": dup_instance.id, "person": additional_user_id})
+            dup_people_serializer.is_valid(raise_exception=True)
+            dup_serializer.save()
+
         # Sending email
         mail_data = {
-            "recipients": EMAIL_MAIN_RECIPIENT,
+            "recipients": EMAIL_MAIN_RECIPIENT, # TODO: remove
             "subject": "crDSR Data Access Request",
             "message": self.get_email_content(output_serializer.data, form_data["requester_name"], form_data["requester_email"]),
             "sender": form_data["requester_email"],

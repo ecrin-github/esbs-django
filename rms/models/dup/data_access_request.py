@@ -7,8 +7,6 @@ from django.db import models
 
 from general.models.organisations import Organisations
 from mdm.models.study.studies import Studies
-from rms.models.dup.dups import DataUseProcesses
-from rms.models.dup.dup_people import DupPeople
 from users.models.users import Users
 
 
@@ -25,7 +23,7 @@ class DataAccessRequest(models.Model):
     principal_secondary_user = models.ForeignKey(Users, on_delete=models.SET_NULL, db_index=True, related_name='data_access_requests',
                                                  default=None, null=True, blank=True, db_column='secondary_user_id')
     cv = models.FileField(blank=True, null=True, upload_to=get_cv_path)
-    additional_secondary_users = models.ManyToManyField(Users, blank=True, null=True)
+    additional_secondary_users = models.ManyToManyField(Users, blank=True)
     requested_study = models.ForeignKey(Studies, on_delete=models.SET_NULL, db_column='requested_study_id', # For now only 1 study requested
                                         related_name='data_access_requests', default=None, null=True, blank=True)
     project_title = models.CharField(max_length=1000, blank=True, null=True, db_index=True)
