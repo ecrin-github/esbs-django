@@ -31,7 +31,11 @@ urlpatterns = [
     # path('by-ls-aai-id', UserByLsAaiId.as_view()),
     # path('by-email', UserByEmail.as_view()),
 
+    path('access-check-study/<study_id>', UserStudyAccessCheck.as_view()),
+    path('access-check-do/<do_id>', UserDOAccessCheck.as_view()),
     path('<uuid:userId>/access-data', UserAccessData.as_view()),
+
+    path('dup-access-data', UserDUPAccessData.as_view()),
     path('users-to-notify/<sd_oid>', UsersToNotify.as_view()),
 
     path('<uuid:pk>', users_detail),

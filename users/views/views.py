@@ -2,7 +2,7 @@ import datetime
 
 from django.db.models import Value, Q
 from django.db.models.functions import Concat
-from django.core.exceptions import BadRequest
+from django.core.exceptions import BadRequest, ValidationError
 from django.http import JsonResponse
 from mozilla_django_oidc.contrib.drf import OIDCAuthentication
 from rest_framework import viewsets, permissions, status
@@ -16,11 +16,16 @@ from app.permissions import IsSuperUser, WriteOnlyForSelf
 from context.models import ObjectAccessTypes
 from general.models import Organisations
 from mdm.models import Studies, DataObjects, ObjectInstances
+from mdm.serializers.study.studies_dto import StudyDUPSerializer
 from rms.models import DataUseProcesses, DataTransferProcesses, DupStudies, DupObjects, DtpStudies, DtpObjects, DtpPeople, DupPeople
 from users.models.profiles import UserProfiles
 from users.models.users import Users
 from users.serializers.profiles_dto import UserProfilesOutputSerializer, UserProfilesInputSerializer
 from users.serializers.users_dto import UsersSerializer, CreateUserSerializer, UsersLimitedSerializer
+
+
+DUP_STATUS_INDEX_ACCESS_GRANTED = 4
+DTP_STATUS_INDEX_TRANSFER = 4
 
 
 class UsersList(GenericAPIView):
@@ -274,6 +279,163 @@ class UsersByNameAndOrganisation(APIView):
 #         return Response(serializer.data)
 
 
+class UserStudyAccessCheck(APIView):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, study_id):
+        uploaded = False    # To check if the study has been uploaded, if yes and has_access is no from checking DTPs, we check DUPs
+        has_access = False
+
+        if not study_id:
+            return Response(status=400, data="Study ID missing")
+        
+        # Checking if study_id is UUID or sd_sid and if study with this id exists
+        try:
+            if not Studies.objects.filter(id=study_id).exists():
+                return Response(status=404, data="Couldn't find study from study ID")
+        except ValidationError: # sd_oid
+            if Studies.objects.filter(sd_sid=study_id).exists():
+                study_id = Studies.objects.get(sd_sid=study_id).id  # Need to use ID instead of sd_oid for the rest of the function
+            else:
+                return Response(status=404, data="Couldn't find study from study sd_sid")
+        
+        user_id = self.request.user.id
+
+        # Checking if the study has been uploaded (=associated study of DTP + DTP at transfer status)
+        # and in that case, if user is in associated people of the DTP
+        dtp_studies = DtpStudies.objects.filter(study=study_id)
+        for dtp_study in dtp_studies:   # Should be only one
+            # May be false if somehow a deletion of a DTP didn't delete records in DTP Study table
+            if DataTransferProcesses.objects.filter(id=dtp_study.dtp_id.id).exists():
+                dtp = DataTransferProcesses.objects.get(id=dtp_study.dtp_id.id)
+                # TODO: transfer status does not necessarily mean that the data has been uploaded, need to change DTP
+                if dtp.status and hasattr(dtp.status, "list_order") and dtp.status.list_order == DTP_STATUS_INDEX_TRANSFER:
+                    uploaded = True
+                    dtp_people_check = DtpPeople.objects.filter(dtp_id=dtp.id, person=user_id)
+                    if dtp_people_check.exists():
+                        has_access = True
+                        break
+
+        if uploaded and not has_access:  # Check DUPs
+            # Getting all DUP users entries for this user
+            dup_users = DupPeople.objects.filter(person=user_id)
+
+            for dup_user in dup_users:
+                # May be false if somehow a deletion of a DUP didn't delete records in DUP People table
+                if DataUseProcesses.objects.filter(id=dup_user.dup_id.id).exists():
+                    dup = DataUseProcesses.objects.get(id=dup_user.dup_id.id)
+                    # Access only if DUP is at "access granted status"
+                    if dup.status and hasattr(dup.status, "list_order") and dup.status.list_order == DUP_STATUS_INDEX_ACCESS_GRANTED:
+                        dup_studies = DupStudies.objects.filter(dup_id=dup_user.dup_id)
+                        for dup_study in dup_studies:
+                            if dup_study.study.id == study_id:
+                                has_access = True
+                                break
+
+        return Response(data={"has_access": has_access})
+
+
+class UserDOAccessCheck(APIView):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, do_id):
+        uploaded = False    # To check if the DO has been uploaded, if yes and has_access is no from checking DTPs, we check DUPs
+        has_access = False
+
+        if not do_id:
+            return Response(status=400, data="Object ID missing")
+        
+        # Checking if do_id is UUID or sd_oid and if DO with this id exists
+        try:
+            if not DataObjects.objects.filter(id=do_id).exists():
+                return Response(status=404, data="Couldn't find DO from DO ID")
+        except ValidationError: # sd_oid
+            if DataObjects.objects.filter(sd_oid=do_id).exists():
+                do_id = DataObjects.objects.get(sd_oid=do_id).id    # Need to use ID instead of sd_oid for the rest of the function
+            else:
+                return Response(status=404, data="Couldn't find DO from DO sdOid")
+
+        user_id = self.request.user.id
+
+        # Checking if the DO has been uploaded (=associated DO of DTP + DTP at transfer status)
+        # and in that case, if user is in associated people of the DTP
+        dtp_dos = DtpObjects.objects.filter(data_object=do_id)
+        for dtp_do in dtp_dos:   # Should be only one
+            # May be false if somehow a deletion of a DTP didn't delete records in DTP Study table
+            if DataTransferProcesses.objects.filter(id=dtp_do.dtp_id.id).exists():
+                dtp = DataTransferProcesses.objects.get(id=dtp_do.dtp_id.id)
+                # TODO: same as above TODO
+                if dtp.status and hasattr(dtp.status, "list_order") and dtp.status.list_order == DTP_STATUS_INDEX_TRANSFER:
+                    uploaded = True
+                    dtp_people_check = DtpPeople.objects.filter(dtp_id=dtp.id, person=user_id)
+                    if dtp_people_check.exists():
+                        has_access = True
+                        break
+
+        if uploaded and not has_access:  # Check DUPs
+            # Getting all DUP users entries for this user
+            dup_users = DupPeople.objects.filter(person=user_id)
+
+            for dup_user in dup_users:
+                # May be false if somehow a deletion of a DUP didn't delete records in DUP People table
+                if DataUseProcesses.objects.filter(id=dup_user.dup_id.id).exists():
+                    dup = DataUseProcesses.objects.get(id=dup_user.dup_id.id)
+                    # Access only if DUP is at "access granted status"
+                    if dup.status and hasattr(dup.status, "list_order") and dup.status.list_order == DUP_STATUS_INDEX_ACCESS_GRANTED:
+                        dup_objects = DupObjects.objects.filter(dup_id=dup_user.dup_id)
+                        for dup_do in dup_objects:
+                            if dup_do.data_object.id == do_id:
+                                has_access = True
+                                break
+
+        return Response(data={"has_access": has_access})
+
+
+class UserDUPAccessData(APIView):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = self.request.user
+
+        user_profile = UserProfiles.objects.filter(user=user.id)
+        if not user_profile.exists():
+            return Response(status=404, data="User profile not found")
+        
+        # Getting all DUP users entries for this user
+        dup_users = DupPeople.objects.filter(person=user.id)
+
+        do_id_list = []
+
+        for dup_user in dup_users:
+            # May be false if somehow a deletion of a DUP didn't delete records in DUP People table
+            if DataUseProcesses.objects.filter(id=dup_user.dup_id.id).exists():
+                dup = DataUseProcesses.objects.get(id=dup_user.dup_id.id)
+                # Access only if DUP is at "access granted status"
+                if dup.status and hasattr(dup.status, "list_order") and dup.status.list_order == DUP_STATUS_INDEX_ACCESS_GRANTED:
+                    dup_objects = DupObjects.objects.filter(dup_id=dup_user.dup_id)
+                    for dup_do in dup_objects:
+                        do_id_list.append(dup_do.data_object.id)
+        
+        do_id_set = set(do_id_list)
+        data_objects = DataObjects.objects.filter(id__in=do_id_set)
+
+        studies_dict = {}
+        for do in data_objects:
+            if do.linked_study.sd_sid in studies_dict:
+                studies_dict[do.linked_study.sd_sid].dos_access_granted.append(do)
+            else:
+                studies_dict[do.linked_study.sd_sid] = do.linked_study
+                # studies_dict[do.linked_study.sd_sid]["dos_access_granted"] = [do]
+                setattr(studies_dict[do.linked_study.sd_sid], "dos_access_granted", [do])
+        studies = studies_dict.values()
+
+        serializer = StudyDUPSerializer(studies, many=True)
+        return Response(serializer.data)
+
+
 class UserAccessData(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     permission_classes = [permissions.IsAuthenticated]
@@ -295,8 +457,13 @@ class UserAccessData(APIView):
 
         for dtp_user in dtp_users:
             dtp_dos = DtpObjects.objects.filter(dtp_id=dtp_user.dtp_id)
+            
             for dtp_do in dtp_dos:
-                write_do_id_list.append(dtp_do.data_object.id)
+                dtp_check = DataTransferProcesses.objects.filter(id=dtp_do.dtp_id).exists
+                if dtp_check.exists():
+                    dtp = DataTransferProcesses.objects.get(id=dtp_do.dtp_id)
+                    if dtp.status and has_attr(dtp.status, list_order) and dtp.status.name.list_order == DTP_STATUS_INDEX_TRANSFER:
+                        write_do_id_list.append(dtp_do.data_object.id)
 
         write_do_id_set = set(write_do_id_list)
 
@@ -310,7 +477,7 @@ class UserAccessData(APIView):
             # May be false if somehow a deletion of a DUP didn't delete records in DUP People table
             if DataUseProcesses.objects.filter(id=dup_user.dup_id.id).exists():
                 dup = DataUseProcesses.objects.get(id=dup_user.dup_id.id)
-                if dup.dua_agreed_date: # Read perm only if DUP is at "availability of the data" step
+                if dup.agreement_signed_date: # Read perm only if DUP is at "availability of the data" step
                     dup_objects = DupObjects.objects.filter(dup_id=dup_user.dup_id)
                     for dup_do in dup_objects:
                         read_do_id_list.append(dup_do.data_object.id)

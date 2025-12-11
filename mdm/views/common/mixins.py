@@ -4,6 +4,8 @@ from django.http import HttpResponseForbidden
 from rest_framework.response import Response
 
 from rms.models import DataUseProcesses, DataTransferProcesses
+from rms.models.dtp.dtp_people import DtpPeople
+from rms.models.dup.dup_people import DupPeople
 
 
 class MultipleFieldLookupMixin:
@@ -51,7 +53,7 @@ class ParentMultipleFieldLookupMixin:
         )
 
 
-class GetAuthFilteringMixin:
+class GetAuthFilteringMixin:    # TODO: proper testing (especially for DTP/DUP)
     """
     Proper filtering of GET requests where users should only see items from their organisations, or none if they don't have an org
     This class requires defining an "object_class", the "queryset", and the "serializer" class variables
@@ -78,22 +80,37 @@ class GetAuthFilteringMixin:
                     .filter(organisation=organisation)
                 )
             elif hasattr(self.object_class, 'dtp_id'):
-                # Class is sub-component of DTP class, need to test organisation on DTP
-                dtp_id_set = set(map(self.get_dtp_dup_id, DataTransferProcesses.objects.filter(organisation=organisation)))
+                # Class is sub-component of DTP class
+                dtp_id_set = set(map(self.get_dtp_dup_id, DtpPeople.objects.filter(person=user)))
                 return (
                     super()
                     .get_queryset(*args, **kwargs)
                     .filter(dtp_id__in=dtp_id_set)
                 )
             elif hasattr(self.object_class, 'dup_id'):
-                # Class is sub-component of DUP class, need to test organisation on DUP
-                dup_id_set = set(map(self.get_dtp_dup_id, DataUseProcesses.objects.filter(organisation=organisation)))
+                # Class is sub-component of DUP class
+                dup_id_set = set(map(lambda p: p.dup_id.id, DupPeople.objects.filter(person=user)))
+
                 return (
                     super()
                     .get_queryset(*args, **kwargs)
                     .filter(dup_id__in=dup_id_set)
                 )
         return self.object_class.objects.none()
+
+        # For studies and data objects
+        try:
+            if user.id == obj.person.id:
+                return True
+        except AttributeError:
+            pass
+
+        # For data objects sub-objects
+        try:
+            if user.id == obj.dup_id.organisation.id:
+                return True
+        except AttributeError:
+            pass
     
     def retrieve(self, request, *args, **kwargs):
         try:
