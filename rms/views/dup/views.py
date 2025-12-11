@@ -160,7 +160,7 @@ class DupStudiesList(GetAuthFilteringMixin, viewsets.ModelViewSet):
         )
 
 
-class DataUseProcessesList(GetAuthFilteringMixin, viewsets.ModelViewSet):
+class DataUseProcessesList(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]
     queryset = DataUseProcesses.objects.all()
     object_class = DataUseProcesses
@@ -172,6 +172,26 @@ class DataUseProcessesList(GetAuthFilteringMixin, viewsets.ModelViewSet):
             return DataUseProcessesInputSerializer
         return super().get_serializer_class()
 
+    def get_queryset(self, *args, **kwargs):
+        if getattr(self, 'swagger_fake_view', False):
+            # queryset just for schema generation metadata
+            return self.object_class.objects.none()
+        user = self.request.user
+        if user.is_superuser:
+            return (
+                super()
+                .get_queryset(*args, **kwargs)
+            )
+        elif user.user_profile and user.user_profile.organisation:
+            dup_id_set = set(map(lambda p: p.dup_id.id, DupPeople.objects.filter(person=user)))
+            
+            return (
+                super()
+                .get_queryset(*args, **kwargs)
+                .filter(id__in=dup_id_set)
+            )
+        return self.object_class.objects.none()
+    
 
 class DataAccessRequestView(GetAuthFilteringMixin, viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication, OIDCAuthentication]

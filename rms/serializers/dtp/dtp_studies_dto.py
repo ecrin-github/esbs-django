@@ -3,6 +3,7 @@ from rest_framework import serializers
 from context.serializers.check_status_types_dto import CheckStatusTypesOutputSerializer
 from mdm.serializers.study.study_main_details_dto import StudyMainDetailsSerializer
 from rms.models.dtp.dtp_studies import DtpStudies
+from rms.serializers.dtp.dtp_objects_dto import DtpObjectsOutputSerializer
 from users.serializers.users_dto import UsersSerializer, UsersLimitedSerializer
 
 
@@ -16,6 +17,7 @@ class DtpStudiesOutputSerializer(serializers.ModelSerializer):
     md_check_status = CheckStatusTypesOutputSerializer(many=False, read_only=True)
     md_check_by = UsersLimitedSerializer(many=False, read_only=True)
     study = StudyMainDetailsSerializer(many=False, read_only=True)
+    dtp_objects = DtpObjectsOutputSerializer(many=True, read_only=True)
 
     class Meta:
         model = DtpStudies

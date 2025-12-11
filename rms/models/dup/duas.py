@@ -12,11 +12,9 @@ class DataUseAgreements(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, db_index=True)
     dup_id = models.ForeignKey(DataUseProcesses, on_delete=models.CASCADE, db_index=True,
                                related_name='dua_dup_id', default=None, null=True, blank=True, db_column='dup_id')
-    secondary_use_reason = models.TextField(blank=True, null=True)
-    conforms_to_default = models.BooleanField(default=False, db_index=True)
-    variations = models.TextField(blank=True, null=True)
-    repo_is_proxy_provider = models.BooleanField(default=False, db_index=True, null=True)
-    dua_file_path = models.TextField(blank=True, null=True)
+    variations_from_agreement_template = models.TextField(blank=True, null=True)
+    access_requests_delegated_to_crdsr = models.BooleanField(default=False, db_index=True, null=True)
+    agreement_link = models.TextField(blank=True, null=True)
     repo_signatory1 = models.ForeignKey(DupPeople, on_delete=models.SET_DEFAULT, db_column='repo_signatory_1', null=True,
                                          related_name='dua_repo_signatory_1', default=None,
                                          db_constraint=IS_RMS_DB_CONSTRAINT)
