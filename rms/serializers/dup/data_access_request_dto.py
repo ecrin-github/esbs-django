@@ -25,13 +25,3 @@ class DataAccessRequestOutputSerializer(serializers.ModelSerializer):
     class Meta:
         model = DataAccessRequest
         fields = '__all__'
-
-
-class DataAccessRequestReconstructSerializer(serializers.ModelSerializer):
-    organisation = OrganisationsInputSerializer(many=False, read_only=True)
-    principal_secondary_user = UsersSerializer(many=True, read_only=True)
-    additional_secondary_users = UsersSerializer(many=True, read_only=True, required=False, allow_null=True)
-
-    class Meta:
-        model = DataAccessRequest
-        fields = '__all__'
