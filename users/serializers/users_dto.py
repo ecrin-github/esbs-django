@@ -47,8 +47,10 @@ class CreateUserSerializer(serializers.Serializer):
             user_data.first_name = user_dto.first_name
             user_data.last_name = user_dto.last_name
         else:
-            user_data.first_name = user_dto.name.split(' ')[0]
-            user_data.last_name = user_dto.family_name
+            name_splitted =  user_dto.name.split(' ')
+            user_data.first_name = name_splitted[0]
+            if len(name_splitted) > 1:
+                user_data.last_name = name_splitted[1]
         user_data.save()
     
     def update_user_profile_data(self, user_profile_data, user_dto):
