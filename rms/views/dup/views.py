@@ -308,7 +308,8 @@ class DataAccessRequestSubmission(APIView):
                     '<b><h4>Controlled access data objects</h4></b>')
         if (len(dar["requested_study"]["linked_objects"]) > 0):
             for o in dar["requested_study"]["linked_objects"]:
-                content += o["sd_oid"] + ' - ' + o["display_title"] + '<br />'
+                if "access_type" in o and "name" in o["access_type"] and o["access_type"]["name"].lower() == "controlled":
+                    content += o["sd_oid"] + ' - ' + o["display_title"] + '<br />'
         else:
             content += '/'
         content += ('<b><h4>Secondary Use Project</h4></b>' +
@@ -412,7 +413,7 @@ class DataAccessRequestSubmission(APIView):
             dup_status = DupStatusTypes.objects.get(list_order=0).id
         
         dup_data = {
-            "display_name": "Data Access Request",
+            "display_name": f"Data Access Request ({output_serializer.data['organisation']['default_name']})",
             "organisation": output_serializer.data["organisation"]["id"], 
             "status": dup_status, # Need a new status?
             "data_access_request": output_serializer.data["id"]
@@ -421,14 +422,28 @@ class DataAccessRequestSubmission(APIView):
         dup_serializer.is_valid(raise_exception=True)
         dup_instance = dup_serializer.save()
 
+        # Associating people (creating DUP People)
         if "id" in output_serializer.data["principal_secondary_user"]:
             dup_people_serializer = DupPeopleInputSerializer(data={"dup_id": dup_instance.id, "person": output_serializer.data["principal_secondary_user"]["id"]})
             dup_people_serializer.is_valid(raise_exception=True)
-            dup_serializer.save()
+            dup_people_serializer.save()
         for additional_user_id in additional_user_ids:
             dup_people_serializer = DupPeopleInputSerializer(data={"dup_id": dup_instance.id, "person": additional_user_id})
             dup_people_serializer.is_valid(raise_exception=True)
-            dup_serializer.save()
+            dup_people_serializer.save()
+        
+        # Associating study (creating DUP Study)
+        dup_study_serializer = DupStudiesInputSerializer(data={"dup_id": dup_instance.id, "study": output_serializer.data["requested_study"]["id"]})
+        dup_study_serializer.is_valid(raise_exception=True)
+        dup_study_instance = dup_study_serializer.save()
+
+        # Associating DOs (creating DUP Objects), to be changed in the future with selection of specific DOs in study
+        if "linked_objects" in output_serializer.data["requested_study"]:
+            for data_object in output_serializer.data["requested_study"]["linked_objects"]:
+                if "access_type" in data_object and "name" in data_object["access_type"] and data_object["access_type"]["name"].lower() == "controlled":
+                    dup_object_serializer = DupObjectsInputSerializer(data={"dup_id": dup_instance.id, "data_object": data_object["id"], "study": dup_study_instance.id})
+                    dup_object_serializer.is_valid(raise_exception=True)
+                    dup_object_serializer.save()
 
         if form_data["requester_email"] not in cc_emails:
             cc_emails.append(form_data["requester_email"])
