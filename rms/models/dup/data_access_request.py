@@ -1,3 +1,4 @@
+import datetime
 import os
 import random
 import string
@@ -35,6 +36,7 @@ class DataAccessRequest(models.Model):
     estimated_access_duration_required = models.CharField(max_length=255, blank=True, null=True)
     provisional_starting_date = models.DateField(blank=True, null=True)
     other_info = models.TextField(blank=True, null=True)
+    request_date = models.DateField(default=datetime.date.today, null=True)
 
     class Meta:
         db_table = 'data_access_requests'
