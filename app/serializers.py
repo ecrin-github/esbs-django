@@ -4,20 +4,18 @@ import os
 from django.core.mail import EmailMultiAlternatives
 from rest_framework import serializers
 
-from configs.app_settings import EMAIL_MAIN_RECIPIENT
+from configs.app_settings import EMAIL_MAIN_RECIPIENT, SMTP_LOGIN
 
 
 class EmailMessageClass:
     subject: str
     message: str
-    sender: str
     cv: str
     cc: str
 
-    def __init__(self, subject: str, message: str, sender: str, cc: str, *args, **kwargs):
+    def __init__(self, subject: str, message: str, cc: str, *args, **kwargs):
         self.subject = subject
         self.message = message
-        self.sender = sender
         self.cv = kwargs.get('cv', None)
         self.cc = cc
 
@@ -25,7 +23,6 @@ class EmailMessageClass:
 class MailSerializer(serializers.Serializer):
     subject = serializers.CharField(max_length=100)
     message = serializers.CharField()
-    sender = serializers.EmailField()
     cv = serializers.CharField(required=False, allow_blank=True)
     cc = serializers.CharField()
 
@@ -35,10 +32,10 @@ class MailSerializer(serializers.Serializer):
         message = EmailMultiAlternatives(
             subject=email.subject,
             body=email.message,
-            from_email=email.sender,
+            from_email=SMTP_LOGIN,
             to=[EMAIL_MAIN_RECIPIENT],
             cc=email.cc.split(','),
-            reply_to=[email.sender]
+            reply_to=[SMTP_LOGIN]
         )
         message.attach_alternative(email.message, "text/html")
 
@@ -62,7 +59,7 @@ class MailSerializer(serializers.Serializer):
 
         return email
 
-    def update(self, instance, validated_data):
+    def update(self, instance, validated_data): # TODO: unused
         instance.subject = validated_data.get('subject', instance.subject)
         instance.message = validated_data.get('message', instance.message)
         instance.recipients = validated_data.get('recipients', instance.recipients)

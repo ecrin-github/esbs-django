@@ -430,12 +430,13 @@ class DataAccessRequestSubmission(APIView):
             dup_people_serializer.is_valid(raise_exception=True)
             dup_serializer.save()
 
+        if form_data["requester_email"] not in cc_emails:
+            cc_emails.append(form_data["requester_email"])
+
         # Sending email
         mail_data = {
-            "recipients": EMAIL_MAIN_RECIPIENT, # TODO: remove
             "subject": "crDSR Data Access Request",
             "message": self.get_email_content(output_serializer.data, form_data["requester_name"], form_data["requester_email"]),
-            "sender": form_data["requester_email"],
             "cv": output_serializer.data["cv"],
             "cc": ','.join(cc_emails)
         }
