@@ -413,7 +413,7 @@ class DataAccessRequestSubmission(APIView):
             dup_status = DupStatusTypes.objects.get(list_order=0).id
         
         dup_data = {
-            "display_name": f"Data Access Request ({output_serializer.data['organisation']['default_name']})",
+            "display_name": "Data Access Request",
             "organisation": output_serializer.data["organisation"]["id"], 
             "status": dup_status, # Need a new status?
             "data_access_request": output_serializer.data["id"]
