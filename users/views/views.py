@@ -449,20 +449,29 @@ class UserAccessData(APIView):
         if not user_profile.exists():
             return Response(status=404, data="User profile not found")
 
+        """
+        Write perms: associated people of DTP in DTP_STATUS_INDEX_TRANSFER status
+        Access perms: associated people of DTP in DTP_STATUS_INDEX_TRANSFER status + associated people of DUP in DUP_STATUS_ACCESS_GRANTED status
+        """
+
         """ Write perms (DTP) """
         # List of DTP IDs for one user
         dtp_users = DtpPeople.objects.filter(person=userId)
 
         write_do_id_list = []
 
+        # TODO: reverse references seem confusing/inconsistent, this should be improved
         for dtp_user in dtp_users:
-            dtp_dos = DtpObjects.objects.filter(dtp_id=dtp_user.dtp_id)
-            
-            for dtp_do in dtp_dos:
-                dtp_check = DataTransferProcesses.objects.filter(id=dtp_do.dtp_id).exists
-                if dtp_check.exists():
-                    dtp = DataTransferProcesses.objects.get(id=dtp_do.dtp_id)
-                    if dtp.status and has_attr(dtp.status, list_order) and dtp.status.name.list_order == DTP_STATUS_INDEX_TRANSFER:
+            # May be false if somehow a deletion of a DUP didn't delete records in DUP People table
+            if DataTransferProcesses.objects.filter(id=dtp_user.dtp_id.id).exists():
+                dtp = DataTransferProcesses.objects.get(id=dtp_user.dtp_id.id)
+
+                # Checking for each user's DTP if the it is in DTP_STATUS_INDEX_TRANSFER status
+                # TODO: transfer status does not necessarily mean that the data has been uploaded, need to change DTP
+                if dtp.status and hasattr(dtp.status, "list_order") and dtp.status.list_order == DTP_STATUS_INDEX_TRANSFER:
+                    # Adding all DTPObjects associated to this DTP to the write permission list 
+                    dtp_dos = DtpObjects.objects.filter(dtp_id=dtp.id)
+                    for dtp_do in dtp_dos:
                         write_do_id_list.append(dtp_do.data_object.id)
 
         write_do_id_set = set(write_do_id_list)
@@ -477,8 +486,10 @@ class UserAccessData(APIView):
             # May be false if somehow a deletion of a DUP didn't delete records in DUP People table
             if DataUseProcesses.objects.filter(id=dup_user.dup_id.id).exists():
                 dup = DataUseProcesses.objects.get(id=dup_user.dup_id.id)
-                if dup.agreement_signed_date: # Read perm only if DUP is at "availability of the data" step
-                    dup_objects = DupObjects.objects.filter(dup_id=dup_user.dup_id)
+
+                # Checking for each user's DUP if the it is in DUP_STATUS_INDEX_ACCESS_GRANTED status
+                if dup.status and hasattr(dup.status, "list_order") and dup.status.list_order == DUP_STATUS_INDEX_ACCESS_GRANTED:
+                    dup_objects = DupObjects.objects.filter(dup_id=dup.id)
                     for dup_do in dup_objects:
                         read_do_id_list.append(dup_do.data_object.id)
         
@@ -488,6 +499,7 @@ class UserAccessData(APIView):
         public_access_type = ObjectAccessTypes.objects.get(name="Public")
         public_dos_set = set(DataObjects.objects.filter(access_type=public_access_type.id).values_list('id', flat=True))
 
+        # Creating the set of all studies/objects with read and/or write permissions, and getting the list of these studies/objects
         all_do_ids_set = read_do_id_set.union(write_do_id_set).union(public_dos_set)
         data_objects = DataObjects.objects.filter(id__in=all_do_ids_set)
         linked_studies = set(data_objects.values_list('linked_study', flat=True))
@@ -504,9 +516,10 @@ class UserAccessData(APIView):
                 if data_objects.exists():
                     for data_object in data_objects:
                         if data_object.id in all_do_ids_set:
-                            # Embargo check
-                            # TODO: still include embargoed DOs for submittors?
-                            if not bool(data_object.embargo_expiry) or data_object.embargo_expiry.replace(tzinfo=None) <= datetime.datetime.now():
+                            # Embargo check: true if no embargo, user is data provider (associated people in DTP), or embargo expired
+                            if not bool(data_object.embargo_expiry) \
+                                or data_object.id in write_do_id_set \
+                                or data_object.embargo_expiry.replace(tzinfo=None) <= datetime.datetime.now():
                                 object_instances = ObjectInstances.objects.filter(data_object=data_object)
                                 object_instances_response = []
                                 if object_instances.exists():
