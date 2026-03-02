@@ -81,7 +81,7 @@ class GetAuthFilteringMixin:    # TODO: proper testing (especially for DTP/DUP)
                 )
             elif hasattr(self.object_class, 'dtp_id'):
                 # Class is sub-component of DTP class
-                dtp_id_set = set(map(self.get_dtp_dup_id, DtpPeople.objects.filter(person=user)))
+                dtp_id_set = set(map(lambda p: p.dtp_id.id, DtpPeople.objects.filter(person=user)))
                 return (
                     super()
                     .get_queryset(*args, **kwargs)
